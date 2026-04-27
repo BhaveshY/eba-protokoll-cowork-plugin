@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Local test outputs
+/protokolle/
+/transkripte/
+*.bereinigt.txt
+*.zusammengefuehrt.txt
+
+# Claude Code session artifacts
+.claude/projects/
+.claude/sessions/
+.remember/now.md

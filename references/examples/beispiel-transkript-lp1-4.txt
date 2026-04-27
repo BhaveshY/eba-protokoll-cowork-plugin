@@ -1,0 +1,48 @@
+[00:00:05] Ich: Guten Morgen zusammen, fangen wir an mit der Planungsbesprechung Nr. 12.
+           Heute geht es um BIM-Stand, Bauantragsfristen und die Wohnfassade.
+[00:00:18] Ich: Erstmal Anwesenheit. Mit dabei sind Herr Regener von Wiwela,
+           Herr Cordes und Frau Nathan von Züblin, Frau Zinni und ich von EBA.
+[00:00:32] Herr Regener: Hallo zusammen.
+[00:00:34] Frau Nathan: Hallo. Frau Müller von der Bauphysik ist heute leider nicht dabei.
+[00:00:42] Ich: OK, vermerken wir als entschuldigt.
+[00:01:05] Ich: Erster Punkt – Organisation. ZÜB, könnt ihr kurz zum DGNB-Stand sagen?
+[00:01:15] Herr Cordes: Ja, der DGNB-Workshop am 14.04. ist bestätigt, 14:00 bis 17:00 Uhr,
+           Online-Format. Wir senden Donnerstag eine Agenda raus.
+[00:01:32] Ich: Donnerstag also der 26.03.26. Gut. Dann ist DGNB-Audit Punkt von letzter
+           Woche damit erledigt.
+[00:01:48] Frau Nathan: Dazu noch: das Zielstrategiepapier kam letzte Woche zurück mit
+           Anmerkungen, die arbeiten wir bis Ende der Woche ein.
+[00:02:02] Ich: Also bis 27.03.26. Notiert.
+[00:02:18] Ich: Punkt zwei – Termine. Bauantrag wird am 27.03.26 eingereicht, das
+           bleibt unser Meilenstein. Unterlagen müssen am 25.03.26 unterschrieben sein.
+[00:02:38] Herr Regener: Termin am 30.03. bei euch im Büro für die Unterschrift,
+           ich komme persönlich vorbei.
+[00:02:50] Ich: Korrektur – am 25.03. geht der Bauherr unterschreiben, ZÜB ist nicht
+           involviert. Herr Regener kommt am 30.03. zur Nachzeichnung.
+[00:03:10] Herr Regener: Genau, so meinte ich.
+[00:03:25] Ich: Punkt drei – BIM-Modell. Frau Zinni, wo stehen wir?
+[00:03:35] Frau Zinni: LP3-Modell ist hochgeladen am 24.03.26 auf FusionLive.
+           Türliste-Attribute sind für IFC noch zu ergänzen, das schaffen wir bis
+           Ende März.
+[00:03:55] Frau Nathan: Wir hätten gerne zur Kalkulation noch die Abkürzungsliste
+           für das Attribut „Typ".
+[00:04:08] Frau Zinni: Klar, machen wir bis KW 13.
+[00:04:20] Ich: Wohnfassade – das hatten wir letzte Woche angerissen. Stand heute:
+           wir bleiben bei der Sandwich-Fassade mit Lisenenprofil. Bauphysik prüft
+           den Brandschutz mit AMA bis 31.03.26.
+[00:04:42] Herr Cordes: Bauphysik weiß Bescheid. AMA wird bis Donnerstag eine
+           Rückmeldung haben.
+[00:05:00] Ich: Donnerstag 26.03.26 – AMA Rückmeldung. Herr Regener, von eurer Seite
+           noch was zur Fassade?
+[00:05:15] Herr Regener: Wir warten auf die Bauaufsicht-Rückmeldung wegen der
+           Lisenen-Überschreitung. Heißt – bis Anfang April.
+[00:05:30] Ich: Bauaufsicht bis 03.04.26. OK. Dann wäre als nächstes Thema die TGA-
+           Abstimmung am 26.03., aber das machen wir in einem separaten Termin.
+[00:05:50] Herr Cordes: Genau, dafür haben wir Slot reserviert um 11 Uhr.
+[00:06:02] Ich: Letzter Punkt – nächster Termin. Standardtermin am 14.04.26
+           um 9 Uhr in Präsenz bei EBA.
+[00:06:18] Herr Regener: Bestätigt.
+[00:06:22] Ich: Ergänzend zum Statiktermin: LHT war heute nicht dabei, aber sie
+           haben schriftlich gemeldet, dass die Positionspläne am 25.03.26 hochgeladen
+           werden. Status erledigt.
+[00:06:42] Ich: Gut, danke euch. Ende der Besprechung.

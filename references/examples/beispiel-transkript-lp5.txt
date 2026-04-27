@@ -1,0 +1,47 @@
+[00:00:05] Ich: Guten Morgen zusammen, Baubesprechung Nr. 8 für das Wilmersdorfer Projekt.
+           Heute auf der Baustelle, Witterung trocken, ca. 12 Grad.
+[00:00:18] Ich: Anwesend: Herr Regener, Bauherr; Herr Schulz, Polier Züblin Rohbau;
+           Frau Andresen von AMA Brandschutz; und ich, Robert von EBA als Bauleitung.
+[00:00:35] Herr Regener: Morgen.
+[00:00:37] Herr Schulz: Morgen.
+[00:00:39] Frau Andresen: Hallo zusammen.
+[00:01:00] Ich: Erster Punkt – Bauablauf Rohbau. Herr Schulz?
+[00:01:08] Herr Schulz: Wir liegen im Plan. UG2 ist betoniert, UG1 läuft diese Woche an.
+           Lieferung der Bewehrung für UG1 ist heute morgen angekommen, alles geprüft.
+[00:01:28] Ich: Gut. Wann ist UG1-Decke geplant?
+[00:01:32] Herr Schulz: KW 17. Wenn das Wetter mitspielt sogar Ende KW 16.
+[00:01:42] Ich: Notiert.
+[00:02:00] Ich: Mängel – ich habe bei der Begehung gestern drei Punkte aufgenommen.
+[00:02:08] Ich: M-048: Im UG2 Achse 5/B-C ist die Betonoberfläche der Wandinnenseite
+           porös. Das muss vor der Abdichtung saniert werden. Frist 30.04.26.
+[00:02:25] Herr Schulz: Wird gemacht. Wir lassen das nächste Woche spachteln.
+[00:02:35] Ich: M-049: Treppenhaus W2 EG, Wandanschluss zur Bodenplatte hat eine
+           Risskante über mehrere Meter. Statiker prüft, ob das relevant ist.
+           Verantwortung LHT, Frist 02.05.26.
+[00:02:55] Ich: M-050: TGA-Durchbruch in UG1 Schacht A, Lage und Größe stimmen nicht
+           mit dem Schalungsplan überein. DES ist informiert, korrigiert per
+           Kernbohrung. Frist 25.04.26.
+[00:03:15] Herr Schulz: Kernbohrung ist beauftragt, kommt am 22.04. auf die Baustelle.
+[00:03:30] Ich: Bemusterung – wir haben gestern den Kalksandstein für die Innenwände
+           bemustert. Bauherr hat Variante 2 gewählt, Hersteller Wienerberger,
+           Format 17,5 cm.
+[00:03:50] Herr Regener: Bestätige. Ist auch im Kostenrahmen.
+[00:04:02] Ich: Brandschutz – Frau Andresen?
+[00:04:08] Frau Andresen: Ich habe zwei Punkte. Erstens, die F90-Wand zwischen UG1
+           Technikraum und Tiefgarage ist im aktuellen Schalungsplan zu dünn
+           angegeben. Sollte 24 cm sein, nicht 17,5.
+[00:04:32] Frau Andresen: Zweitens, die Brandschutzklappen für die Lüftung im UG2
+           müssen bemustert werden. DES und der Hersteller, Trox, kommen am 28.04.
+           zur Bemusterung.
+[00:04:55] Ich: F90-Wand: M-051 als Mangel aufnehmen, Frist 24.04.26 für Korrektur
+           im Schalungsplan. Verantwortung DES.
+[00:05:10] Ich: Trox-Bemusterung am 28.04. notiert.
+[00:05:25] Ich: Termine – nächster Bautermin am 06.05.26, 09:00 Uhr,
+           Baustellenbüro. Ist das für alle OK?
+[00:05:38] Herr Regener: Passt.
+[00:05:40] Herr Schulz: Ja.
+[00:05:42] Frau Andresen: Bei mir auch.
+[00:05:55] Ich: Noch ein Hinweis: das Sicherheitsbegehungs-Audit findet nächste Woche
+           Mittwoch statt, also am 22.04. Polier bitte vor Ort sein.
+[00:06:10] Herr Schulz: OK.
+[00:06:18] Ich: Damit Schluss für heute. Danke.

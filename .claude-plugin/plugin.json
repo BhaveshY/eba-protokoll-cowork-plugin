@@ -1,0 +1,21 @@
+{
+  "name": "eba-protokoll-cowork",
+  "version": "0.1.0",
+  "description": "Erzeugt EBA-konforme Protokolle (Gesprächsnotiz, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App.",
+  "author": {
+    "name": "Eike Becker_Architekten",
+    "email": "BhaveshYeole@eb-a.de"
+  },
+  "homepage": "https://github.com/BhaveshY/eba-protokoll-app",
+  "repository": "https://github.com/BhaveshY/eba-protokoll-app",
+  "license": "MIT",
+  "keywords": [
+    "eba",
+    "protokoll",
+    "transkript",
+    "deepgram",
+    "bauleitung",
+    "planung",
+    "cowork"
+  ]
+}

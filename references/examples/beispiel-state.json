@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "projekt": {
+    "nr": "553",
+    "name": "WIL",
+    "beschreibung": "Wilmersdorfer Straße — gemischtes Wohn- und Bürogebäude"
+  },
+  "typ": "lp1-4",
+  "letzte_besprechung_nr": 12,
+  "dk_schema": [
+    { "dk": "01", "name": "Organisation" },
+    { "dk": "02", "name": "Termine" },
+    { "dk": "03", "name": "Planungsvorgaben/Entscheidungen" },
+    { "dk": "05", "name": "Objektplanung (ARC)" },
+    { "dk": "06", "name": "Objektplanung — Fassade" },
+    { "dk": "07", "name": "Tragwerksplanung" },
+    { "dk": "08", "name": "TGA" },
+    { "dk": "09", "name": "Brandschutz" }
+  ],
+  "verteiler": [
+    { "vorname": "Ulrich",  "name": "Regener",       "kz": "UR",  "firma": "Wiwela Bau Projekt GmbH",      "firma_kz": "WB"  },
+    { "vorname": "Sven",    "name": "Cordes",        "kz": "SC",  "firma": "Ed. Züblin AG",                "firma_kz": "ZÜB" },
+    { "vorname": "Natasha", "name": "Nathan",        "kz": "NN",  "firma": "Ed. Züblin AG",                "firma_kz": "ZÜB" },
+    { "vorname": "Robert",  "name": "von Gruenewaldt","kz": "RvG", "firma": "Eike Becker_Architekten",     "firma_kz": "EBA" },
+    { "vorname": "Sara",    "name": "Zinni",         "kz": "SZ",  "firma": "Eike Becker_Architekten",     "firma_kz": "EBA" },
+    { "vorname": "Andreas", "name": "Tebarth",       "kz": "AT",  "firma": "LHT Bauingenieure GmbH",      "firma_kz": "LHT" },
+    { "vorname": "Sergej",  "name": "Grinko",        "kz": "SG",  "firma": "LHT Bauingenieure GmbH",      "firma_kz": "LHT" },
+    { "vorname": "Leo",     "name": "Kursinski",     "kz": "LK",  "firma": "DES GmbH",                    "firma_kz": "DES" },
+    { "vorname": "Daniela", "name": "Andresen",      "kz": "DA",  "firma": "AMA Brandschutz",             "firma_kz": "AMA" },
+    { "vorname": "Anja",    "name": "Weisflog",      "kz": "AW",  "firma": "Atelier 8",                    "firma_kz": "A8"  }
+  ],
+  "firma_kuerzel": {
+    "EBA": "Eike Becker_Architekten",
+    "WB":  "Wiwela Bau Projekt GmbH",
+    "ZÜB": "Ed. Züblin AG",
+    "LHT": "LHT Bauingenieure GmbH",
+    "DES": "DES GmbH",
+    "AMA": "AMA Brandschutz",
+    "A8":  "Atelier 8",
+    "G4W": "G4W GmbH"
+  },
+  "offene_punkte": [
+    {
+      "dk": "01",
+      "b": "12",
+      "ln": "02",
+      "beschreibung": "Anmerkungen zum Zielstrategiepapier werden bis 27.03.26 eingearbeitet.",
+      "zustaendig": "ZÜB",
+      "termin": "27.03.26",
+      "status": "O",
+      "historie": [
+        { "b": "12", "kommentar": "ursprünglich eröffnet" }
+      ]
+    },
+    {
+      "dk": "02",
+      "b": "12",
+      "ln": "01",
+      "beschreibung": "Bauantrag-Einreichung am 27.03.26. Unterschrift Bauherr am 25.03.26, Nachunterschrift WB am 30.03.26.",
+      "zustaendig": "EBA WB",
+      "termin": "27.03.26",
+      "status": "O",
+      "historie": [
+        { "b": "12", "kommentar": "ursprünglich eröffnet" }
+      ]
+    },
+    {
+      "dk": "05",
+      "b": "12",
+      "ln": "01",
+      "beschreibung": "Türliste-Attribute werden für den IFC-Export bis 31.03.26 ergänzt.",
+      "zustaendig": "EBA",
+      "termin": "31.03.26",
+      "status": "O",
+      "historie": [
+        { "b": "12", "kommentar": "ursprünglich eröffnet" }
+      ]
+    },
+    {
+      "dk": "05",
+      "b": "12",
+      "ln": "02",
+      "beschreibung": "Abkürzungsliste für das Attribut „Typ\" wird durch EBA bis KW 13 bereitgestellt.",
+      "zustaendig": "EBA",
+      "termin": "KW 13",
+      "status": "O",
+      "historie": [
+        { "b": "12", "kommentar": "ursprünglich eröffnet" }
+      ]
+    },
+    {
+      "dk": "06",
+      "b": "12",
+      "ln": "01",
+      "beschreibung": "Wohnfassade W1: Sandwich-Fassade mit Lisenenprofil. Bauphysik prüft den Brandschutz mit AMA bis 31.03.26.",
+      "zustaendig": "LHT AMA",
+      "termin": "31.03.26",
+      "status": "O",
+      "historie": [
+        { "b": "12", "kommentar": "ursprünglich eröffnet" }
+      ]
+    },
+    {
+      "dk": "06",
+      "b": "12",
+      "ln": "02",
+      "beschreibung": "AMA-Rückmeldung zur Brandschutz-Konformität der Sandwich-Fassade bis 26.03.26.",
+      "zustaendig": "AMA",
+      "termin": "26.03.26",
+      "status": "O",
+      "historie": [
+        { "b": "12", "kommentar": "ursprünglich eröffnet" }
+      ]
+    },
+    {
+      "dk": "06",
+      "b": "12",
+      "ln": "03",
+      "beschreibung": "Bauaufsicht-Rückmeldung zur Lisenen-Überschreitung der Grundstücksgrenze bis 03.04.26.",
+      "zustaendig": "WB",
+      "termin": "03.04.26",
+      "status": "O",
+      "historie": [
+        { "b": "12", "kommentar": "ursprünglich eröffnet" }
+      ]
+    }
+  ],
+  "letztes_protokoll": "2026-03-24_protokoll-12_planungsbespr.md",
+  "aktualisiert_am": "2026-03-24T09:30:00+01:00"
+}
