@@ -76,6 +76,10 @@ Speichere als Markdown unter
 `protokolle/<jjjj-mm-tt>_<projekt-kurzname>_gespraechsnotiz.md`. Wenn das
 `protokolle/`-Verzeichnis nicht existiert, anlegen.
 
+**Alternativ — EBA-Dateinamen-Konvention** (wenn vom Nutzer gewünscht): siehe
+`${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:
+`<PrjNr>-<PrjKZ>-EBA-GN-<JJMMTT>.md`, z.B. `553-WIL-EBA-GN-260324.md`.
+
 Verwende **exakt** die Markdown-Struktur aus `${CLAUDE_PLUGIN_ROOT}/references/templates/gespraechsnotiz.md`.
 Die „Hinweis"-Box bleibt wortgleich.
 

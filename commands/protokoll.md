@@ -1,6 +1,6 @@
 ---
-description: Erzeugt ein EBA-Protokoll aus einem Transkript der EBA Protokoll App. Erkennt das Format automatisch (Gesprächsnotiz / LP1-4 / LP5).
-argument-hint: <pfad/zur/transkript.txt> [--typ gesprächsnotiz|lp1-4|lp5]
+description: Erzeugt ein EBA-Protokoll aus einem Transkript der EBA Protokoll App. Erkennt das Format automatisch (Gesprächsnotiz / Protokoll-einfach / LP1-4 / LP5).
+argument-hint: <pfad/zur/transkript.txt> [--typ gesprächsnotiz|einfach|lp1-4|lp5]
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Skill
 ---
 
@@ -12,7 +12,8 @@ Argument vom Nutzer: $ARGUMENTS
 
 Das ist entweder:
 - Ein Pfad zu einer Transkript-Datei (`.txt` oder `.srt`).
-- Optional gefolgt von einem Format-Hint: `--typ gesprächsnotiz`, `--typ lp1-4`, `--typ lp5`.
+- Optional gefolgt von einem Format-Hint: `--typ gesprächsnotiz`,
+  `--typ einfach`, `--typ lp1-4`, `--typ lp5`.
 - Oder leer — dann den letzten Transkript aus `transkripte/` heuristisch wählen oder beim Nutzer rückfragen.
 
 ## Vorgehen
@@ -20,7 +21,7 @@ Das ist entweder:
 1. **Skill `eba-protokoll`** invocieren (über das Skill-Tool):
    - Wenn der Nutzer einen `--typ`-Hint gegeben hat, Format-Erkennung überspringen
      und direkt die entsprechende Format-Skill aufrufen
-     (`gespraechsnotiz` / `protokoll-lp1-4` / `protokoll-lp5`).
+     (`gespraechsnotiz` / `protokoll-einfach` / `protokoll-lp1-4` / `protokoll-lp5`).
    - Sonst die Auto-Erkennung in `eba-protokoll` durchlaufen lassen.
 
 2. Den Anweisungen der Skill **strikt** folgen: Referenzen aus

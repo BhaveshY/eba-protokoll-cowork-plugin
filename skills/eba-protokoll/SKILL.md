@@ -1,6 +1,6 @@
 ---
 name: eba-protokoll
-description: Use when the user asks to "make a protocol", "create a protocol", "Protokoll erstellen", "Protokoll generieren", "process this transcript", or hands over a transcript file (.txt or .srt produced by the EBA Protokoll App) without specifying which template. Auto-detects the right EBA protocol format (Gesprächsnotiz, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) from the transcript content and project metadata, then delegates to the matching format skill.
+description: Use when the user asks to "make a protocol", "create a protocol", "Protokoll erstellen", "Protokoll generieren", "process this transcript", or hands over a transcript file (.txt or .srt produced by the EBA Protokoll App) without specifying which template. Auto-detects the right EBA protocol format (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) from the transcript content and project metadata, then delegates to the matching format skill.
 ---
 
 # EBA-Protokoll: Auto-Erkennung & Dispatch
@@ -42,6 +42,7 @@ Wende folgende Heuristik an (in dieser Reihenfolge, der erste Treffer gewinnt):
    - Es kommt **kein** Begriff aus dem LP-Vokabular vor (siehe unten).
    - Höchstens 3 Sprecher.
    - Kein „Besprechung Nr. …", „Jour Fixe", „LPH", „Werkplanung" im Text.
+   - **Keine konkreten Lieferfristen** im Gespräch erwähnt.
 
 2. **Bauleitungsprotokoll LP5** wenn einer dieser Begriffe vorkommt:
    `Baustelle`, `Mangel`, `Bemusterung`, `Abnahme`, `Rohbau`, `Witterung`,
@@ -53,21 +54,34 @@ Wende folgende Heuristik an (in dieser Reihenfolge, der erste Treffer gewinnt):
    `Modellaustausch`, `LOIN`, `LOG`, `LOI`, `BAP`, `AIA`, `Datendrop`.
    → Verwendet das LP1-4-Skelett mit BIM-Kategorienschema.
 
-4. **Planungsprotokoll LP1-4** (Default für längere Besprechungen):
+4. **Planungsprotokoll LP1-4** (Tracking, mit D/K|B|LN) wenn einer gilt:
+   - Es existiert ein Vorprotokoll im Projektordner
+     (`protokolle/<projekt>/protokoll-state.json` oder ältere `protokoll-NN-…md`).
+   - Im Transkript fallen **Verweise auf vorherige Besprechungen** (z.B. „letztes Mal",
+     „in der Besprechung 10", „aus #08", „LN 02E").
    - Begriffe: `Bauantrag`, `Genehmigungsplanung`, `Vorentwurf`, `Entwurf`,
-     `LPH 1`–`LPH 4`, `Planungsbesprechung`, `Jour Fixe`, `Kick-Off`,
-     `Vorplanung`, `Workshop`, `DGNB`, `Brandschutzkonzept`,
-     `Statik` (Kontext Planung), `TGA`-Konzept, `Fassadenplanung`.
-   - Oder: > 3 Sprecher und > 1500 Wörter.
+     `LPH 1`–`LPH 4`, `Planungsbesprechung Nr.`, `Jour Fixe Nr.`, `JF-NN`,
+     `Vorplanung`, `DGNB`, `Brandschutzkonzept`, `Statik` (Kontext Planung),
+     `TGA`-Konzept, `Fassadenplanung`.
+   - Oder: > 5 Sprecher und Transkript erwähnt explizit Vortermin oder Folgenummerierung.
 
-5. Wenn nichts klar passt: **frage den Nutzer**.
+5. **Protokoll-einfach** (Word LP1-4 Stand A, ohne Tracking) wenn:
+   - 3+ Sprecher und konkrete Lieferfristen im Gespräch.
+   - **Aber** kein Vorprotokoll, keine Verweise auf vorherige Besprechungen,
+     kein D/K-Schema im Projekt etabliert.
+   - Typisch für Kick-Off, Workshop, einmalige Abstimmung, Erstbesprechung
+     ohne Folge-Tracking.
+   - Begriffe: `Kick-Off`, `Workshop`, `Erstgespräch`, `Auftakt`,
+     `einmalige Abstimmung`.
+
+6. Wenn nichts klar passt: **frage den Nutzer**.
 
 Stelle die erkannte Klassifikation **transparent** an den Nutzer und biete an, sie zu
 ändern, bevor das Protokoll erzeugt wird:
 
 > „Ich erkenne dies als **Planungsprotokoll LP1-4** (Begriffe: Bauantrag, DGNB, LP3).
 > Soll ich so fortfahren oder eine andere Vorlage wählen
-> (Gesprächsnotiz / LP1-4 / LP5)?"
+> (Gesprächsnotiz / Protokoll-einfach / LP1-4 / LP5)?"
 
 In **Auto-Mode** (kontinuierlicher Modus, keine Rückfragen erwünscht): Klassifikation
 ohne Rückfrage anwenden, aber im Protokoll-Header als `_(automatisch erkannt)_` vermerken.
@@ -75,6 +89,7 @@ ohne Rückfrage anwenden, aber im Protokoll-Header als `_(automatisch erkannt)_`
 ### 4. An die Format-Skill delegieren
 
 - **Gesprächsnotiz** → Skill `gespraechsnotiz` in `skills/gespraechsnotiz/SKILL.md`.
+- **Protokoll-einfach** → Skill `protokoll-einfach` in `skills/protokoll-einfach/SKILL.md`.
 - **LP1-4** (inkl. BIM) → Skill `protokoll-lp1-4` in `skills/protokoll-lp1-4/SKILL.md`.
 - **LP5** → Skill `protokoll-lp5` in `skills/protokoll-lp5/SKILL.md`.
 
@@ -98,6 +113,7 @@ Wenn `protokolle/` nicht existiert: anlegen.
 ## Verfügbare Referenz-Dateien
 
 - `${CLAUDE_PLUGIN_ROOT}/references/templates/gespraechsnotiz.md`
+- `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-einfach.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-lp1-4.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-lp5.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/disziplin-kategorien.md`
@@ -105,6 +121,7 @@ Wenn `protokolle/` nicht existiert: anlegen.
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/status-codes.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/sprache-und-stil.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/transkript-format.md`
+- `${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`
 
 Lies die jeweils relevanten Referenzen vor dem Schreiben des Protokolls — sie enthalten
 die EBA-spezifischen Konventionen.

@@ -3,9 +3,12 @@
 Ein Claude-Code-Plugin, das aus Transkripten der **EBA Protokoll App** strukturierte
 Protokolle nach den EBA-Vorlagen `QMG-024-141` erzeugt:
 
-- **Gesprächsnotiz** (`ORG-GESPRAECHSNOTIZ`, Stand D)
-- **Planungsprotokoll LP1-4** (`ORG-PK-LP1-4`, mit D/K|B|LN-Tracking)
-- **Bauleitungsprotokoll LP5** (`ORG-PK-LP5`, mit baustellenspezifischen Kategorien)
+| Format | QMG-Index | Verwendung |
+|--------|-----------|------------|
+| **Gesprächsnotiz** | `ORG-GESPRAECHSNOTIZ` (Stand D, 02.02.23) | Kurze formlose Notiz, ≤ 3 Sprecher, ohne Tracking. |
+| **Protokoll-einfach** | `ORG-PK-LP1-4-MA` (Stand A, 27.02.23, Word) | Kick-Off, Workshop, einmalige Abstimmung mit Frist-Spalte aber ohne D/K-Tracking. |
+| **Planungsprotokoll LP1-4** | `ORG-PK-LP1-4-EXCEL-MA` (Stand A, 20.09.24) | LP1-4 Tracking-Protokoll mit D/K\|B\|LN-Schema, Status, Fortschreibung. |
+| **Bauleitungsprotokoll LP5** | `ORG-PK-LP5-MA` (Stand B, 02.02.23) | LP5 Bauleitung mit baustellenspezifischen Kategorien, Mängeln, Bemusterungen. |
 
 Das Plugin kennt die **Fortschreibung** über mehrere Besprechungen (offene Punkte werden
 übernommen, neue Bemerkungen mit `LN = NNE` und `#NN:`-Versionsmarker als Ergänzung
@@ -56,9 +59,10 @@ nach `protokolle/<projekt>/<datum>_protokoll-NN_<thema>.md`.
 Wenn du das Format explizit setzen willst:
 
 ```
-/gespraechsnotiz transkripte/kurzes-team-meeting.txt
-/protokoll-lp1-4  transkripte/planungsbespr-12.txt
-/protokoll-lp5    transkripte/baustellenbegehung.txt
+/gespraechsnotiz   transkripte/kurzes-team-meeting.txt
+/protokoll-einfach transkripte/kick-off-meeting.txt
+/protokoll-lp1-4   transkripte/planungsbespr-12.txt
+/protokoll-lp5     transkripte/baustellenbegehung.txt
 ```
 
 Für Folgeprotokolle (Fortschreibung):
@@ -73,7 +77,8 @@ Für Folgeprotokolle (Fortschreibung):
 |--------|-------|
 | `/protokoll <transkript>` | Auto-Erkennung des Formats und Protokoll-Erstellung. |
 | `/gespraechsnotiz <transkript>` | Erzwinge Gesprächsnotiz-Format. |
-| `/protokoll-lp1-4 <transkript>` | Erzwinge Planungsprotokoll LP1-4. |
+| `/protokoll-einfach <transkript>` | Erzwinge einfaches Protokoll (LP1-4 Word, ohne Tracking). |
+| `/protokoll-lp1-4 <transkript>` | Erzwinge Planungsprotokoll LP1-4 (Tracking). |
 | `/protokoll-lp5 <transkript>` | Erzwinge Bauleitungsprotokoll LP5. |
 | `/protokoll-fortschreiben <transkript>` | Folgeprotokoll mit Übernahme offener Punkte. |
 | `/transkript-vorbereiten <transkript>` | Sprecher umbenennen, Turns mergen, Files zusammenführen. |
@@ -84,7 +89,8 @@ Für Folgeprotokolle (Fortschreibung):
 |-------|---------|
 | `eba-protokoll` | Nutzer sagt „Protokoll erstellen", „make a protocol", übergibt eine Transkript-Datei ohne Format-Hint. |
 | `gespraechsnotiz` | „Gesprächsnotiz", „kurze Notiz", „kurzes Protokoll". |
-| `protokoll-lp1-4` | „Planungsprotokoll", „LP1-4", „Jour Fixe", „Kick-Off", „BIM-Koordination", „Workshop-Protokoll". |
+| `protokoll-einfach` | „einfaches Protokoll", „Workshop", „Kick-Off", „Erstgespräch" — mit Frist, ohne D/K-Tracking. |
+| `protokoll-lp1-4` | „Planungsprotokoll", „LP1-4", „Jour Fixe Nr.", „BIM-Koordination", „Tracking-Protokoll". |
 | `protokoll-lp5` | „LP5-Protokoll", „Baubesprechung", „Bauleitungsprotokoll", „Baustelle", „Mängelprotokoll". |
 | `protokoll-fortschreiben` | Folgeprotokoll, Vorprotokoll vorhanden. |
 | `transkript-vorbereiten` | „Sprecher umbenennen", „Transkripte zusammenführen", „Transkript bereinigen". |
@@ -135,6 +141,8 @@ Im `references/examples/`-Ordner:
 
 - `beispiel-transkript-gespraechsnotiz.txt` + `beispiel-ausgabe-gespraechsnotiz.md` —
   einfache 90-Sekunden-Abstimmung.
+- `beispiel-transkript-einfach.txt` + `beispiel-ausgabe-einfach.md` — Kick-Off
+  Meeting mit 4 Teilnehmern, 5 Themen + Unterpunkten, kombinierte Frist-Spalte.
 - `beispiel-transkript-lp1-4.txt` + `beispiel-ausgabe-lp1-4.md` — Planungsbesprechung
   mit 5 Teilnehmern, 7 Themen.
 - `beispiel-transkript-lp5.txt` + `beispiel-ausgabe-lp5.md` — Baustellenbegehung
@@ -156,8 +164,9 @@ Das Plugin füllt das State-File mit dem ersten Protokoll vollständig auf.
 
 ## Entwicklungsstand
 
-Version 0.1.0 — Initiale Veröffentlichung, deckt die drei Standardvorlagen
-QMG-024-141 ab. Geplant:
+Version 0.1.0 — Initiale Veröffentlichung, deckt die vier Standardvorlagen
+QMG-024-141 ab (Gesprächsnotiz, Protokoll-einfach Word LP1-4 Stand A,
+Planungsprotokoll LP1-4 Excel Stand A, Bauleitungsprotokoll LP5 Stand B). Geplant:
 
 - Export nach `.docx` direkt aus dem Plugin (Pandoc-Wrapper).
 - Sondervorlage für DGNB-Workshops.

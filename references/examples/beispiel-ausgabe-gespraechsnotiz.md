@@ -23,12 +23,14 @@ _Bauantragsstand und Rückmeldung der Bauaufsicht_
 | Robert  | von Gruenewaldt | RvG | Eike Becker_Architekten |
 | —       | Müller    | Mü     | Wiwela Bau Projekt GmbH |
 
-## Verteiler (wie Teilnehmer und zusätzlich)
+## Verteiler
 
-| Vorname | Name      | Kürzel | Firma                   |
-|---------|-----------|--------|-------------------------|
-| Robert  | von Gruenewaldt | RvG | Eike Becker_Architekten |
-| —       | Müller    | Mü     | Wiwela Bau Projekt GmbH |
+> Wie Teilnehmer und zusätzlich
+
+| Vorname | Name            | Firma                   |
+|---------|-----------------|-------------------------|
+| Robert  | von Gruenewaldt | Eike Becker_Architekten |
+| —       | Müller          | Wiwela Bau Projekt GmbH |
 
 ## Gesprächsinhalt
 

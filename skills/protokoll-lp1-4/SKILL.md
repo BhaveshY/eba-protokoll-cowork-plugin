@@ -146,6 +146,14 @@ auflisten. Sonst weglassen oder als „keine" vermerken.
 Speichere als Markdown unter
 `protokolle/<projekt>/<jjjj-mm-tt>_protokoll-<NN>_<thema>.md`.
 
+**Alternativ — EBA-Dateinamen-Konvention** (wenn der Nutzer das wünscht oder im
+Projekt etabliert ist): siehe
+`${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:
+`<PrjNr>-<PrjKZ>-EBA-PLB-PK-<JJMMTT>.md`, z.B.
+`553-WIL-EBA-PLB-PK-260324.md`. Für die BIM-Variante:
+`<PrjNr>-<PrjKZ>-EBA_BIM-PK-JF-<NN>_<JJMMTT>.md`, z.B.
+`553-WIL-EBA_BIM-PK-JF-07_260331.md`.
+
 Aktualisiere die State-Datei `protokolle/<projekt>/protokoll-state.json` (siehe
 `${CLAUDE_PLUGIN_ROOT}/scripts/protokoll-state.md` für das Format) — sie enthält:
 

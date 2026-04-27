@@ -33,11 +33,13 @@ _<kurze Beschreibung zum Dokument / Übergeordnetes Thema>_
 |---------|------|--------|-------|
 | <Vorname> | <Name> | <KZ> | <Firma> |
 
-## Verteiler (wie Teilnehmer und zusätzlich)
+## Verteiler
 
-| Vorname | Name | Kürzel | Firma |
-|---------|------|--------|-------|
-| <Vorname> | <Name> | <KZ> | <Firma> |
+> Wie Teilnehmer und zusätzlich
+
+| Vorname | Name | Firma |
+|---------|------|-------|
+| <Vorname> | <Name> | <Firma> |
 
 ## Gesprächsinhalt
 

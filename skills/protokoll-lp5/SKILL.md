@@ -105,6 +105,10 @@ Wie LP1-4. Bei LP5 oft besonders wichtig:
 Speicherort:
 `protokolle/<projekt>/<jjjj-mm-tt>_protokoll-lp5-<NN>_<thema>.md`.
 
+**Alternativ — EBA-Dateinamen-Konvention**: siehe
+`${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:
+`<PrjNr>-<PrjKZ>-EBA-BL-PK-<JJMMTT>.md`, z.B. `541-MAR-EBA-BL-PK-260415.md`.
+
 State-File: `protokolle/<projekt>/protokoll-state.json` mit zusätzlichen LP5-Feldern:
 
 - `letzte_mangelnummer`: für die fortlaufende Mangelnummerierung.

@@ -69,6 +69,19 @@ Wichtigstes Merkmal: **Fortgeschriebenes Tracking** — siehe
 |-----------------------|------------|-----|-------|------|
 | <Thema>               | <Namen>    | <Ort> | <TT.MM.JJ> | <0.00–0.00> |
 
+## Aufstellvermerk zum Dokument
+
+| Rolle    | Name / Kürzel        | Datum       |
+|----------|----------------------|-------------|
+| Ersteller | <Name oder Kürzel> | <TT.MM.JJ>  |
+| Geprüft   | <Name oder Kürzel> | <TT.MM.JJ>  |
+
+## Nachträgliche Anmerkungen zum Dokument
+
+| Ersteller | Erstell-/Änderungsdatum | Anmerkung                          |
+|-----------|-------------------------|------------------------------------|
+| ---       | ---                     | ---                                |
+
 ## Anlagen
 
 | Dokument/e, Plan/Pläne | V/I | Datum | Format |
@@ -77,15 +90,15 @@ Wichtigstes Merkmal: **Fortgeschriebenes Tracking** — siehe
 
 ## Kennzeichnungen im Dokument
 
-| Termin Status              | Farbe         | Bemerkung |
-|----------------------------|---------------|-----------|
-| aktuell/fortgeschrieben    | _Kennzeichnung_ | ab Protokoll 2, ausgenommen Versendung Nr. 1 |
-| aktuell/angemerkt          | _Kennzeichnung_ | Anmerkungen nach erster Versendung |
-| überschritten              | _Kennzeichnung_ | offene überfällige Termine |
+> Die Themen/Inhalte erhalten zur besseren Nachvollziehbarkeit je Status eine
+> entsprechende Kennzeichnung.
 
----
-
-_Aufstellvermerk_: Erstellt durch <Kürzel>, <TT.MM.JJ>. Geprüft durch <Kürzel>, <TT.MM.JJ>.
+| Termin Status              | Farbe              | Bemerkung                                        |
+|----------------------------|--------------------|--------------------------------------------------|
+| aktuell/fortgeschrieben    | _Kennzeichnung_    | ab Protokoll 2, ausgenommen Versendung Nr. 1     |
+| aktuell/angemerkt          | _Kennzeichnung_    | Anmerkungen nach erster Versendung/Wiederversendung |
+| überschritten              | _Kennzeichnung_    | offene überfällige Termine                       |
+| erledigt                   | _Kennzeichnung_    | erledigte Themen (einmalig)                      |
 ```
 
 ## LP5-spezifische Kategorien

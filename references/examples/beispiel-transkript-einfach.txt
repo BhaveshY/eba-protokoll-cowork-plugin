@@ -1,0 +1,36 @@
+[00:00:05] Ich: Guten Morgen zusammen, willkommen zum Kick-Off Meeting für das
+           Projekt VTS-549. Wir wollen heute den Rahmen abstecken.
+[00:00:22] Herr Schmidt: Guten Morgen. Ja, ich bin gespannt auf den Zeitplan.
+[00:00:30] Frau Klein: Hallo zusammen.
+[00:00:33] Herr Tebarth: Morgen.
+[00:00:36] Ich: Erster Punkt — Projektorganisation. EBA übernimmt die
+           Gesamtkoordination, Frau Klein ist die Hauptansprechpartnerin auf
+           Bauherrenseite.
+[00:01:05] Frau Klein: Genau, und ich bin am besten per Mail erreichbar.
+[00:01:14] Ich: Wir richten ein gemeinsames Cloud-Verzeichnis ein. EBA legt das
+           bis Freitag, 17.04.26, an.
+[00:01:30] Herr Schmidt: OK.
+[00:01:35] Ich: Zweiter Punkt — Termine. Der Bauantrag soll bis Ende Juni
+           eingereicht werden. Das heißt LP3 muss bis Anfang Mai stehen.
+[00:02:05] Herr Tebarth: Statik-seitig kein Problem, ich liefere die
+           Vordimensionierung bis 30.04.26.
+[00:02:25] Ich: Sehr gut. Frau Klein, wann bekommen wir die Lageplan-Unterlagen
+           vom Vermesser?
+[00:02:38] Frau Klein: Vermesser hat zugesagt bis KW 17.
+[00:02:48] Ich: Notiert — KW 17 für Lageplan.
+[00:02:55] Ich: Dritter Punkt — Brandschutz. Wir hatten ja kurz gesprochen,
+           AMA macht das wieder.
+[00:03:10] Herr Schmidt: Frau Andresen ist gesetzt, hat schon zugestimmt.
+[00:03:18] Ich: Erstabstimmung mit AMA legen wir auf den 22.04.26, 14 Uhr,
+           bei uns im Büro.
+[00:03:35] Frau Klein: Ich nehme online teil.
+[00:03:42] Ich: Vierter Punkt — Kostenrahmen. WB hat eine Kostenobergrenze von
+           4,5 Mio. Euro netto kommuniziert. Das ist die harte Grenze.
+[00:04:08] Frau Klein: Ja, das steht so im Bauherrenbeschluss.
+[00:04:15] Ich: Letzter Punkt — Folgetermine. Da wir eine klassische
+           LP3-Phase haben, lege ich ein wöchentliches JF auf Mittwochs 10 Uhr,
+           Start nächste Woche, 22.04.26.
+[00:04:38] Herr Schmidt: Geht klar.
+[00:04:42] Herr Tebarth: Bei mir auch.
+[00:04:48] Ich: Dann sind wir durch. Schönen Tag noch.
+[00:04:55] Frau Klein: Danke, ebenso.

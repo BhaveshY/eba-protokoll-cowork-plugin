@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "eba-protokoll-cowork",
-  "description": "Erzeugt EBA-konforme Protokolle (Gesprächsnotiz, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App.",
+  "description": "Erzeugt EBA-konforme Protokolle (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App.",
   "owner": {
     "name": "Eike Becker_Architekten",
     "email": "BhaveshYeole@eb-a.de"
@@ -10,7 +10,7 @@
     {
       "name": "eba-protokoll-cowork",
       "source": "./",
-      "description": "Erzeugt EBA-konforme Protokolle (Gesprächsnotiz, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App. Inklusive Fortschreibung über mehrere Besprechungen mit D/K|B|LN-Tracking.",
+      "description": "Erzeugt EBA-konforme Protokolle nach allen vier QMG-024-141-Vorlagen (Gesprächsnotiz, Protokoll-einfach Word LP1-4, Planungsprotokoll LP1-4 Tracking, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App. Inklusive Fortschreibung über mehrere Besprechungen mit D/K|B|LN-Tracking.",
       "version": "0.1.0",
       "category": "productivity",
       "tags": [
@@ -19,6 +19,8 @@
         "eba",
         "bauleitung",
         "planung",
+        "kick-off",
+        "workshop",
         "qmg-024-141"
       ]
     }
