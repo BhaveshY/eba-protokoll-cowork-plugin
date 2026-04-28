@@ -1,6 +1,14 @@
 ---
 name: protokoll-lp5
-description: Use when the user asks for a "Protokoll LP5", "Bauleitungsprotokoll", "Baubesprechung", "Baustelle", "Mängelprotokoll", "Bemusterungsprotokoll", or has a transcript from a construction-phase meeting (LP5 Ausführungsplanung / LP8 Objektüberwachung). Produces the EBA QMG-024-141 ORG-PK-LP5 tracking protocol with construction-specific D/K categories (Mängel, Bemusterung, Bauablauf, …).
+description: >-
+  Use when the user asks for a "Protokoll LP5", "Bauleitungsprotokoll",
+  "Baubesprechung", "Baustelle", "Mängelprotokoll", "Bemusterungsprotokoll", or
+  has a transcript from a construction-phase meeting (LP5 Ausführungsplanung /
+  LP8 Objektüberwachung). Produces the EBA QMG-024-141 ORG-PK-LP5 tracking
+  protocol with construction-specific D/K categories (Mängel, Bemusterung,
+  Bauablauf, …). Do not use for pure BIM-Koordination, BIM-Jour-Fixe,
+  BIM-PK-JF, IFC, BCF, BIMcollab, CDE, BAP, LOIN, or Datendrop transcripts
+  unless the user explicitly asks for LP5.
 ---
 
 # Bauleitungsprotokoll LP5 erstellen
@@ -124,6 +132,9 @@ Wie LP1-4. Zusätzlich:
 
 ## Anti-Pattern
 
+- ❌ Reine BIM-Koordination (`BIM-PK-JF`, `BIM-Jour-Fixe`, IFC/BCF/BIMcollab/CDE,
+  Datendrop, BAP, LOIN) als LP5 behandeln — dafür die LP1-4-BIM-Variante verwenden,
+  außer der Nutzer verlangt ausdrücklich LP5.
 - ❌ Mängelpunkte ohne Mangelnummer notieren — sie müssen über die Projektdauer
   eindeutig referenzierbar sein.
 - ❌ Witterung weglassen, wenn sie auf der Baustelle relevant war (z.B. wegen

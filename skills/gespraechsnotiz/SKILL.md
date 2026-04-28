@@ -1,6 +1,11 @@
 ---
 name: gespraechsnotiz
-description: Use when the user asks for a "Gesprächsnotiz", "kurze Notiz", "conversation note", "kurzes Protokoll", "informelle Notiz", or has a short transcript (under ~1500 words, ≤3 speakers, no LP-specific vocabulary) that should be turned into the simple EBA Gesprächsnotiz format (no D/K|B|LN tracking, no status column).
+description: >-
+  Use when the user asks for a "Gesprächsnotiz", "kurze Notiz",
+  "conversation note", "kurzes Protokoll", "informelle Notiz", or has a short
+  transcript (under ~1500 words, ≤3 speakers, no LP-specific vocabulary) that
+  should be turned into the simple EBA Gesprächsnotiz format (no D/K|B|LN
+  tracking, no status column).
 ---
 
 # Gesprächsnotiz erstellen

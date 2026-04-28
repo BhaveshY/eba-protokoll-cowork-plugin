@@ -1,6 +1,12 @@
 ---
 name: protokoll-fortschreiben
-description: Use when generating an LP1-4 or LP5 protocol that follows a previous one in the same project — i.e. when a protokoll-state.json or earlier protocol exists in the project's protokolle/ directory. Carries open items forward, marks new comments as Ergänzung (LN-suffix E, prefix #NN:), increments the meeting number B, and preserves the project-specific D/K schema, distribution list, and Firma-/Personen-Kürzel.
+description: >-
+  Use when generating an LP1-4 or LP5 protocol that follows a previous one in
+  the same project — i.e. when a protokoll-state.json or earlier protocol exists
+  in the project's protokolle/ directory. Carries open items forward, marks new
+  comments as Ergänzung (LN-suffix E, prefix #NN:), increments the meeting
+  number B, and preserves the project-specific D/K schema, distribution list,
+  and Firma-/Personen-Kürzel.
 ---
 
 # Protokoll fortschreiben (Folgeprotokoll erstellen)

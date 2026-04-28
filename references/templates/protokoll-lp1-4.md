@@ -122,14 +122,14 @@ Wenn ein BIM-Koordinations-JF protokolliert wird, gilt die BIM-Variante:
 
 | D/K | Bedeutung |
 |-----|-----------|
-| 01  | Organisation |
-| 02  | Termine |
-| 03  | Modellierungsvorgaben / Entscheidungen |
-| 04  | Modell Allgemein |
-| 05  | Objektplanung (ARC) |
-| 06  | Tragwerksplanung (TWP) |
-| 07  | TGA |
-| 08  | Fassade / Sonstiges |
+| 1   | Organisation |
+| 2   | Termine |
+| 3   | Modellierungsvorgaben / Entscheidungen |
+| 4   | Modell Allgemein |
+| 5   | Objektplanung (ARC) |
+| 6   | Tragwerksplanung (TWP) |
+| 7   | TGA |
+| 8   | Fassade / Sonstiges |
 
 ## LN-Konvention (Laufende Nummer)
 

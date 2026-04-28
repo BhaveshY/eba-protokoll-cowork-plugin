@@ -1,7 +1,8 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "eba-protokoll-cowork",
-  "description": "Erzeugt EBA-konforme Protokolle (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App.",
+  "metadata": {
+    "description": "Erzeugt EBA-konforme Protokolle (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App."
+  },
   "owner": {
     "name": "Eike Becker_Architekten",
     "email": "BhaveshYeole@eb-a.de"

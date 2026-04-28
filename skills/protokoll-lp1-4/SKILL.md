@@ -1,6 +1,13 @@
 ---
 name: protokoll-lp1-4
-description: Use when the user asks for a "Protokoll LP1-4", "Planungsprotokoll", "Planungsbesprechung", "Jour Fixe", "Kick-Off", "BIM-Koordination", "Workshop-Protokoll", or has a transcript from a planning-phase meeting (LP1-Grundlagenermittlung, LP2-Vorplanung, LP3-Entwurfsplanung, LP4-Genehmigungsplanung). Produces the EBA QMG-024-141 ORG-PK-(LP1-4) tracking protocol with D/K|B|LN topic numbering, status column, and continuous tracking across meetings.
+description: >-
+  Use when the user asks for a "Protokoll LP1-4", "Planungsprotokoll",
+  "Planungsbesprechung", "Jour Fixe", "Kick-Off", "BIM-Koordination",
+  "Workshop-Protokoll", or has a transcript from a planning-phase meeting
+  (LP1-Grundlagenermittlung, LP2-Vorplanung, LP3-Entwurfsplanung,
+  LP4-Genehmigungsplanung). Produces the EBA QMG-024-141 ORG-PK-(LP1-4)
+  tracking protocol with D/K|B|LN topic numbering, status column, and continuous
+  tracking across meetings.
 ---
 
 # Planungsprotokoll LP1-4 erstellen
@@ -89,6 +96,9 @@ Anhand des Themas die passende Kategorie aus dem Schema in
   10 Freianlagen.
 
 Bei BIM-Koordinationsterminen das BIM-Schema verwenden.
+Ein `BIM-PK-JF`, `BIM-Jour-Fixe` oder `EBA_BIM-PK-JF` bleibt die LP1-4-BIM-Variante,
+auch wenn Generalunternehmer, ausführende Firmen oder Züblin BIM-Management teilnehmen.
+Nur bei ausdrücklichem LP5-/Baustellen-Hinweis auf `/protokoll-lp5` wechseln.
 
 Pro D/K-Kategorie eine Header-Zeile (`D/K = 03`, restliche Spalten leer, Beschreibung
 wie „**Planungsvorgaben / Entscheidungen**"), dann die Themen darunter.
@@ -182,6 +192,8 @@ Wenn das Transkript ein BIM-Koordinations-JF ist (siehe Auto-Erkennung in der
   8 Sonstiges).
 - Spalte `ausblenden = x` für erledigte Themen (wird in Markdown nicht dargestellt,
   aber im State-File getrackt).
+- Beispielpaar: `references/examples/beispiel-transkript-bim.txt` und
+  `references/examples/beispiel-ausgabe-bim.md`.
 
 ## Anti-Pattern
 

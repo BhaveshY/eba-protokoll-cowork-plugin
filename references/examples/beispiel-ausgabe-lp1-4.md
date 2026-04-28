@@ -69,10 +69,33 @@
 | DGNB-Workshop         | Alle Fachplaner | Online | 14.04.26 | 14:00–17:00 |
 | Planungsbesprechung Nr. 13 | EBA WB ZÜB LHT DES | EBA, Berlin | 14.04.26 | 09:00–10:30 |
 
+## Aufstellvermerk zum Dokument
+
+| Rolle     | Name / Kürzel | Datum    |
+|-----------|---------------|----------|
+| Ersteller | RvG           | 24.03.26 |
+| Geprüft   | —             | —        |
+
+## Nachträgliche Anmerkungen zum Dokument
+
+| Ersteller | Erstell-/Änderungsdatum | Anmerkung |
+|-----------|-------------------------|-----------|
+| ---       | ---                     | ---       |
+
 ## Anlagen
 
-—
+| Dokument/e, Plan/Pläne | V/I | Datum | Format |
+|------------------------|-----|-------|--------|
+| —                      | —   | —     | —      |
 
----
+## Kennzeichnungen im Dokument
 
-_Aufstellvermerk_: Erstellt durch RvG, 24.03.26. Geprüft durch —, —.
+> Die Themen/Inhalte erhalten zur besseren Nachvollziehbarkeit je Status eine
+> entsprechende Kennzeichnung.
+
+| Termin Status           | Farbe           | Bemerkung                                           |
+|-------------------------|-----------------|-----------------------------------------------------|
+| aktuell/fortgeschrieben | _Kennzeichnung_ | ab Protokoll 2, ausgenommen Versendung Nr. 1        |
+| aktuell/angemerkt       | _Kennzeichnung_ | Anmerkungen nach erster Versendung/Wiederversendung |
+| überschritten           | _Kennzeichnung_ | offene überfällige Termine                          |
+| erledigt                | _Kennzeichnung_ | erledigte Themen (einmalig)                         |

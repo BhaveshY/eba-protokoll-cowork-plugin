@@ -1,6 +1,13 @@
 ---
 name: eba-protokoll
-description: Use when the user asks to "make a protocol", "create a protocol", "Protokoll erstellen", "Protokoll generieren", "process this transcript", or hands over a transcript file (.txt or .srt produced by the EBA Protokoll App) without specifying which template. Auto-detects the right EBA protocol format (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) from the transcript content and project metadata, then delegates to the matching format skill.
+description: >-
+  Use when the user asks to "make a protocol", "create a protocol",
+  "Protokoll erstellen", "Protokoll generieren", "process this transcript", or
+  hands over a transcript file (.txt or .srt produced by the EBA Protokoll App)
+  without specifying which template. Auto-detects the right EBA protocol format
+  (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4,
+  Bauleitungsprotokoll LP5) from the transcript content and project metadata,
+  then delegates to the matching format skill.
 ---
 
 # EBA-Protokoll: Auto-Erkennung & Dispatch
@@ -44,15 +51,21 @@ Wende folgende Heuristik an (in dieser Reihenfolge, der erste Treffer gewinnt):
    - Kein „Besprechung Nr. …", „Jour Fixe", „LPH", „Werkplanung" im Text.
    - **Keine konkreten Lieferfristen** im Gespräch erwähnt.
 
-2. **Bauleitungsprotokoll LP5** wenn einer dieser Begriffe vorkommt:
+2. **BIM-Protokoll** (Sub-Variante von LP1-4) wenn einer dieser Begriffe vorkommt:
+   `BIM`, `IFC`, `BCF`, `BIMcollab`, `Revit`, `ViCADo`, `CDE`, `Fachmodell`,
+   `Modellaustausch`, `LOIN`, `LOG`, `LOI`, `BAP`, `AIA`, `Datendrop`,
+   `BIM-Koordination`, `BIM-Jour-Fixe`, `BIM-PK-JF`, `EBA_BIM-PK-JF`.
+   → Verwendet das LP1-4-Skelett mit BIM-Kategorienschema.
+
+   BIM-Signale gewinnen vor LP5-Signalen. Auch wenn ein Generalunternehmer oder
+   Züblin BIM-Management teilnimmt, bleibt ein `BIM-PK-JF` ein LP1-4-BIM-Protokoll,
+   solange nicht ausdrücklich eine LP5-/Baustellenvorlage verlangt wird.
+
+3. **Bauleitungsprotokoll LP5** wenn einer dieser Begriffe vorkommt und kein
+   BIM-Protokoll erkannt wurde:
    `Baustelle`, `Mangel`, `Bemusterung`, `Abnahme`, `Rohbau`, `Witterung`,
    `Gewerk`, `Kran`, `Liefertermin`, `LPH 5`, `LP5`, `LP 5`, `Bauleitung`,
    `OBÜ` (Objektüberwachung), `Polier`, `Bauleiter`, `Baustellenbegehung`.
-
-3. **BIM-Protokoll** (Sub-Variante von LP1-4) wenn einer dieser Begriffe vorkommt:
-   `BIM`, `IFC`, `BCF`, `BIMcollab`, `Revit`, `ViCADo`, `CDE`, `Fachmodell`,
-   `Modellaustausch`, `LOIN`, `LOG`, `LOI`, `BAP`, `AIA`, `Datendrop`.
-   → Verwendet das LP1-4-Skelett mit BIM-Kategorienschema.
 
 4. **Planungsprotokoll LP1-4** (Tracking, mit D/K|B|LN) wenn einer gilt:
    - Es existiert ein Vorprotokoll im Projektordner

@@ -67,18 +67,34 @@
 | Bemusterung Brandschutzklappen Trox | DES AMA Trox | Baustelle | 28.04.26 | – |
 | Baubesprechung Nr. 9  | Alle       | Baustellenbüro | 06.05.26 | 09:00–10:00 |
 
+## Aufstellvermerk zum Dokument
+
+| Rolle     | Name / Kürzel | Datum    |
+|-----------|---------------|----------|
+| Ersteller | RvG           | 15.04.26 |
+| Geprüft   | —             | —        |
+
+## Nachträgliche Anmerkungen zum Dokument
+
+| Ersteller | Erstell-/Änderungsdatum | Anmerkung |
+|-----------|-------------------------|-----------|
+| ---       | ---                     | ---       |
+
 ## Anlagen
 
-—
+| Dokument/e, Plan/Pläne | V/I | Datum | Format |
+|------------------------|-----|-------|--------|
+| Mängelfotos M-048 bis M-051 | – | 15.04.26 | JPG |
+| Schalungsplan UG1/UG2       | – | aktuell  | PDF |
 
 ## Kennzeichnungen im Dokument
 
-| Termin Status              | Farbe         | Bemerkung                                |
-|----------------------------|---------------|------------------------------------------|
-| aktuell/fortgeschrieben    | _Kennzeichnung_ | ab Protokoll 2, ausgenommen Versendung Nr. 1 |
-| aktuell/angemerkt          | _Kennzeichnung_ | Anmerkungen nach erster Versendung         |
-| überschritten              | _Kennzeichnung_ | offene überfällige Termine                |
+> Die Themen/Inhalte erhalten zur besseren Nachvollziehbarkeit je Status eine
+> entsprechende Kennzeichnung.
 
----
-
-_Aufstellvermerk_: Erstellt durch RvG, 15.04.26. Geprüft durch —, —.
+| Termin Status           | Farbe           | Bemerkung                                           |
+|-------------------------|-----------------|-----------------------------------------------------|
+| aktuell/fortgeschrieben | _Kennzeichnung_ | ab Protokoll 2, ausgenommen Versendung Nr. 1        |
+| aktuell/angemerkt       | _Kennzeichnung_ | Anmerkungen nach erster Versendung/Wiederversendung |
+| überschritten           | _Kennzeichnung_ | offene überfällige Termine                          |
+| erledigt                | _Kennzeichnung_ | erledigte Themen (einmalig)                         |

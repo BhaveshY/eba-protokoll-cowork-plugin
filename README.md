@@ -145,9 +145,24 @@ Im `references/examples/`-Ordner:
   Meeting mit 4 Teilnehmern, 5 Themen + Unterpunkten, kombinierte Frist-Spalte.
 - `beispiel-transkript-lp1-4.txt` + `beispiel-ausgabe-lp1-4.md` — Planungsbesprechung
   mit 5 Teilnehmern, 7 Themen.
+- `beispiel-transkript-bim.txt` + `beispiel-ausgabe-bim.md` — BIM-Koordination JF-07
+  als LP1-4-Subvariante mit eigenem BIM-D/K-Schema (1–8).
 - `beispiel-transkript-lp5.txt` + `beispiel-ausgabe-lp5.md` — Baustellenbegehung
   mit Mängelaufnahme und Bemusterung.
 - `beispiel-state.json` — vollständiges State-File für ein laufendes Projekt.
+
+## Qualitätschecks
+
+Die Referenzen lassen sich statisch prüfen mit:
+
+```bash
+node scripts/validate-references.mjs
+```
+
+Der Check stellt sicher, dass die Beispielausgaben die aktuellen Vorlagen-Endblöcke
+verwenden, die BIM-Variante als Beispielpaar vorhanden ist und der Validator
+formatabhängig zwischen Gesprächsnotiz, Protokoll-einfach und Tracking-Protokollen
+unterscheidet.
 
 ## Konfiguration
 

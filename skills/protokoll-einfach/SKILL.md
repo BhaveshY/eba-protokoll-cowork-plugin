@@ -1,6 +1,12 @@
 ---
 name: protokoll-einfach
-description: Use when the user asks for a "Protokoll einfach", "einfaches Protokoll", "Protokoll ohne Tracking", "Workshop-Protokoll ohne D/K", "Kick-Off Notiz", or "simple meeting protocol with deadlines but no tracking". Produces the EBA QMG-024-141 ORG-PK-LP1-4-MA Word format (Stand A): hierarchical theme numbering (Thema 01.1), combined "Zuständig / Frist" column, 3-day notice period, no status column, no D/K|B|LN scheme.
+description: >-
+  Use when the user asks for a "Protokoll einfach", "einfaches Protokoll",
+  "Protokoll ohne Tracking", "Workshop-Protokoll ohne D/K", "Kick-Off Notiz",
+  or "simple meeting protocol with deadlines but no tracking". Produces the EBA
+  QMG-024-141 ORG-PK-LP1-4-MA Word format (Stand A): hierarchical theme
+  numbering (Thema 01.1), combined "Zuständig / Frist" column, 3-day notice
+  period, no status column, no D/K|B|LN scheme.
 ---
 
 # Einfaches Protokoll erstellen

@@ -1,6 +1,11 @@
 ---
 name: transkript-vorbereiten
-description: Use when the user wants to clean up a transcript before generating a protocol — fixing speaker labels (renaming "Sprecher 1" to real names), merging adjacent same-speaker turns, removing filler words, splitting overly long transcripts by date, or stitching multiple transcripts of one continuous meeting together.
+description: >-
+  Use when the user wants to clean up a transcript before generating a protocol
+  — fixing speaker labels (renaming "Sprecher 1" to real names), merging
+  adjacent same-speaker turns, removing filler words, splitting overly long
+  transcripts by date, or stitching multiple transcripts of one continuous
+  meeting together.
 ---
 
 # Transkript vorbereiten (Pre-Processing)
