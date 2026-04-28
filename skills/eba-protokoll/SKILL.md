@@ -42,50 +42,73 @@ Mit dem Read-Tool die ganze Datei einlesen. Folgende Metadaten heuristisch ablei
 
 ### 3. Protokoll-Typ erkennen
 
+**Anker-Prinzip**: Echte EBA-Besprechungen benennen ihren Typ in den ersten
+1–3 Sätzen ("Guten Morgen zur **Planungsbesprechung Nr. 12** …",
+"Willkommen zur **BIM-Koordination Jour Fixe 07** …", "Wir starten die
+**Baubesprechung Nr. 9** …"). Erkenne das Format vorrangig aus diesem
+**Meeting-Anker** in den ersten ~30 Zeilen — nicht aus zufälligen
+Stichwortvorkommen im Themenkörper.
+
+Eine **LP1-4-Planungsbesprechung darf BIM-Themen enthalten**; das macht sie
+nicht zu einer BIM-Koordination. Nur wenn das Meeting *selbst* eine
+BIM-Koordination ist, gilt die BIM-Variante.
+
 Wende folgende Heuristik an (in dieser Reihenfolge, der erste Treffer gewinnt):
 
-1. **Gesprächsnotiz** wenn alle gelten:
-   - Transkript ist kürzer als ~1500 Wörter (≈ 10 Min Gespräch).
-   - Es kommt **kein** Begriff aus dem LP-Vokabular vor (siehe unten).
-   - Höchstens 3 Sprecher.
-   - Kein „Besprechung Nr. …", „Jour Fixe", „LPH", „Werkplanung" im Text.
-   - **Keine konkreten Lieferfristen** im Gespräch erwähnt.
+1. **BIM-Protokoll** (Sub-Variante von LP1-4) wenn der **Meeting-Anker** in den
+   ersten ~30 Zeilen oder im Dateinamen explizit eine BIM-Koordination benennt:
+   - Phrasen: `BIM-Koordination`, `BIM-Jour-Fixe`, `BIM-JF`, `BIM-Koordination
+     Jour Fixe`, `Koordinations-JF`, `BIM-Termin`.
+   - Dateiname-Marker: `BIM-PK-JF`, `EBA_BIM-PK-JF`.
 
-2. **BIM-Protokoll** (Sub-Variante von LP1-4) wenn einer dieser Begriffe vorkommt:
-   `BIM`, `IFC`, `BCF`, `BIMcollab`, `Revit`, `ViCADo`, `CDE`, `Fachmodell`,
-   `Modellaustausch`, `LOIN`, `LOG`, `LOI`, `BAP`, `AIA`, `Datendrop`,
-   `BIM-Koordination`, `BIM-Jour-Fixe`, `BIM-PK-JF`, `EBA_BIM-PK-JF`.
-   → Verwendet das LP1-4-Skelett mit BIM-Kategorienschema.
+   → Verwendet das LP1-4-Skelett mit BIM-Kategorienschema (D/K = `1`–`8`).
 
-   BIM-Signale gewinnen vor LP5-Signalen. Auch wenn ein Generalunternehmer oder
-   Züblin BIM-Management teilnimmt, bleibt ein `BIM-PK-JF` ein LP1-4-BIM-Protokoll,
-   solange nicht ausdrücklich eine LP5-/Baustellenvorlage verlangt wird.
+   BIM-Signale gewinnen vor LP5-Signalen, wenn ein Meeting **explizit** als
+   BIM-Koordination eröffnet wird — auch wenn Bauleitungs-Personal teilnimmt.
 
-3. **Bauleitungsprotokoll LP5** wenn einer dieser Begriffe vorkommt und kein
-   BIM-Protokoll erkannt wurde:
-   `Baustelle`, `Mangel`, `Bemusterung`, `Abnahme`, `Rohbau`, `Witterung`,
-   `Gewerk`, `Kran`, `Liefertermin`, `LPH 5`, `LP5`, `LP 5`, `Bauleitung`,
-   `OBÜ` (Objektüberwachung), `Polier`, `Bauleiter`, `Baustellenbegehung`.
+   **NICHT** als BIM klassifizieren, nur weil im Themenkörper Begriffe wie `BIM`,
+   `IFC`, `BCF`, `BIMcollab`, `Revit`, `Fachmodell`, `Modellaustausch`, `LOIN`,
+   `BAP`, `AIA`, `Datendrop` vorkommen. Diese können auch in einer
+   Planungsbesprechung als ein Thema unter mehreren auftreten.
 
-4. **Planungsprotokoll LP1-4** (Tracking, mit D/K|B|LN) wenn einer gilt:
+2. **Bauleitungsprotokoll LP5** wenn der **Meeting-Anker** eine Baustellen-
+   oder Bauleitungsbesprechung benennt:
+   - Phrasen: `Baubesprechung Nr.`, `Bauleitungs-JF`, `Baustellenbegehung`,
+     `Mängelbegehung`, `Bauleitung Jour Fixe`, `OBÜ-Termin`, `LP5`, `LPH 5`.
+   - Oder: Mehrere Themen rund um `Mangel`, `Bemusterung`, `Abnahme`, `Rohbau`,
+     `Gewerk`, `Polier`, `Kran`, `Liefertermin`, `Witterung` werden im Transkript
+     systematisch durchgesprochen (nicht nur einmal erwähnt).
+
+3. **Planungsprotokoll LP1-4** (Tracking, mit D/K|B|LN) wenn einer gilt:
    - Es existiert ein Vorprotokoll im Projektordner
      (`protokolle/<projekt>/protokoll-state.json` oder ältere `protokoll-NN-…md`).
-   - Im Transkript fallen **Verweise auf vorherige Besprechungen** (z.B. „letztes Mal",
-     „in der Besprechung 10", „aus #08", „LN 02E").
-   - Begriffe: `Bauantrag`, `Genehmigungsplanung`, `Vorentwurf`, `Entwurf`,
-     `LPH 1`–`LPH 4`, `Planungsbesprechung Nr.`, `Jour Fixe Nr.`, `JF-NN`,
-     `Vorplanung`, `DGNB`, `Brandschutzkonzept`, `Statik` (Kontext Planung),
-     `TGA`-Konzept, `Fassadenplanung`.
-   - Oder: > 5 Sprecher und Transkript erwähnt explizit Vortermin oder Folgenummerierung.
+   - Im Transkript fallen **Verweise auf vorherige Besprechungen** (z.B.
+     „letzte Woche", „letztes Mal", „aus #08", „LN 02E", „Punkt von letzter
+     Woche damit erledigt").
+   - **Meeting-Anker** in den ersten ~30 Zeilen: `Planungsbesprechung Nr.`,
+     `Jour Fixe Nr.`, `JF-NN`, `Werkplanungs-JF`, `Planungs-JF`.
+   - Oder: Im Transkript wird ein **fortgeschrittener LP-Kontext** beschrieben
+     (Bauantrag-Einreichung, DGNB-Workshop mit Nummer, LP3-Abschluss,
+     Fassadenstand mit Vorlagen) UND das Meeting hat eine erkennbare
+     Tracking-Konvention (Themen mit konkretem Datum + Verantwortlichem
+     im EBA-Kürzel-Stil).
 
-5. **Protokoll-einfach** (Word LP1-4 Stand A, ohne Tracking) wenn:
-   - 3+ Sprecher und konkrete Lieferfristen im Gespräch.
+4. **Protokoll-einfach** (Word LP1-4 Stand A, ohne Tracking) wenn der
+   **Meeting-Anker** ein Kick-Off, Workshop, Erstgespräch ist:
+   - Phrasen: `Kick-Off`, `Kickoff`, `Workshop`, `Erstgespräch`,
+     `Auftaktbesprechung`, `Auftakt`, `Erstbesprechung`.
+   - 3+ Sprecher, konkrete Liefertermine im Gespräch.
    - **Aber** kein Vorprotokoll, keine Verweise auf vorherige Besprechungen,
      kein D/K-Schema im Projekt etabliert.
-   - Typisch für Kick-Off, Workshop, einmalige Abstimmung, Erstbesprechung
-     ohne Folge-Tracking.
-   - Begriffe: `Kick-Off`, `Workshop`, `Erstgespräch`, `Auftakt`,
-     `einmalige Abstimmung`.
+
+5. **Gesprächsnotiz** wenn alle gelten:
+   - Transkript ist kürzer als ~1500 Wörter (≈ 10 Min Gespräch).
+   - Höchstens 3 Sprecher.
+   - **Kein** Meeting-Anker für BIM, LP5, LP1-4 oder Kick-Off.
+   - Keine fortgeschrittene Tracking-Sprache („aus #08", „LN 02E",
+     „Besprechung Nr."). Casual Datums- und Wochentagsverweise
+     („Donnerstag", „morgen", „bis 18.03.") sind in einer Gesprächsnotiz
+     **erlaubt**.
 
 6. Wenn nichts klar passt: **frage den Nutzer**.
 

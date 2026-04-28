@@ -125,6 +125,65 @@ expect(
   "LP5 skill description excludes pure BIM coordination",
 );
 
+// Dispatcher smoke test — verify each example transcript would route to the
+// correct format skill via the auto-detection heuristic. Mirrors the rules
+// documented in skills/eba-protokoll/SKILL.md (Meeting-Anker prinzip).
+function classifyTranscript(text, filename) {
+  const head = text.split("\n").slice(0, 30).join("\n");
+  const speakers = new Set(
+    text
+      .split("\n")
+      .map((l) => l.match(/^\[\d{2}:\d{2}:\d{2}\]\s+([^:]+):/))
+      .filter(Boolean)
+      .map((m) => m[1].trim()),
+  );
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  const bimAnchor =
+    /(BIM-Koordination|BIM-Jour-Fixe|BIM-JF\b|Koordinations-JF|BIM-Termin)/.test(head) ||
+    /(BIM-PK-JF|EBA_BIM-PK-JF)/.test(filename);
+  const lp5Anchor =
+    /(Baubesprechung Nr\.|Bauleitungs-JF|Baustellenbegehung|Mängelbegehung|Bauleitung Jour Fixe|OBÜ-Termin|\bLP5\b|\bLPH\s?5\b)/.test(
+      head,
+    );
+  const lp14Anchor =
+    /(Planungsbesprechung Nr\.|Jour Fixe Nr\.|JF-\d+|Werkplanungs-JF|Planungs-JF)/.test(head);
+  const einfachAnchor =
+    /(Kick-Off|Kickoff|Workshop|Erstgespräch|Auftaktbesprechung|\bAuftakt\b|Erstbesprechung)/i.test(head);
+  const priorRefs =
+    /(letztes Mal|letzte Woche|aus #\d+|LN\s?\d+E|Besprechung Nr\.|Punkt von letzter Woche)/i.test(text);
+
+  if (bimAnchor) return "protokoll-lp1-4-bim";
+  if (lp5Anchor) return "protokoll-lp5";
+  if (priorRefs || lp14Anchor) return "protokoll-lp1-4";
+  if (einfachAnchor && speakers.size >= 3) return "protokoll-einfach";
+  if (
+    wordCount < 1500 &&
+    speakers.size <= 3 &&
+    !lp5Anchor &&
+    !bimAnchor &&
+    !lp14Anchor &&
+    !einfachAnchor
+  ) {
+    return "gespraechsnotiz";
+  }
+  return "unklar";
+}
+
+const dispatchCases = [
+  { file: "references/examples/beispiel-transkript-gespraechsnotiz.txt", expect: "gespraechsnotiz" },
+  { file: "references/examples/beispiel-transkript-einfach.txt", expect: "protokoll-einfach" },
+  { file: "references/examples/beispiel-transkript-lp1-4.txt", expect: "protokoll-lp1-4" },
+  { file: "references/examples/beispiel-transkript-lp5.txt", expect: "protokoll-lp5" },
+  { file: "references/examples/beispiel-transkript-bim.txt", expect: "protokoll-lp1-4-bim" },
+];
+
+for (const { file, expect: expected } of dispatchCases) {
+  const text = read(file);
+  const filename = file.split("/").pop();
+  const got = classifyTranscript(text, filename);
+  expect(got === expected, `dispatch heuristic routes ${filename} to ${expected} (got ${got})`);
+}
+
 if (failures.length > 0) {
   console.error(`Reference validation failed with ${failures.length} issue(s):`);
   for (const failure of failures) {
