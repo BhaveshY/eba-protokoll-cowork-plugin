@@ -131,16 +131,38 @@ Schreibe die State-Datei neu mit:
 - `dk_schema`: aktualisiert mit ggf. neu hinzugekommenen Kategorien.
 - `letzte_mangelnummer` (nur LP5): aktualisiert.
 
-### 8. Ausgabe und Zusammenfassung
+### 8. Ausgabe als DOCX + PDF schreiben & Zusammenfassung
 
-Speichere das neue Protokoll in `protokolle/<projekt>/`. Berichte dem Nutzer:
+**Endformat**: DOCX (immer) und PDF (wenn ein Konverter verfügbar ist).
+**Kein Markdown** im Projekt-Ordner. Die `protokoll-state.json` bleibt erhalten
+(persistente Projektzustand-Datei).
 
-- Pfad des neuen Protokolls.
+Schritte:
+
+1. Erzeuge das Folgeprotokoll als Markdown unter einem flüchtigen Pfad:
+   `/tmp/eba-protokoll-fortschreibung-<jjjj-mm-tt>-<projekt>.md`.
+
+2. Rufe den Renderer auf:
+
+   ```bash
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
+     "/tmp/eba-protokoll-fortschreibung-<datum>-<projekt>.md" \
+     --out-dir "protokolle/<projekt>/"
+   ```
+
+3. Schreibe die aktualisierte `protokolle/<projekt>/protokoll-state.json`.
+
+Berichte dem Nutzer:
+
+- Pfade der erzeugten DOCX- und PDF-Dateien.
 - Anzahl übernommener offener Punkte ohne Änderung.
 - Anzahl Ergänzungen zu Vorpunkten (mit kurzer Auflistung der LN-Referenzen).
 - Anzahl neu eröffneter Punkte.
 - Anzahl in dieser Besprechung erledigter Punkte (Status-Wechsel von `O` auf `E`).
 - Anzahl überfälliger Punkte (Termin liegt vor dem aktuellen Datum, Status weiterhin `O`).
+
+Volle Pipeline-Beschreibung:
+`${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 ### 9. Optionale „Ausblenden"-Logik
 

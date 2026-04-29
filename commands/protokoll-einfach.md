@@ -25,8 +25,10 @@ Wenn leer, frage den Nutzer nach der Datei oder liste verfügbare Transkripte au
    - Verteiler (3 Spalten: Vorname, Name, Firma).
    - Gesprächsinhalt mit hierarchischer Themenstruktur und kombinierter
      Spalte „Zuständig / Frist".
-3. Ausgabe als Markdown unter
-   `protokolle/<jjjj-mm-tt>_<projekt-kurzname>_protokoll.md`.
+3. Ausgabe als **DOCX + PDF** (kein Markdown im Projekt) unter
+   `protokolle/<jjjj-mm-tt>_<projekt-kurzname>_protokoll.docx` und
+   `…_protokoll.pdf`. Pipeline:
+   `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 ## Verwendung
 

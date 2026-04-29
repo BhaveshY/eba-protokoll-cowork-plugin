@@ -108,14 +108,36 @@ Wie LP1-4. Bei LP5 oft besonders wichtig:
 - **Nächster Baustellentermin** als prominenter Folgetermin.
 - **Gewerk-Liefertermine** in der Termine-Tabelle, falls relevant.
 
-### 9. Ausgabe & State
+### 9. Ausgabe als DOCX + PDF schreiben & State aktualisieren
 
-Speicherort:
-`protokolle/<projekt>/<jjjj-mm-tt>_protokoll-lp5-<NN>_<thema>.md`.
+**Endformat**: DOCX (immer) und PDF (wenn ein Konverter verfügbar ist —
+Windows: LibreOffice oder MS Word). **Kein Markdown** im Projekt-Ordner.
 
-**Alternativ — EBA-Dateinamen-Konvention**: siehe
+Schritte:
+
+1. Erzeuge das Protokoll als Markdown unter einem flüchtigen Pfad:
+   `/tmp/eba-protokoll-lp5-<jjjj-mm-tt>-<projekt>.md`. Die Vorbemerkungs-Box
+   bleibt wortgleich (mit **5 Kalendertagen**).
+
+2. Rufe den Renderer auf:
+
+   ```bash
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
+     "/tmp/eba-protokoll-lp5-<datum>-<projekt>.md" \
+     --out-dir "protokolle/<projekt>/"
+   ```
+
+3. Der Renderer schreibt
+   `protokolle/<projekt>/eba-protokoll-lp5-<datum>-<projekt>.docx` plus
+   die zugehörige PDF und löscht das MD-Zwischenformat.
+
+**EBA-Dateinamen-Konvention**: siehe
 `${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:
-`<PrjNr>-<PrjKZ>-EBA-BL-PK-<JJMMTT>.md`, z.B. `541-MAR-EBA-BL-PK-260415.md`.
+`<PrjNr>-<PrjKZ>-EBA-BL-PK-<JJMMTT>` (ohne Endung; Renderer hängt
+`.docx`/`.pdf` an), z.B. `541-MAR-EBA-BL-PK-260415.docx`.
+
+Volle Pipeline-Beschreibung:
+`${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 State-File: `protokolle/<projekt>/protokoll-state.json` mit zusätzlichen LP5-Feldern:
 

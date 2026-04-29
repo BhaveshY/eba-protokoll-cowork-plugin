@@ -151,18 +151,40 @@ auflisten. Sonst weglassen oder als „keine" vermerken.
 - **Geprüft durch / Prüfdatum**: leer lassen — wird später von der prüfenden Person
   ausgefüllt.
 
-### 10. Ausgabe schreiben & State aktualisieren
+### 10. Ausgabe als DOCX + PDF schreiben & State aktualisieren
 
-Speichere als Markdown unter
-`protokolle/<projekt>/<jjjj-mm-tt>_protokoll-<NN>_<thema>.md`.
+**Endformat**: DOCX (immer) und PDF (wenn ein Konverter verfügbar ist —
+Windows: LibreOffice oder MS Word). **Kein Markdown** im Projekt-Ordner.
 
-**Alternativ — EBA-Dateinamen-Konvention** (wenn der Nutzer das wünscht oder im
+Schritte:
+
+1. Erzeuge das Protokoll als Markdown unter einem flüchtigen Pfad:
+   `/tmp/eba-protokoll-lp1-4-<jjjj-mm-tt>-<projekt>.md` (bzw.
+   `/tmp/eba-protokoll-bim-...md` für BIM-Koordinationen).
+   Die Vorbemerkungs-Box bleibt wortgleich (mit **5 Kalendertagen**).
+
+2. Rufe den Renderer auf:
+
+   ```bash
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
+     "/tmp/eba-protokoll-lp1-4-<datum>-<projekt>.md" \
+     --out-dir "protokolle/<projekt>/"
+   ```
+
+3. Der Renderer schreibt
+   `protokolle/<projekt>/eba-protokoll-lp1-4-<datum>-<projekt>.docx` und
+   die zugehörige PDF, und löscht das MD-Zwischenformat. Das Format wird vom
+   Renderer als `protokoll-tracking` erkannt.
+
+**EBA-Dateinamen-Konvention** (wenn der Nutzer das wünscht oder im
 Projekt etabliert ist): siehe
 `${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:
-`<PrjNr>-<PrjKZ>-EBA-PLB-PK-<JJMMTT>.md`, z.B.
-`553-WIL-EBA-PLB-PK-260324.md`. Für die BIM-Variante:
-`<PrjNr>-<PrjKZ>-EBA_BIM-PK-JF-<NN>_<JJMMTT>.md`, z.B.
-`553-WIL-EBA_BIM-PK-JF-07_260331.md`.
+`<PrjNr>-<PrjKZ>-EBA-PLB-PK-<JJMMTT>` (ohne Endung; Renderer hängt
+`.docx`/`.pdf` an), z.B. `553-WIL-EBA-PLB-PK-260324.docx`. Für die
+BIM-Variante: `<PrjNr>-<PrjKZ>-EBA_BIM-PK-JF-<NN>_<JJMMTT>`.
+
+Volle Pipeline-Beschreibung:
+`${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 Aktualisiere die State-Datei `protokolle/<projekt>/protokoll-state.json` (siehe
 `${CLAUDE_PLUGIN_ROOT}/scripts/protokoll-state.md` für das Format) — sie enthält:

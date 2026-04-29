@@ -141,10 +141,19 @@ dem `E`-Suffix als Ergänzung markiert.
 
 ### 6. Ausgabe ablegen
 
-Default-Speicherort: `protokolle/<jjjj-mm-tt>_<projekt>_<typ>.md` relativ zum aktuellen
+**Endformat: DOCX (immer) und PDF (wenn ein Konverter — Windows: LibreOffice
+oder MS Word — verfügbar ist). Kein Markdown im Projekt-Ordner.**
+
+Default-Speicherort:
+`protokolle/<jjjj-mm-tt>_<projekt>_<typ>.docx` (+ `.pdf`) relativ zum aktuellen
 Arbeitsverzeichnis. Wenn der Nutzer einen anderen Pfad wünscht, dort.
 
 Wenn `protokolle/` nicht existiert: anlegen.
+
+Die Format-Skills delegieren das Rendering an
+`${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py`. Die vollständige Pipeline
+ist beschrieben in
+`${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 ## Verfügbare Referenz-Dateien
 
@@ -152,6 +161,7 @@ Wenn `protokolle/` nicht existiert: anlegen.
 - `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-einfach.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-lp1-4.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-lp5.md`
+- `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/disziplin-kategorien.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/firma-kuerzel.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/status-codes.md`

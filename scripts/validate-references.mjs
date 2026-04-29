@@ -125,6 +125,59 @@ expect(
   "LP5 skill description excludes pure BIM coordination",
 );
 
+// ─── DOCX/PDF output pipeline (v0.2) ─────────────────────────────────────
+//
+// All five protocol skills must instruct Claude to produce DOCX/PDF, not
+// Markdown. A central reference describes the pipeline; every format skill
+// must cite it.
+
+expectFile("scripts/render_protokoll.py");
+expectFile("references/categories/ausgabe-konvention.md");
+expectFile("references/templates/qmg/QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx");
+expectFile("references/templates/qmg/QMG-024-141_ORG-PK-LP1-4-MA_230227-A.docx");
+expectFile("references/templates/qmg/QMG-024-141_ORG-PK-LP5-MA_230202-B.docx");
+expectFile("references/templates/qmg/QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx");
+
+const ausgabeKonvention = read("references/categories/ausgabe-konvention.md");
+expect(
+  ausgabeKonvention.includes("render_protokoll.py"),
+  "ausgabe-konvention references the renderer",
+);
+expect(
+  ausgabeKonvention.includes("LibreOffice") && ausgabeKonvention.includes("MS Word"),
+  "ausgabe-konvention documents Windows PDF converter options",
+);
+
+for (const skillRel of [
+  "skills/gespraechsnotiz/SKILL.md",
+  "skills/protokoll-einfach/SKILL.md",
+  "skills/protokoll-lp1-4/SKILL.md",
+  "skills/protokoll-lp5/SKILL.md",
+  "skills/protokoll-fortschreiben/SKILL.md",
+]) {
+  const skill = read(skillRel);
+  expect(
+    skill.includes("ausgabe-konvention.md"),
+    `${skillRel} cites the ausgabe-konvention reference`,
+  );
+  expect(
+    skill.includes("render_protokoll.py"),
+    `${skillRel} invokes the render_protokoll.py renderer`,
+  );
+  expect(
+    skill.includes("DOCX") && skill.includes("PDF"),
+    `${skillRel} documents DOCX + PDF as the deliverables`,
+  );
+}
+
+const pluginManifest = JSON.parse(read(".claude-plugin/plugin.json"));
+expect(pluginManifest.version === "0.2.0", "plugin.json bumped to 0.2.0");
+const market = JSON.parse(read(".claude-plugin/marketplace.json"));
+expect(
+  market.plugins[0].version === "0.2.0",
+  "marketplace.json plugin entry bumped to 0.2.0",
+);
+
 // Dispatcher smoke test — verify each example transcript would route to the
 // correct format skill via the auto-detection heuristic. Mirrors the rules
 // documented in skills/eba-protokoll/SKILL.md (Meeting-Anker prinzip).

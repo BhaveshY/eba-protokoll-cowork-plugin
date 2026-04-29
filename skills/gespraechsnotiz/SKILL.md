@@ -75,18 +75,38 @@ Pro erkanntem Themenblock eine Zeile (oder Hauptzeile + Unterzeilen mit Hierarch
 
 Bei Unterthemen: `Thema 01`, `Thema 01.1`, `Thema 01.2`, `Thema 02`, …
 
-### 6. Ausgabe schreiben
+### 6. Ausgabe als DOCX + PDF schreiben
 
-Speichere als Markdown unter
-`protokolle/<jjjj-mm-tt>_<projekt-kurzname>_gespraechsnotiz.md`. Wenn das
-`protokolle/`-Verzeichnis nicht existiert, anlegen.
+**Endformat**: DOCX (immer) und PDF (wenn ein Konverter verfügbar ist —
+Windows: LibreOffice oder MS Word). **Kein Markdown** im Projekt-Ordner.
 
-**Alternativ — EBA-Dateinamen-Konvention** (wenn vom Nutzer gewünscht): siehe
+Schritte:
+
+1. Erzeuge die Notiz als Markdown unter einem flüchtigen Pfad:
+   `/tmp/eba-gespraechsnotiz-<jjjj-mm-tt>-<projekt-kuerzel>.md`.
+   Verwende **exakt** die Markdown-Struktur aus
+   `${CLAUDE_PLUGIN_ROOT}/references/templates/gespraechsnotiz.md`. Die
+   „Hinweis"-Box bleibt wortgleich.
+
+2. Rufe den Renderer auf:
+
+   ```bash
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
+     "/tmp/eba-gespraechsnotiz-<datum>-<kuerzel>.md" \
+     --out-dir "protokolle/"
+   ```
+
+3. Der Renderer schreibt
+   `protokolle/eba-gespraechsnotiz-<datum>-<kuerzel>.docx` und
+   `protokolle/eba-gespraechsnotiz-<datum>-<kuerzel>.pdf`,
+   und löscht das MD-Zwischenformat.
+
+**EBA-Dateinamen-Konvention** (wenn vom Nutzer gewünscht): siehe
 `${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:
-`<PrjNr>-<PrjKZ>-EBA-GN-<JJMMTT>.md`, z.B. `553-WIL-EBA-GN-260324.md`.
+`<PrjNr>-<PrjKZ>-EBA-GN-<JJMMTT>` (ohne Endung; Renderer hängt `.docx`/`.pdf` an).
 
-Verwende **exakt** die Markdown-Struktur aus `${CLAUDE_PLUGIN_ROOT}/references/templates/gespraechsnotiz.md`.
-Die „Hinweis"-Box bleibt wortgleich.
+Volle Pipeline-Beschreibung:
+`${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 ### 7. Zusammenfassung an den Nutzer
 

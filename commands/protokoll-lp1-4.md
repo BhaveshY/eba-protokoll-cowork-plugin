@@ -28,7 +28,9 @@ existiert, fortschreiben; sonst neu.
    - `categories/transkript-format.md`
 4. Header, Teilnehmer, Unterlagen, Themen-Tabelle (D/K|B|LN), Termine, Anlagen,
    Aufstellvermerk.
-5. Ausgabe: `protokolle/<projekt>/<jjjj-mm-tt>_protokoll-<NN>_<thema>.md`.
+5. Ausgabe als **DOCX + PDF** (kein Markdown im Projekt):
+   `protokolle/<projekt>/<jjjj-mm-tt>_protokoll-<NN>_<thema>.docx` und `…<thema>.pdf`.
+   Pipeline: `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 6. State-Datei aktualisieren / anlegen: `protokolle/<projekt>/protokoll-state.json`.
 
 ## Verwendung

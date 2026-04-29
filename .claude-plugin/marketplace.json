@@ -1,7 +1,7 @@
 {
   "name": "eba-protokoll-cowork",
   "metadata": {
-    "description": "Erzeugt EBA-konforme Protokolle (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App."
+    "description": "Erzeugt EBA-konforme Protokolle als DOCX + PDF aus Transkripten der EBA Protokoll App."
   },
   "owner": {
     "name": "Eike Becker_Architekten",
@@ -11,8 +11,8 @@
     {
       "name": "eba-protokoll-cowork",
       "source": "./",
-      "description": "Erzeugt EBA-konforme Protokolle nach allen vier QMG-024-141-Vorlagen (Gesprächsnotiz, Protokoll-einfach Word LP1-4, Planungsprotokoll LP1-4 Tracking, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App. Inklusive Fortschreibung über mehrere Besprechungen mit D/K|B|LN-Tracking.",
-      "version": "0.1.0",
+      "description": "Erzeugt EBA-konforme Protokolle als DOCX + PDF nach allen vier QMG-024-141-Vorlagen (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4 Tracking, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App. Windows-first; PDF via LibreOffice oder MS Word. Inklusive Fortschreibung mit D/K|B|LN-Tracking.",
+      "version": "0.2.0",
       "category": "productivity",
       "tags": [
         "protokoll",

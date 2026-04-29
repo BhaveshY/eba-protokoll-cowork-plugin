@@ -53,8 +53,13 @@ landet in `transkripte/<datum>_<thema>.txt`. Dann:
 ```
 
 Das Plugin erkennt automatisch den passenden Format-Typ (Gesprächsnotiz / LP1-4 / LP5),
-zeigt die Erkennung transparent an, und schreibt das fertige Protokoll als Markdown
-nach `protokolle/<projekt>/<datum>_protokoll-NN_<thema>.md`.
+zeigt die Erkennung transparent an, und schreibt das fertige Protokoll als
+**DOCX + PDF** nach
+`protokolle/<projekt>/<datum>_protokoll-NN_<thema>.docx` (und `.pdf`).
+Markdown wird **nicht** ins Projekt geschrieben — es ist nur ein flüchtiges
+Zwischenformat. Die PDF-Erzeugung benötigt einen Konverter; auf Windows
+empfohlen: **LibreOffice** (https://www.libreoffice.org/) oder **MS Word**
+mit `pywin32`.
 
 Wenn du das Format explizit setzen willst:
 
@@ -114,11 +119,14 @@ plugins/eba-protokoll-cowork/
 ├── skills/                        # Auto-Skills (model-invoked)
 ├── agents/                        # Subagents
 ├── references/
-│   ├── templates/                 # Markdown-Vorlagen
-│   ├── categories/                # D/K-Schemata, Kürzel, Status, Stil
+│   ├── templates/                 # Markdown-Vorlagen (Skill-Anleitungen)
+│   │   └── qmg/                   # Original-QMG-024-141-Templates (.docx, .xlsx)
+│   ├── categories/                # D/K-Schemata, Kürzel, Status, Stil, Ausgabe-Konvention
 │   └── examples/                  # Beispiel-Transkripte und -Protokolle
 ├── scripts/
-│   └── protokoll-state.md         # State-File-Schema-Dokumentation
+│   ├── render_protokoll.py        # MD → DOCX + PDF Renderer (von allen Skills aufgerufen)
+│   ├── protokoll-state.md         # State-File-Schema-Dokumentation
+│   └── validate-references.mjs    # Statische Plugin-Validierung
 └── README.md
 ```
 
@@ -130,8 +138,10 @@ plugins/eba-protokoll-cowork/
 │   └── 2026-04-22_pk-12.txt
 └── protokolle/                    # vom Plugin erzeugte Protokolle
     └── 553-WIL/                   # je Projekt ein Ordner
-        ├── 2026-03-24_protokoll-12_planungsbespr.md
-        ├── 2026-04-22_protokoll-13_planungsbespr.md
+        ├── 2026-03-24_protokoll-12_planungsbespr.docx   # immer
+        ├── 2026-03-24_protokoll-12_planungsbespr.pdf    # wenn Konverter vorhanden
+        ├── 2026-04-22_protokoll-13_planungsbespr.docx
+        ├── 2026-04-22_protokoll-13_planungsbespr.pdf
         └── protokoll-state.json   # Gedächtnis zwischen Sitzungen
 ```
 
@@ -177,15 +187,51 @@ echo '{"schema_version":1,"projekt":{"nr":"553","name":"WIL"}}' \
 
 Das Plugin füllt das State-File mit dem ersten Protokoll vollständig auf.
 
+## Endformat-Pipeline (DOCX + PDF)
+
+Alle Skills delegieren das Rendering an
+`scripts/render_protokoll.py`. Der Renderer:
+
+1. Liest das vom Skill erzeugte Markdown-Zwischenformat aus `/tmp/`.
+2. Schreibt ein EBA-gestyltes DOCX (Arial, A4, oranger Akzent, graue
+   Tabellenkopfzeilen) nach `protokolle/<projekt>/`.
+3. Konvertiert die DOCX zu PDF — Reihenfolge der versuchten Konverter:
+   1. **MS Word COM** (Windows, mit `pywin32`)
+   2. **LibreOffice headless** (Win/Mac/Linux)
+   3. **macOS Pages** (nur als macOS-Dev-Fallback)
+4. Löscht das MD-Zwischenformat.
+
+Die volle Konvention steht in
+`references/categories/ausgabe-konvention.md`.
+
+**Setup auf Windows** (einmalig pro Maschine):
+
+```powershell
+pip install -r scripts\requirements.txt
+```
+
+Plus eine PDF-Konverter-Option:
+
+- **LibreOffice** (empfohlen, einfacher Setup):
+  Download von https://www.libreoffice.org/, installieren — fertig.
+- **MS Word**: wenn bereits installiert, wird automatisch via `pywin32`
+  genutzt (das `requirements.txt` installiert das Paket auf Windows).
+
+Ohne PDF-Konverter wird nur die DOCX erzeugt; sie lässt sich manuell in
+Word/LibreOffice öffnen und dort als PDF exportieren.
+
 ## Entwicklungsstand
 
-Version 0.1.0 — Initiale Veröffentlichung, deckt die vier Standardvorlagen
-QMG-024-141 ab (Gesprächsnotiz, Protokoll-einfach Word LP1-4 Stand A,
-Planungsprotokoll LP1-4 Excel Stand A, Bauleitungsprotokoll LP5 Stand B). Geplant:
+Version 0.2.0 — DOCX + PDF Output, Windows-First. Deckt die vier
+Standardvorlagen QMG-024-141 ab (Gesprächsnotiz, Protokoll-einfach Word LP1-4
+Stand A, Planungsprotokoll LP1-4 Stand C / BIM-Subvariante,
+Bauleitungsprotokoll LP5 Stand B). Geplant:
 
-- Export nach `.docx` direkt aus dem Plugin (Pandoc-Wrapper).
+- Direkte Befüllung der QMG-024-141-Templates statt Fresh-DOCX
+  (höchste Layout-Treue, Phase 2).
 - Sondervorlage für DGNB-Workshops.
-- Visualisierung des State-Files (offene Punkte, Termine, Mängelliste) als HTML-Dashboard.
+- Visualisierung des State-Files (offene Punkte, Termine, Mängelliste) als
+  HTML-Dashboard.
 
 ## Lizenz
 

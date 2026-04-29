@@ -22,8 +22,10 @@ Wenn leer, frage den Nutzer nach der Datei oder liste verfügbare Transkripte au
    - Header (Projekt, Ort, Datum, Ersteller).
    - Teilnehmer- und Verteilertabelle.
    - Gesprächsinhalt mit hierarchischer Themenstruktur.
-3. Ausgabe als Markdown unter
-   `protokolle/<jjjj-mm-tt>_<projekt>_gespraechsnotiz.md`.
+3. Ausgabe als **DOCX + PDF** (kein Markdown im Projekt) unter
+   `protokolle/<jjjj-mm-tt>_<projekt>_gespraechsnotiz.docx` und
+   `…_gespraechsnotiz.pdf`. Pipeline:
+   `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 ## Verwendung
 

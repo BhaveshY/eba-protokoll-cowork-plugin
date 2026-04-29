@@ -27,7 +27,8 @@ Arbeitsverzeichnis).
    Fortschreibung gibt — empfehlen, `/protokoll-lp1-4` oder `/protokoll-lp5` mit
    `--neu` zu verwenden.
 5. Themen zusammenführen (Übernahme + Ergänzung + neu).
-6. Ausgabe schreiben, State aktualisieren.
+6. Ausgabe als **DOCX + PDF** schreiben (kein Markdown im Projekt), State aktualisieren.
+   Pipeline: `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 ## Verwendung
 
@@ -38,6 +39,6 @@ Arbeitsverzeichnis).
 
 ## Output
 
-- Pfad zum neuen Folgeprotokoll.
-- Aktualisierter State.
+- Pfade zu DOCX (und PDF, wenn erzeugt).
+- Aktualisierter State (`protokoll-state.json`).
 - Übersicht: übernommen / ergänzt / neu / erledigt / überfällig.

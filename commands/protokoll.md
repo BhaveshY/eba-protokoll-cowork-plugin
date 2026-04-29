@@ -28,14 +28,17 @@ Das ist entweder:
    `${CLAUDE_PLUGIN_ROOT}/references/` lesen, Vorprotokoll prüfen (für LP1-4/LP5),
    Header befüllen, Themen-Tabelle bauen, Ausgabe schreiben.
 
-3. Speicherort default: `protokolle/<jjjj-mm-tt>_<projekt>_<typ>.md` relativ zum
-   aktuellen Arbeitsverzeichnis.
+3. Speicherort default:
+   `protokolle/<jjjj-mm-tt>_<projekt>_<typ>.docx` (+ `.pdf`) relativ zum
+   aktuellen Arbeitsverzeichnis. Das **DOCX wird immer erzeugt**; die **PDF
+   wenn ein Konverter verfügbar ist** (Windows: LibreOffice oder MS Word).
+   **Kein Markdown** im Projekt.
 
 4. Wenn der Nutzer in seinem Argument einen Speicherort angibt (`--out <pfad>`),
    diesen verwenden.
 
 5. Am Ende **zusammenfassen**:
-   - Pfad zum erzeugten Protokoll.
+   - Pfade zu DOCX (und PDF, wenn erzeugt).
    - Erkannter Format-Typ.
    - Anzahl Teilnehmer / Themen / offene vs. erledigte Punkte.
    - Punkte, die unklar sind und Klärung brauchen.
@@ -43,7 +46,7 @@ Das ist entweder:
 ## Wichtig
 
 - Niemals den ursprünglichen Transkript verändern.
-- Ausgabe ist Markdown. Wenn der Nutzer DOCX oder PDF wünscht, ein Folgeschritt mit
-  Pandoc oder anderen Werkzeugen — nicht in dieser Skill.
+- Ausgabe ist **DOCX + PDF** — nicht Markdown. Pipeline:
+  `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 - Bei Format-Konflikten (z.B. Nutzer sagt LP1-4, Transkript klingt nach Gesprächsnotiz):
   Hinweis geben, aber **dem Nutzer-Hint folgen**.

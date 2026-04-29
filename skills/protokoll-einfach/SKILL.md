@@ -87,18 +87,38 @@ Pro erkanntem Themenblock eine Zeile (oder Hauptzeile + Unterzeilen mit Hierarch
 
 Bei Unterthemen: `Thema 01`, `Thema 01.1`, `Thema 01.2`, `Thema 02`, …
 
-### 6. Ausgabe schreiben
+### 6. Ausgabe als DOCX + PDF schreiben
 
-Speichere als Markdown unter
-`protokolle/<jjjj-mm-tt>_<projekt-kurzname>_protokoll.md`. Wenn das
-`protokolle/`-Verzeichnis nicht existiert, anlegen.
+**Endformat**: DOCX (immer) und PDF (wenn ein Konverter verfügbar ist —
+Windows: LibreOffice oder MS Word). **Kein Markdown** im Projekt-Ordner.
 
-**Alternativ — EBA-Dateinamen-Konvention** (wenn vom Nutzer gewünscht): siehe
+Schritte:
+
+1. Erzeuge das Protokoll als Markdown unter einem flüchtigen Pfad:
+   `/tmp/eba-protokoll-einfach-<jjjj-mm-tt>-<projekt-kuerzel>.md`.
+   Verwende **exakt** die Markdown-Struktur aus
+   `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-einfach.md`. Die
+   „Hinweis"-Box bleibt wortgleich (mit **3 Kalendertagen**, nicht 5).
+
+2. Rufe den Renderer auf:
+
+   ```bash
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
+     "/tmp/eba-protokoll-einfach-<datum>-<kuerzel>.md" \
+     --out-dir "protokolle/"
+   ```
+
+3. Der Renderer schreibt
+   `protokolle/eba-protokoll-einfach-<datum>-<kuerzel>.docx` und
+   `protokolle/eba-protokoll-einfach-<datum>-<kuerzel>.pdf`,
+   und löscht das MD-Zwischenformat.
+
+**EBA-Dateinamen-Konvention** (wenn vom Nutzer gewünscht): siehe
 `${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:
-`<PrjNr>-<PrjKZ>-EBA-WS-PK-<JJMMTT>.md`, z.B. `553-WIL-EBA-WS-PK-260324.md`.
+`<PrjNr>-<PrjKZ>-EBA-WS-PK-<JJMMTT>` (ohne Endung; Renderer hängt `.docx`/`.pdf` an).
 
-Verwende **exakt** die Markdown-Struktur aus
-`${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-einfach.md`.
+Volle Pipeline-Beschreibung:
+`${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 ### 7. Zusammenfassung an den Nutzer
 

@@ -29,7 +29,9 @@ Default: automatisch erkennen.
    - Witterung im Header (falls aus Transkript erkennbar).
    - Mängelnummer-Nummerierung (über `letzte_mangelnummer` im State).
    - Bemusterungen als eigene Themen-Zeilen unter D/K = 04.
-5. Ausgabe: `protokolle/<projekt>/<jjjj-mm-tt>_protokoll-lp5-<NN>_<thema>.md`.
+5. Ausgabe als **DOCX + PDF** (kein Markdown im Projekt):
+   `protokolle/<projekt>/<jjjj-mm-tt>_protokoll-lp5-<NN>_<thema>.docx` und `…<thema>.pdf`.
+   Pipeline: `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 6. State-Datei aktualisieren.
 
 ## Verwendung

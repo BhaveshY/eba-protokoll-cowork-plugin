@@ -1,7 +1,7 @@
 {
   "name": "eba-protokoll-cowork",
-  "version": "0.1.0",
-  "description": "Erzeugt EBA-konforme Protokolle (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App.",
+  "version": "0.2.0",
+  "description": "Erzeugt EBA-konforme Protokolle als DOCX + PDF (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4, Bauleitungsprotokoll LP5) aus Transkripten der EBA Protokoll App. Windows-first: PDF via LibreOffice oder MS Word.",
   "author": {
     "name": "Eike Becker_Architekten",
     "email": "BhaveshYeole@eb-a.de"
