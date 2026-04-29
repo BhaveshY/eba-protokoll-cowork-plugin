@@ -294,29 +294,6 @@ def _add_para(doc, text: str, *, italic=False, indent_left_cm=0.0):
     return p
 
 
-def _section_to_table(section: MdSection) -> tuple[list[str], list[list[str]], list[str]]:
-    """Find the first markdown table inside a section and return (headers, rows,
-    extra_blockquote_lines_before_table). If no table, headers/rows are empty."""
-    table_block: list[str] = []
-    in_table = False
-    pre_lines: list[str] = []
-    for line in section.lines:
-        if line.lstrip().startswith("|"):
-            in_table = True
-            table_block.append(line)
-        elif in_table:
-            break
-        else:
-            if line.strip():
-                pre_lines.append(line)
-    if not table_block:
-        return [], [], pre_lines
-    table = _parse_md_table(table_block)
-    if not table:
-        return [], [], pre_lines
-    return table[0], table[1:], pre_lines
-
-
 def _setup_page(doc):
     """A4 portrait, EBA-style margins, default font Arial 10pt."""
     style = doc.styles["Normal"]
@@ -405,24 +382,77 @@ def render_to_docx(parsed: ParsedMd, out_path: Path) -> None:
     # Body sections
     for s in parsed.sections:
         _add_heading(doc, s.heading, level=2)
-        headers, rows, pre_lines = _section_to_table(s)
-        for line in pre_lines:
-            stripped = line.lstrip()
-            if stripped.startswith(">"):
-                _add_para(doc, _strip_md_inline(stripped[1:].strip()), italic=True)
-            elif stripped.startswith("- ") or stripped.startswith("* "):
-                p = doc.add_paragraph(style="List Bullet")
-                _add_run(p, _strip_md_inline(stripped[2:]), size_pt=10)
-            elif stripped == "---":
-                pass
-            else:
-                _add_para(doc, _strip_md_inline(stripped))
-        if headers:
-            _make_table(doc, headers, rows)
-            doc.add_paragraph()
+        _render_section_lines(doc, s.lines)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(out_path))
+
+
+def _render_section_lines(doc, lines: list[str]) -> None:
+    """Render a markdown section in document order.
+
+    Tracking protocols put multiple header tables and the Vorbemerkung inside the
+    first ``## zur Besprechung`` section. Rendering only the first table silently
+    drops Ort/Datum/Zeit and the standard notice, so this function walks the
+    whole section and flushes tables/blockquote groups as they appear.
+    """
+    table_block: list[str] = []
+    quote_block: list[str] = []
+
+    def flush_table() -> None:
+        nonlocal table_block
+        if not table_block:
+            return
+        table = _parse_md_table(table_block)
+        table_block = []
+        if not table:
+            return
+        _make_table(doc, table[0], table[1:])
+        doc.add_paragraph()
+
+    def flush_quote() -> None:
+        nonlocal quote_block
+        if not quote_block:
+            return
+        text = " ".join(quote_block).strip()
+        quote_block = []
+        if not text:
+            return
+        if "Vorbemerkung" in text or "Hinweis" in text:
+            _add_notice_box(doc, _strip_md_inline(text))
+        else:
+            _add_para(doc, _strip_md_inline(text), italic=True)
+
+    for raw in lines:
+        stripped = raw.lstrip()
+        if stripped.startswith("|"):
+            flush_quote()
+            table_block.append(raw)
+            continue
+
+        flush_table()
+
+        if not stripped:
+            flush_quote()
+            continue
+        if stripped.startswith(">"):
+            quote_block.append(re.sub(r"^>\s?", "", stripped).strip())
+            continue
+
+        flush_quote()
+
+        if stripped.startswith("### "):
+            _add_heading(doc, _strip_md_inline(stripped[4:].strip()), level=3)
+        elif stripped.startswith("- ") or stripped.startswith("* "):
+            p = doc.add_paragraph(style="List Bullet")
+            _add_run(p, _strip_md_inline(stripped[2:]), size_pt=10)
+        elif stripped == "---":
+            continue
+        else:
+            _add_para(doc, _strip_md_inline(stripped))
+
+    flush_table()
+    flush_quote()
 
 
 def _add_notice_box(doc, text: str) -> None:
