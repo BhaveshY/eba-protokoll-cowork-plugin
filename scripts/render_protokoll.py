@@ -32,6 +32,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import os
 import re
 import subprocess
@@ -133,6 +134,9 @@ EBA_ORANGE_SOFT = "FFE0CC"  # 'soft' background tint
 EBA_GREY_HEADER = "E1E1E1"  # 'silver' for table headers
 EBA_GREY_LIGHT = "F2F2F2"   # very light grey for key cells
 EBA_TEXT_GREY = "404040"
+
+QMG_TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "references" / "templates" / "qmg"
+GESPRAECHSNOTIZ_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx"
 
 
 # ─── Markdown parsing ──────────────────────────────────────────────────────
@@ -276,6 +280,213 @@ def _detect_format(parsed: ParsedMd) -> str:
         if "Gesprächsinhalt" in all_text:
             return "protokoll-einfach"
     return "unknown"
+
+
+def _first_table_from_section(parsed: ParsedMd, heading: str) -> list[list[str]]:
+    for section in parsed.sections:
+        if section.heading.strip().lower() != heading.lower():
+            continue
+        block: list[str] = []
+        for line in section.lines:
+            if line.lstrip().startswith("|"):
+                block.append(line)
+            elif block:
+                break
+        return _parse_md_table(block)
+    return []
+
+
+def _kv_from_table(table: list[list[str]]) -> dict[str, str]:
+    values: dict[str, str] = {}
+    for row in table:
+        if len(row) >= 2:
+            values[row[0].strip()] = row[1].strip()
+    return values
+
+
+def _actual_tcs(row_or_tr) -> list:
+    tr = getattr(row_or_tr, "_tr", row_or_tr)
+    return list(tr.findall(qn("w:tc")))
+
+
+def _first_rpr(p):
+    for r in p.findall(qn("w:r")):
+        rpr = r.find(qn("w:rPr"))
+        if rpr is not None:
+            return deepcopy(rpr)
+    return None
+
+
+def _set_tc_text(tc, text: str) -> None:
+    """Replace visible text in a template table cell while keeping cell and
+    paragraph formatting. This avoids flattening the QMG grid styling."""
+    text = _strip_md_inline(text or "")
+    tc_el = getattr(tc, "_tc", tc)
+    paragraphs = tc_el.findall(qn("w:p"))
+    if not paragraphs:
+        paragraphs = [OxmlElement("w:p")]
+        tc_el.append(paragraphs[0])
+    p = paragraphs[0]
+    rpr_template = _first_rpr(p)
+    ppr = p.find(qn("w:pPr"))
+    for child in list(p):
+        if child is not ppr:
+            p.remove(child)
+    for extra in paragraphs[1:]:
+        tc_el.remove(extra)
+
+    r = OxmlElement("w:r")
+    if rpr_template is not None:
+        r.append(rpr_template)
+    parts = text.split("\n") if text else [""]
+    for idx, part in enumerate(parts):
+        if idx:
+            r.append(OxmlElement("w:br"))
+        t = OxmlElement("w:t")
+        if part.startswith(" ") or part.endswith(" "):
+            t.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+        t.text = part
+        r.append(t)
+    p.append(r)
+
+
+def _replace_visible_text(element, replacements: dict[str, str]) -> None:
+    for text_node in element.iter(qn("w:t")):
+        if not text_node.text:
+            continue
+        new_text = text_node.text
+        for old, new in replacements.items():
+            new_text = new_text.replace(old, new)
+        text_node.text = new_text
+
+
+def _delete_rows_after(table, keep_last_index: int) -> None:
+    for row in list(table.rows)[keep_last_index + 1 :]:
+        row._tr.getparent().remove(row._tr)
+
+
+def _append_row_from_template(table, template_tr):
+    new_tr = deepcopy(template_tr)
+    table._tbl.append(new_tr)
+    return new_tr
+
+
+def _fill_grid_table(table, rows: list[list[str]], *, start_row: int, cell_indices: list[int]) -> None:
+    templates = [deepcopy(row._tr) for row in table.rows[start_row:]]
+    fallback = templates[0] if templates else deepcopy(table.rows[-1]._tr)
+    _delete_rows_after(table, start_row - 1)
+    for values in rows:
+        tr = _append_row_from_template(table, fallback)
+        cells = _actual_tcs(tr)
+        for value, cell_idx in zip(values, cell_indices):
+            if cell_idx < len(cells):
+                _set_tc_text(cells[cell_idx], value)
+
+
+def _fill_gespraechsinhalt_table(table, rows: list[list[str]]) -> None:
+    template_main = deepcopy(table.rows[1]._tr)
+    template_sub = deepcopy(table.rows[2]._tr if len(table.rows) > 2 else table.rows[1]._tr)
+    _delete_rows_after(table, 0)
+    for row in rows:
+        topic = row[0] if len(row) > 0 else ""
+        desc = row[1] if len(row) > 1 else ""
+        owner = row[2] if len(row) > 2 else ""
+        template = template_main if re.fullmatch(r"Thema\s+\d+", topic.strip()) else template_sub
+        tr = _append_row_from_template(table, template)
+        cells = _actual_tcs(tr)
+        for value, cell_idx in [(topic, 0), (desc, 2), (owner, 4)]:
+            if cell_idx < len(cells):
+                _set_tc_text(cells[cell_idx], value)
+
+
+def _trim_gespraechsnotiz_template_body(doc) -> None:
+    """Keep only the official front document and discard QMG help/internal pages."""
+    body = doc._body._body
+    children = list(body)
+    first_sect_pr = None
+    for child in children:
+        if child.tag == qn("w:p"):
+            ppr = child.find(qn("w:pPr"))
+            if ppr is not None:
+                sect_pr = ppr.find(qn("w:sectPr"))
+                if sect_pr is not None:
+                    first_sect_pr = deepcopy(sect_pr)
+                    break
+    if first_sect_pr is None:
+        first_sect_pr = deepcopy(doc.sections[0]._sectPr)
+
+    table_count = 0
+    cut_index = len(children)
+    for idx, child in enumerate(children):
+        if child.tag == qn("w:tbl"):
+            table_count += 1
+            if table_count == 4:
+                cut_index = idx + 1
+                break
+    for child in children[cut_index:]:
+        body.remove(child)
+
+    for child in list(body):
+        if child.tag == qn("w:sectPr"):
+            body.remove(child)
+    body.append(first_sect_pr)
+
+
+def _render_gespraechsnotiz_template(parsed: ParsedMd, out_path: Path) -> None:
+    if not GESPRAECHSNOTIZ_TEMPLATE.exists():
+        raise FileNotFoundError(f"Missing QMG template: {GESPRAECHSNOTIZ_TEMPLATE}")
+
+    doc = Document(str(GESPRAECHSNOTIZ_TEMPLATE))
+    _trim_gespraechsnotiz_template_body(doc)
+
+    project = _kv_from_table(parsed.header_tables[0] if parsed.header_tables else [])
+    meta_table = parsed.header_tables[1] if len(parsed.header_tables) > 1 else []
+    meta = dict(zip(meta_table[0], meta_table[1])) if len(meta_table) >= 2 else {}
+
+    project_name = project.get("Projektname", "")
+    project_number = project.get("Projekt-Nummer", "")
+    project_desc = project.get("Projekt-Beschreibung", "")
+    subtitle = parsed.subtitle or project_desc
+
+    main = doc.tables[0]
+    _set_tc_text(_actual_tcs(main.rows[0])[0], parsed.title or "Gesprächsnotiz")
+    _set_tc_text(_actual_tcs(main.rows[1])[0], subtitle)
+    _set_tc_text(_actual_tcs(main.rows[2])[2], project_name)
+    _set_tc_text(_actual_tcs(main.rows[3])[2], project_number)
+    _set_tc_text(_actual_tcs(main.rows[4])[2], project_desc)
+    row = _actual_tcs(main.rows[7])
+    for key, idx in [("Ort", 0), ("Gesprächsdatum", 2), ("Erstelldatum", 4), ("Ersteller", 6)]:
+        if idx < len(row):
+            _set_tc_text(row[idx], meta.get(key, ""))
+
+    teilnehmer = _first_table_from_section(parsed, "Teilnehmer")
+    teilnehmer_rows = [r for r in teilnehmer[1:] if any(c.strip() for c in r)]
+    _fill_grid_table(doc.tables[1], teilnehmer_rows, start_row=2, cell_indices=[0, 2, 4, 6])
+
+    verteiler = _first_table_from_section(parsed, "Verteiler")
+    verteiler_rows = [r for r in verteiler[1:] if any(c.strip() for c in r)]
+    _fill_grid_table(doc.tables[2], verteiler_rows, start_row=2, cell_indices=[0, 2, 6])
+
+    inhalt = _first_table_from_section(parsed, "Gesprächsinhalt")
+    inhalt_rows = [r for r in inhalt[1:] if any(c.strip() for c in r)]
+    _fill_gespraechsinhalt_table(doc.tables[3], inhalt_rows)
+
+    replacements = {
+        "_Projektnummer einsetzen_": project_number,
+        "_Projektname einsetzen_": project_name,
+        "_kurze Beschreibung zum Dokument/Übergeordnetes Thema einsetzen_": subtitle,
+        "_Projektbeschreibung_": project_desc,
+        "_Ort_": meta.get("Ort", ""),
+        "_tt.mm.jj_": meta.get("Gesprächsdatum", ""),
+        "_Ersteller_": meta.get("Ersteller", ""),
+    }
+    _replace_visible_text(doc._element, replacements)
+    for part in doc.part.related_parts.values():
+        if part.partname.startswith("/word/header") or part.partname.startswith("/word/footer"):
+            _replace_visible_text(part._element, replacements)
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    doc.save(str(out_path))
 
 
 # ─── DOCX rendering ────────────────────────────────────────────────────────
@@ -427,11 +638,14 @@ def _add_title_block(doc, title: str, subtitle: str | None) -> None:
 def render_to_docx(parsed: ParsedMd, out_path: Path) -> None:
     """Build an EBA-styled DOCX from the parsed MD.
 
-    This does NOT fill the official QMG-024-141 .docx template — instead it
-    produces a fresh, well-formatted document with the same content, tables,
-    and hierarchy. The styling matches EBA's brand (Arial, orange accent,
-    grey table headers, A4 portrait, professional spacing) so it reads as
-    an EBA document in MS Word on Windows."""
+    Gesprächsnotiz uses the official QMG-024-141 Word template and fills its
+    real tables so header/footer/page numbering and EBA-CI are preserved. The
+    other formats still use the generic renderer until their QMG mappings are
+    implemented."""
+    if parsed.detected_format == "gespraechsnotiz":
+        _render_gespraechsnotiz_template(parsed, out_path)
+        return
+
     doc = Document()
     _setup_page(doc)
 

@@ -16,7 +16,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from zipfile import ZipFile
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 try:
     from docx import Document
@@ -30,6 +32,7 @@ except ImportError:
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RENDERER = REPO_ROOT / "scripts" / "render_protokoll.py"
+W_NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 
 
 def read_docx_text(path: Path) -> str:
@@ -39,6 +42,41 @@ def read_docx_text(path: Path) -> str:
         for row in table.rows:
             parts.append(" | ".join(cell.text for cell in row.cells))
     return "\n".join(parts)
+
+
+def qmg_template_checks(path: Path, example: str) -> list[str]:
+    if "gespraechsnotiz" not in example and "eba-interview" not in example:
+        return []
+    failures: list[str] = []
+    with ZipFile(path) as z:
+        names = z.namelist()
+        body = ET.fromstring(z.read("word/document.xml")).find("w:body", W_NS)
+        if body is None:
+            return [f"{example}: DOCX has no body"]
+        body_tables = body.findall("w:tbl", W_NS)
+        if len(body_tables) != 4:
+            failures.append(f"{example}: Gesprächsnotiz should keep exactly 4 QMG body tables")
+        xml_blob = "\n".join(
+            z.read(name).decode("utf-8", "ignore")
+            for name in names
+            if name.startswith("word/") and name.endswith(".xml")
+        )
+        for internal_marker in ["Hilfe und Tipps", "Dokument-Raster", "Diese Zeile bitte nicht löschen"]:
+            if internal_marker in xml_blob:
+                failures.append(f"{example}: internal QMG helper page leaked into output")
+        headers = [name for name in names if name.startswith("word/header")]
+        footers = [name for name in names if name.startswith("word/footer")]
+        if not headers:
+            failures.append(f"{example}: official header parts are missing")
+        if not footers:
+            failures.append(f"{example}: official footer parts are missing")
+        header_text = "\n".join(z.read(name).decode("utf-8", "ignore") for name in headers)
+        footer_text = "\n".join(z.read(name).decode("utf-8", "ignore") for name in footers)
+        if "Eike Becker_Architekten" not in header_text and "Eike Becker_Architekten" not in footer_text:
+            failures.append(f"{example}: EBA header/footer branding missing")
+        if "PAGE" not in footer_text or "SECTIONPAGES" not in footer_text:
+            failures.append(f"{example}: page number fields missing from footer")
+    return failures
 
 
 def render_example(example: str, required_text: list[str]) -> list[str]:
@@ -78,6 +116,7 @@ def render_example(example: str, required_text: list[str]) -> list[str]:
         for needle in required_text:
             if needle not in rendered:
                 failures.append(f"{example}: rendered DOCX missing {needle!r}")
+        failures.extend(qmg_template_checks(docx_path, example))
     return failures
 
 

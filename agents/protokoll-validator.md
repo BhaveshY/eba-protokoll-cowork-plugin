@@ -91,6 +91,8 @@ wurde. Nicht wegen `Projekt-Nr. = 000`, `Ort = nicht angegeben` oder
 - [ ] Keine Status-Spalte, keine D/K-Spalte, keine B-Spalte, keine LN-Spalte verlangen.
 - [ ] Zuständig ist gesetzt oder bei reinen Informationen nachvollziehbar als
       `Info`, `Alle` oder `Beide` markiert.
+- [ ] Fachliche Klärungshinweise stehen im betroffenen Thema, nicht als separate
+      Zusatztabelle am Dokumentende.
 
 #### Protokoll-einfach
 

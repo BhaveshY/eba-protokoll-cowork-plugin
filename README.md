@@ -59,6 +59,8 @@ zeigt die Erkennung transparent an, und schreibt das fertige Protokoll als
 Markdown wird **nicht** ins Projekt geschrieben — es ist nur ein flüchtiges
 Zwischenformat. Auf **Windows 11 mit MS Word** erzeugt der Renderer die PDF
 automatisch über Word und richtet fehlende Python-Pakete selbst ein.
+Für Gesprächsnotizen wird die offizielle QMG-DOCX-Vorlage direkt befüllt,
+damit EBA-CI, Header, Footer und Seitenzahlen erhalten bleiben.
 
 Rohe Transkripte dürfen unvollständig sein. Wenn Projekt-Nr., Projektname, Ort
 oder Ersteller fehlen, erzeugt das Plugin trotzdem das passende Protokoll,
@@ -223,8 +225,9 @@ DOCX abzuliefern.
 
 ## Entwicklungsstand
 
-Version 0.2.2 — DOCX + PDF Output, Windows-11-First mit automatischem
-Dependency-Bootstrap und Metadaten-Fallbacks für rohe Transkripte. Deckt die vier
+Version 0.2.3 — DOCX + PDF Output, Windows-11-First mit automatischem
+Dependency-Bootstrap, Metadaten-Fallbacks für rohe Transkripte und
+QMG-Template-Füllung für Gesprächsnotizen. Deckt die vier
 Standardvorlagen QMG-024-141 ab (Gesprächsnotiz, Protokoll-einfach Word LP1-4
 Stand A, Planungsprotokoll LP1-4 Stand C / BIM-Subvariante,
 Bauleitungsprotokoll LP5 Stand B). Geplant:

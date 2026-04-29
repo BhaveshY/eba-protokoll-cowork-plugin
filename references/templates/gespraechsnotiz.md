@@ -65,3 +65,7 @@ _Diese Gesprächsnotiz wurde mit der EBA Protokoll App + eba-protokoll-cowork er
 5. Themen sind hierarchisch nummeriert: `Thema 01`, `Thema 01.1`, `Thema 01.2`, `Thema 02`, …
 6. Keine Statusspalten — Gesprächsnotizen sind formlos.
 7. Beschreibungen sind **prägnante Zusammenfassungen**, keine wörtlichen Zitate.
+8. Offene fachliche Zuständigkeiten bleiben im jeweiligen Thema: keine zusätzliche
+   Tabelle ans Dokumentende hängen. Die Anmerkung steht am Ende der breiteren
+   `Beschreibung`; das schmale Feld `Zuständig` enthält nur `Klärung`, `Info`
+   oder ein Kürzel.

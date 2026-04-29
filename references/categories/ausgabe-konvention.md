@@ -128,6 +128,9 @@ und PDF vorhanden sind oder ein echter Blocker vorliegt.
   den QMG-024-141-Referenzen entsprechen.
 - Die offiziellen Dateien in `references/templates/qmg/` sind die fachliche
   Layout- und Wortlaut-Referenz.
+- Gesprächsnotizen werden direkt aus
+  `QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx` erzeugt, damit Header,
+  Footer, Seitenzahlen und EBA-CI erhalten bleiben.
 - Markdown-Beispiele in `references/examples/` sind Regressionstests für den
   Renderer. Nach Änderungen an Renderer oder Skills `scripts/smoke_render.py`
   ausführen.

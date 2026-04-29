@@ -35,10 +35,10 @@ _ARD Morgenmagazin — Interview zum Thema Bauen und Baunormen_
 
 | Thema    | Beschreibung | Zuständig |
 |----------|--------------|-----------|
-| Thema 01 | Einordnung von Baunormen: Baunormen sichern grundsätzlich Qualität und haben über Jahre zu hohen baulichen Standards beigetragen. Zugleich führt die hohe Normendichte zu aufwendigeren Bauprozessen. | Info |
-| Thema 02 | Differenzierung der Anforderungen: EBA hebt hervor, dass stärker zwischen qualitätssichernden Anforderungen und unnötig komplizierenden Verfahren unterschieden werden sollte. | Info |
+| Thema 01 | Einordnung von Baunormen: Baunormen sichern grundsätzlich Qualität und haben über Jahre zu hohen baulichen Standards beigetragen. Zugleich führt die hohe Normendichte zu aufwendigeren Bauprozessen. Anmerkung: Klärung durch EB / Normung / Politik. | Klärung |
+| Thema 02 | Differenzierung der Anforderungen: EBA hebt hervor, dass stärker zwischen qualitätssichernden Anforderungen und unnötig komplizierenden Verfahren unterschieden werden sollte. Anmerkung: Klärung durch EB / Normung. | Klärung |
 | Thema 03 | Innovation und Verlässlichkeit: Gute Regeln schaffen Verlässlichkeit. Problematisch wird es, wenn Standards nicht ausreichend priorisiert werden und jedes Detail gleich wichtig erscheint. | Info |
-| Thema 04 | Ansatz für bezahlbares Bauen: Einfachere Verfahren, mehr Vertrauen in qualifizierte Planerinnen und Planer sowie schnellere Zulassung erprobter Lösungen können Bauen bezahlbarer machen, ohne Qualität aufzugeben. | Info |
+| Thema 04 | Ansatz für bezahlbares Bauen: Einfachere Verfahren, mehr Vertrauen in qualifizierte Planerinnen und Planer sowie schnellere Zulassung erprobter Lösungen können Bauen bezahlbarer machen, ohne Qualität aufzugeben. Anmerkung: Klärung durch EB / Gesetzgeber. | Klärung |
 
 ---
 

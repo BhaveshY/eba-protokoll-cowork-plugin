@@ -158,6 +158,10 @@ expect(
 const interview = read("references/examples/beispiel-ausgabe-eba-interview.md");
 expect(interview.includes("| Projekt-Nummer     | 000"), "EBA interview example uses project number 000");
 expect(interview.includes("ARD Morgenmagazin / Studio Berlin"), "EBA interview example derives the source/location");
+expect(
+  interview.includes("Anmerkung: Klärung durch") && !interview.includes("## Fachliche Einordnung"),
+  "EBA interview example keeps fachliche Klärung inside Gesprächsinhalt rows",
+);
 
 // ─── DOCX/PDF output pipeline (v0.2) ─────────────────────────────────────
 //
@@ -198,6 +202,12 @@ expect(
   renderer.includes("pdf_required = sys.platform == \"win32\""),
   "renderer treats PDF as required on Windows",
 );
+expect(
+  renderer.includes("GESPRAECHSNOTIZ_TEMPLATE") &&
+    renderer.includes("def _render_gespraechsnotiz_template") &&
+    renderer.includes("page numbering and EBA-CI are preserved"),
+  "renderer fills the official Gesprächsnotiz QMG template",
+);
 
 for (const skillRel of [
   "skills/gespraechsnotiz/SKILL.md",
@@ -226,11 +236,11 @@ for (const skillRel of [
 }
 
 const pluginManifest = JSON.parse(read(".claude-plugin/plugin.json"));
-expect(pluginManifest.version === "0.2.2", "plugin.json bumped to 0.2.2");
+expect(pluginManifest.version === "0.2.3", "plugin.json bumped to 0.2.3");
 const market = JSON.parse(read(".claude-plugin/marketplace.json"));
 expect(
-  market.plugins[0].version === "0.2.2",
-  "marketplace.json plugin entry bumped to 0.2.2",
+  market.plugins[0].version === "0.2.3",
+  "marketplace.json plugin entry bumped to 0.2.3",
 );
 
 // Dispatcher smoke test — verify each example transcript would route to the

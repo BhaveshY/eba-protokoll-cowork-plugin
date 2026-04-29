@@ -94,6 +94,12 @@ Pro erkanntem Themenblock eine Zeile (oder Hauptzeile + Unterzeilen mit Hierarch
 - **Beschreibung**: 2–6 Sätze prägnant zusammengefasst, **nie wörtlich zitieren**. Aktive
   Stimme, sachlicher Ton. Implizite Aufgaben mit aufnehmen.
 - **Zuständig**: Kürzel des Verantwortlichen (oder `–` bei reinen Informationspunkten).
+  Wenn eine Forderung/Anmerkung im Gespräch steht, aber niemand direkt adressiert
+  wird, **keine separate Klärungstabelle am Ende anhängen**. Stattdessen im selben
+  Themen-Eintrag am Ende der **Beschreibung** notieren:
+  `Anmerkung: Klärung durch EBA / Fachplaner / Behörde.`
+  Das schmale Feld `Zuständig` dann kurz mit `Klärung`, `Info` oder einem Kürzel
+  füllen.
 
 Bei Unterthemen: `Thema 01`, `Thema 01.1`, `Thema 01.2`, `Thema 02`, …
 
