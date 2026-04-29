@@ -58,6 +58,8 @@ _Diese Gesprächsnotiz wurde mit der EBA Protokoll App + eba-protokoll-cowork er
 
 1. Die Hinweis-Box bleibt **wortgleich** wie oben.
 2. `Projekt-Nummer` ist die EBA-interne Projektnummer (3-stellig, z.B. `549`, `553`).
+   Bei rohen Transkripten ohne erkennbare Projektnummer ist `000` der zulässige
+   Fallback.
 3. `Ersteller` ist das **Kürzel** des Protokollerstellers, nicht der volle Name.
 4. `Kürzel` für Teilnehmer sind 2–3-stellige Initialen (z.B. `EB`, `RvG`, `SK`).
 5. Themen sind hierarchisch nummeriert: `Thema 01`, `Thema 01.1`, `Thema 01.2`, `Thema 02`, …

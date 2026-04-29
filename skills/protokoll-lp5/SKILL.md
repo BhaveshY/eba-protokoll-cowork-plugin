@@ -30,6 +30,7 @@ Lies in dieser Reihenfolge:
 4. `${CLAUDE_PLUGIN_ROOT}/references/categories/status-codes.md`
 5. `${CLAUDE_PLUGIN_ROOT}/references/categories/sprache-und-stil.md`
 6. `${CLAUDE_PLUGIN_ROOT}/references/categories/transkript-format.md`
+7. `${CLAUDE_PLUGIN_ROOT}/references/categories/metadaten-konvention.md`
 
 ### 2. Vorprotokoll prüfen
 
@@ -45,7 +46,15 @@ Spezifisch für LP5:
 - **Witterung**: wenn aus dem Transkript erkennbar (z.B. „heute morgen war es regnerisch"),
   in der Vorbemerkung erwähnen: „Witterung: regnerisch, ca. 8 °C".
 - **Ort**: Adresse der Baustelle, falls aus dem Transkript erkennbar.
-- Restliche Header-Felder: wie LP1-4.
+- **Projekt-Nr. / Projekt-Name**: aus Transkript ableiten. Wenn nichts erkennbar
+  ist, **nicht abbrechen**: Fallbacks aus `metadaten-konvention.md` verwenden
+  (`Projekt-Nr. = 000`, Projektname aus Datei/Thema oder `EBA / Allgemein`).
+- **Datum / Zeit / Ersteller**: wie LP1-4; fehlende Werte mit
+  `metadaten-konvention.md` füllen.
+
+Fehlende Projektmetadaten ändern den Protokolltyp nicht: eine klare Baubesprechung,
+Baustellenbegehung oder Mängelbegehung bleibt LP5, nur die Headerfelder bekommen
+Fallbacks.
 
 ### 4. Teilnehmer
 
@@ -135,6 +144,8 @@ Schritte:
    Windows-PDF-Fehler meldet, stderr lesen, denselben Befehl nach der
    automatischen Selbstheilung erneut versuchen und erst danach echte Blocker
    melden.
+
+Wenn kein Projektordner ableitbar ist, `protokolle/000-RAW/` verwenden.
 
 **EBA-Dateinamen-Konvention**: siehe
 `${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:

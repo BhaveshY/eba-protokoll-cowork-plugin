@@ -18,8 +18,10 @@ Wenn leer, frage den Nutzer nach der Datei oder liste verfügbare Transkripte au
 1. **Skill `gespraechsnotiz`** invocieren (über das Skill-Tool).
 2. Den Anweisungen folgen:
    - Referenzen aus `${CLAUDE_PLUGIN_ROOT}/references/templates/gespraechsnotiz.md`,
-     `sprache-und-stil.md` und `transkript-format.md` lesen.
-   - Header (Projekt, Ort, Datum, Ersteller).
+     `sprache-und-stil.md`, `transkript-format.md` und
+     `metadaten-konvention.md` lesen.
+   - Header (Projekt, Ort, Datum, Ersteller) automatisch füllen; fehlende
+     Projektmetadaten mit `Projekt-Nummer = 000` und passenden Fallbacks ersetzen.
    - Teilnehmer- und Verteilertabelle.
    - Gesprächsinhalt mit hierarchischer Themenstruktur.
 3. Ausgabe als **DOCX + PDF** (kein Markdown im Projekt) unter

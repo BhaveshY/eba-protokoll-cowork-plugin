@@ -25,6 +25,7 @@ Default: automatisch erkennen.
    - `categories/status-codes.md`
    - `categories/sprache-und-stil.md`
    - `categories/transkript-format.md`
+   - `categories/metadaten-konvention.md`
 4. Spezifika für LP5 berücksichtigen:
    - Witterung im Header (falls aus Transkript erkennbar).
    - Mängelnummer-Nummerierung (über `letzte_mangelnummer` im State).
@@ -46,5 +47,7 @@ Default: automatisch erkennen.
 - Bauphasen LP5 (Ausführungsplanung) und LP8 (Objektüberwachung).
 - Baubesprechungen, Baustellenbegehungen, Mängelbegehungen, Bemusterungen, Abnahmen.
 - Witterungsabhängige Termine, Gewerk-Logistik, Lieferungen.
+- Fehlende Projekt-Nr., Projektname, Ort oder Ersteller ändern diese Formatwahl
+  nicht; automatisch Fallbacks verwenden und als Annahmen nennen.
 
 Bei Planungsphasen LP1-4: `/protokoll-lp1-4`.

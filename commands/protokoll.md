@@ -26,7 +26,9 @@ Das ist entweder:
 
 2. Den Anweisungen der Skill **strikt** folgen: Referenzen aus
    `${CLAUDE_PLUGIN_ROOT}/references/` lesen, Vorprotokoll prüfen (für LP1-4/LP5),
-   Header befüllen, Themen-Tabelle bauen, Ausgabe schreiben.
+   Header mit Fallbacks aus
+   `${CLAUDE_PLUGIN_ROOT}/references/categories/metadaten-konvention.md`
+   befüllen, Themen-Tabelle bauen, Ausgabe schreiben.
 
 3. Speicherort default:
    `protokolle/<jjjj-mm-tt>_<projekt>_<typ>.docx` (+ `.pdf`) relativ zum
@@ -41,7 +43,8 @@ Das ist entweder:
    - Pfade zu DOCX und PDF.
    - Erkannter Format-Typ.
    - Anzahl Teilnehmer / Themen / offene vs. erledigte Punkte.
-   - Punkte, die unklar sind und Klärung brauchen.
+   - Annahmen/Fallbacks, z.B. `Projekt-Nr. 000`, `Ort nicht angegeben`.
+   - Punkte, die fachlich unklar sind und später geprüft werden sollten.
 
 ## Wichtig
 
@@ -49,5 +52,8 @@ Das ist entweder:
 - Ausgabe ist **DOCX + PDF** — nicht Markdown. Keine technischen Setup-Fragen
   an den Nutzer; der Renderer heilt Abhängigkeiten selbst. Pipeline:
   `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
+- Nicht wegen fehlender Projekt-Nr., Projektname, Ort oder Ersteller fragen.
+  Diese Felder automatisch aus dem Transkript ableiten oder per
+  `metadaten-konvention.md` füllen. Nur echte Format-Konflikte klären.
 - Bei Format-Konflikten (z.B. Nutzer sagt LP1-4, Transkript klingt nach Gesprächsnotiz):
   Hinweis geben, aber **dem Nutzer-Hint folgen**.

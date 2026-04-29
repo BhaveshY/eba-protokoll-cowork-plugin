@@ -14,8 +14,9 @@ Die EBA Protokoll App schreibt Transkripte in folgendem Format:
   auftauchen.
 - **`Sprecher 1`, `Sprecher 2`, …** — automatisch erkannte weitere Teilnehmer ohne
   manuelle Namenszuweisung. Im Protokoll bleibt diese Kennung nur dann, wenn keine
-  bessere Information vorliegt; ansonsten den realen Namen aus dem Kontext erschließen
-  oder beim Nutzer rückfragen.
+  bessere Information vorliegt; ansonsten den realen Namen aus dem Kontext erschließen.
+  Nicht blockieren, wenn der Name fehlt: Sprecherlabel als Platzhalter verwenden und
+  in der Zusammenfassung als Annahme nennen.
 - **`Herr Müller`, `Frau Schmidt`, …** — wenn der Nutzer die Sprecher in der App
   umbenannt hat. Diese Namen sind autoritativ und werden 1:1 ins Protokoll übernommen.
 

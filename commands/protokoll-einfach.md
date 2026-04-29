@@ -19,8 +19,10 @@ Wenn leer, frage den Nutzer nach der Datei oder liste verfügbare Transkripte au
 1. **Skill `protokoll-einfach`** invocieren (über das Skill-Tool).
 2. Den Anweisungen folgen:
    - Referenzen aus `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-einfach.md`,
-     `sprache-und-stil.md`, `transkript-format.md` und `firma-kuerzel.md` lesen.
-   - Header (Projekt, Ort, Datum, Ersteller).
+     `sprache-und-stil.md`, `transkript-format.md`, `firma-kuerzel.md` und
+     `metadaten-konvention.md` lesen.
+   - Header (Projekt, Ort, Datum, Ersteller) automatisch füllen; fehlende
+     Projektmetadaten mit `Projekt-Nummer = 000` und passenden Fallbacks ersetzen.
    - Teilnehmer (4 Spalten: Vorname, Name, Kürzel, Firma).
    - Verteiler (3 Spalten: Vorname, Name, Firma).
    - Gesprächsinhalt mit hierarchischer Themenstruktur und kombinierter
@@ -50,5 +52,7 @@ Andernfalls:
 ## Wichtig
 
 - Niemals den ursprünglichen Transkript verändern.
+- Nicht wegen fehlender Projektmetadaten nachfragen; Fallbacks nutzen und am Ende
+  transparent nennen.
 - Hinweis-Text bleibt **wortgleich** mit „3 Kalendertagen".
 - Spalte „Zuständig / Frist" ist **eine** kombinierte Spalte, kein Split.

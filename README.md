@@ -60,6 +60,12 @@ Markdown wird **nicht** ins Projekt geschrieben — es ist nur ein flüchtiges
 Zwischenformat. Auf **Windows 11 mit MS Word** erzeugt der Renderer die PDF
 automatisch über Word und richtet fehlende Python-Pakete selbst ein.
 
+Rohe Transkripte dürfen unvollständig sein. Wenn Projekt-Nr., Projektname, Ort
+oder Ersteller fehlen, erzeugt das Plugin trotzdem das passende Protokoll,
+füllt die Header mit Fallbacks (`Projekt-Nr. 000`, `Ort nicht angegeben`,
+`Ersteller EBA`) und nennt diese Annahmen am Ende. Nur echte Format-Konflikte
+wie LP1-4 vs. LP5 werden zurückgefragt.
+
 Wenn du das Format explizit setzen willst:
 
 ```
@@ -120,7 +126,7 @@ plugins/eba-protokoll-cowork/
 ├── references/
 │   ├── templates/                 # Markdown-Vorlagen (Skill-Anleitungen)
 │   │   └── qmg/                   # Original-QMG-024-141-Templates (.docx, .xlsx)
-│   ├── categories/                # D/K-Schemata, Kürzel, Status, Stil, Ausgabe-Konvention
+│   ├── categories/                # D/K-Schemata, Kürzel, Status, Stil, Ausgabe-/Metadaten-Konvention
 │   └── examples/                  # Beispiel-Transkripte und -Protokolle
 ├── scripts/
 │   ├── render_protokoll.py        # MD → DOCX + PDF Renderer (von allen Skills aufgerufen)
@@ -171,9 +177,9 @@ node scripts/validate-references.mjs
 ```
 
 Der Check stellt sicher, dass die Beispielausgaben die aktuellen Vorlagen-Endblöcke
-verwenden, die BIM-Variante als Beispielpaar vorhanden ist und der Validator
+verwenden, die BIM-Variante als Beispielpaar vorhanden ist, der Validator
 formatabhängig zwischen Gesprächsnotiz, Protokoll-einfach und Tracking-Protokollen
-unterscheidet.
+unterscheidet und rohe Transkripte ohne Projektmetadaten über Fallbacks weiterlaufen.
 
 ## Konfiguration
 
@@ -217,8 +223,8 @@ DOCX abzuliefern.
 
 ## Entwicklungsstand
 
-Version 0.2.1 — DOCX + PDF Output, Windows-11-First mit automatischem
-Dependency-Bootstrap. Deckt die vier
+Version 0.2.2 — DOCX + PDF Output, Windows-11-First mit automatischem
+Dependency-Bootstrap und Metadaten-Fallbacks für rohe Transkripte. Deckt die vier
 Standardvorlagen QMG-024-141 ab (Gesprächsnotiz, Protokoll-einfach Word LP1-4
 Stand A, Planungsprotokoll LP1-4 Stand C / BIM-Subvariante,
 Bauleitungsprotokoll LP5 Stand B). Geplant:

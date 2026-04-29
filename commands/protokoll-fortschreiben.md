@@ -14,6 +14,8 @@ um das Projektverzeichnis explizit zu setzen.
 Wenn `--projekt` fehlt: Projektverzeichnis aus dem Transkript-Pfad heuristisch
 ableiten (`protokolle/<projekt>/` nahe der Transkript-Datei oder im aktuellen
 Arbeitsverzeichnis).
+Wenn nur Rohmetadaten fehlen, nicht abbrechen: Fallbacks aus
+`${CLAUDE_PLUGIN_ROOT}/references/categories/metadaten-konvention.md` verwenden.
 
 ## Vorgehen
 
@@ -22,7 +24,7 @@ Arbeitsverzeichnis).
    - `protokolle/<projekt>/protokoll-state.json`
    - Neuestes vorhandenes Protokoll im Projektordner.
 3. Wenn keine State-Datei vorhanden: aus dem Vorprotokoll heuristisch ableiten und
-   dem Nutzer anbieten, eine State-Datei zu generieren.
+   die State-Datei generieren.
 4. Wenn weder State noch Vorprotokoll: dem Nutzer mitteilen, dass es keine
    Fortschreibung gibt — empfehlen, `/protokoll-lp1-4` oder `/protokoll-lp5` mit
    `--neu` zu verwenden.

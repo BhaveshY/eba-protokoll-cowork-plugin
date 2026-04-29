@@ -101,6 +101,10 @@ Wichtigstes Merkmal: **Fortgeschriebenes Tracking** — siehe
 | erledigt                   | _Kennzeichnung_    | erledigte Themen (einmalig)                      |
 ```
 
+Wenn Projekt-Nr., Projekt-Name, Ort, Datum oder Ersteller im Rohtranskript fehlen,
+die Fallbacks aus `references/categories/metadaten-konvention.md` verwenden.
+`Projekt-Nr. = 000` ist dabei ein bewusster Platzhalter und kein Validator-Fehler.
+
 ## LP5-spezifische Kategorien
 
 Vorschlag für die D/K-Kategorien in LP5 (projektabhängig anpassbar):

@@ -61,7 +61,10 @@ Anhand des Transkriptinhalts lässt sich abschätzen, welches Schema passt:
 - Fallen Begriffe wie „Baustelle", „Mangel", „Bemusterung", „Abnahme", „Rohbau-Fortschritt",
   „Baufortschritt", „Witterung" → LP5-Schema.
 
-Bei Unsicherheit → den Nutzer fragen oder das LP1-4-Schema (Standard) verwenden.
+Bei Unsicherheit → nur nachfragen, wenn LP1-4 vs. LP5 strukturell wirklich
+unentscheidbar ist. Fehlende Projektmetadaten sind kein Grund zur Rückfrage;
+dann die Fallbacks aus `metadaten-konvention.md` verwenden. Wenn kein
+Baustellen-/LP5-Anker vorliegt, das LP1-4-Schema (Standard) verwenden.
 
 ## Erweiterung um projektspezifische Kategorien
 

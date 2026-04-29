@@ -29,6 +29,12 @@ werden, wenn der Nutzer explizit eine Fortschreibung fordert.
 
 ## Vorgehen
 
+Bei fehlender Projekt-Nr. oder fehlendem Projekt-Namen gelten die Fallbacks aus
+`${CLAUDE_PLUGIN_ROOT}/references/categories/metadaten-konvention.md`. Für neue
+oder nicht eindeutig zuordenbare Rohtranskripte `protokolle/000-RAW/` verwenden.
+Nur wenn der Nutzer ausdrücklich eine Fortschreibung verlangt und weder State noch
+Vorprotokoll auffindbar sind, ist das ein echter Blocker.
+
 ### 1. Vorprotokoll und State laden
 
 ```

@@ -26,6 +26,7 @@ existiert, fortschreiben; sonst neu.
    - `categories/status-codes.md`
    - `categories/sprache-und-stil.md`
    - `categories/transkript-format.md`
+   - `categories/metadaten-konvention.md`
 4. Header, Teilnehmer, Unterlagen, Themen-Tabelle (D/K|B|LN), Termine, Anlagen,
    Aufstellvermerk.
 5. Ausgabe als **DOCX + PDF** (kein Markdown im Projekt):
@@ -46,6 +47,8 @@ existiert, fortschreiben; sonst neu.
 - Kick-Off, Workshops, Jour Fixe, BIM-Koordination, DGNB-Abstimmungen.
 - Mehrere Teilnehmer, oft externe Fachplaner.
 - Tracking über mehrere Termine erwünscht.
+- Fehlende Projekt-Nr., Projektname, Ort oder Ersteller ändern diese Formatwahl
+  nicht; automatisch Fallbacks verwenden und als Annahmen nennen.
 
 Bei Bauphasen ab LP5 (Ausführung): `/protokoll-lp5`.
 Bei kurzen formlosen Gesprächen: `/gespraechsnotiz`.

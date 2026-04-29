@@ -76,12 +76,14 @@ expectFile("references/examples/beispiel-transkript-bim.txt");
 expectFile("references/examples/beispiel-ausgabe-bim.md");
 expectFile("references/examples/beispiel-transkript-eba-interview.txt");
 expectFile("references/examples/beispiel-ausgabe-eba-interview.md");
+expectFile("references/categories/metadaten-konvention.md");
 
 const readme = read("README.md");
 expect(readme.includes("beispiel-transkript-bim.txt"), "README lists the BIM transcript example");
 expect(readme.includes("beispiel-ausgabe-bim.md"), "README lists the BIM output example");
 expect(readme.includes("beispiel-transkript-eba-interview.txt"), "README lists the EBA interview transcript example");
 expect(readme.includes("beispiel-ausgabe-eba-interview.md"), "README lists the EBA interview output example");
+expect(readme.includes("Projekt-Nr. 000"), "README documents raw transcript metadata fallbacks");
 
 const bim = read("references/examples/beispiel-ausgabe-bim.md");
 expect(bim.includes("### BIM-Koordination JF-07"), "BIM output names the BIM JF variant");
@@ -112,6 +114,11 @@ expect(
   validator.includes('format: "gespraechsnotiz" | "protokoll-einfach" | "protokoll-lp1-4" | "protokoll-bim" | "protokoll-lp5" | "unklar"'),
   "validator output includes detected format",
 );
+expect(
+  validator.includes("`000` ist ein") &&
+    validator.includes("Metadaten sind **Warnungen**, keine Fehler"),
+  "validator accepts metadata fallbacks as warnings, not errors",
+);
 
 const autoSkill = read("skills/eba-protokoll/SKILL.md");
 expect(
@@ -121,6 +128,11 @@ expect(
 expect(
   autoSkill.includes("BIM-Signale gewinnen vor LP5-Signalen"),
   "auto-detection documents that BIM signals win over LP5",
+);
+expect(
+  autoSkill.includes("Flexible Metadaten bedeuten **nicht** flexible Formatwahl") &&
+    autoSkill.includes("metadaten-konvention.md"),
+  "auto-detection keeps format choice strict while using metadata fallbacks",
 );
 
 const lp5Skill = read("skills/protokoll-lp5/SKILL.md");
@@ -207,14 +219,18 @@ for (const skillRel of [
     skill.includes("DOCX") && skill.includes("PDF"),
     `${skillRel} documents DOCX + PDF as the deliverables`,
   );
+  expect(
+    skill.includes("metadaten-konvention.md"),
+    `${skillRel} cites the metadata fallback reference`,
+  );
 }
 
 const pluginManifest = JSON.parse(read(".claude-plugin/plugin.json"));
-expect(pluginManifest.version === "0.2.1", "plugin.json bumped to 0.2.1");
+expect(pluginManifest.version === "0.2.2", "plugin.json bumped to 0.2.2");
 const market = JSON.parse(read(".claude-plugin/marketplace.json"));
 expect(
-  market.plugins[0].version === "0.2.1",
-  "marketplace.json plugin entry bumped to 0.2.1",
+  market.plugins[0].version === "0.2.2",
+  "marketplace.json plugin entry bumped to 0.2.2",
 );
 
 // Dispatcher smoke test — verify each example transcript would route to the
@@ -246,12 +262,16 @@ function classifyTranscript(text, filename) {
   const ebaInterviewAnchor =
     /(ARD|ZDF|rbb|Deutschlandfunk|Morgenmagazin|Interview|Pressegespräch|Redaktion|Moderator|Journalist)/i.test(head) &&
     /(Eike Becker|EBA|Eike Becker_Architekten|Architekt)/i.test(text);
+  const rawActionTranscript =
+    speakers.size >= 3 &&
+    /(bis \d{1,2}\.\d{1,2}\.\d{2,4}|KW\s?\d+|übernimmt|schickt|prüft|klärt|Termin|Frist|Aufgabe)/i.test(text);
 
   if (bimAnchor) return "protokoll-lp1-4-bim";
   if (lp5Anchor) return "protokoll-lp5";
   if (priorRefs || lp14Anchor) return "protokoll-lp1-4";
   if (einfachAnchor && speakers.size >= 3) return "protokoll-einfach";
   if (ebaInterviewAnchor) return "gespraechsnotiz";
+  if (rawActionTranscript) return "protokoll-einfach";
   if (
     wordCount < 1500 &&
     speakers.size <= 3 &&
@@ -280,6 +300,17 @@ for (const { file, expect: expected } of dispatchCases) {
   const got = classifyTranscript(text, filename);
   expect(got === expected, `dispatch heuristic routes ${filename} to ${expected} (got ${got})`);
 }
+
+const rawNoProjectTranscript = `
+[00:00:02] Becker: Wir starten mit der Abstimmung zur Fassade.
+[00:00:14] Scholz: Ich prüfe die Detailzeichnung bis 02.05.26.
+[00:00:31] Hubertz: EBA schickt die Materialfreigabe in KW 19.
+[00:00:58] Nassif: Dann ist die Frist klar, danke.
+`;
+expect(
+  classifyTranscript(rawNoProjectTranscript, "roh-ohne-projektnummer.txt") === "protokoll-einfach",
+  "raw transcript without project metadata but with tasks/deadlines routes to Protokoll-einfach",
+);
 
 if (failures.length > 0) {
   console.error(`Reference validation failed with ${failures.length} issue(s):`);

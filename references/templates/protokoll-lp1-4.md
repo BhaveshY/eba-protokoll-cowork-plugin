@@ -101,6 +101,10 @@ Besprechungen werden in jedem neuen Protokoll mit ihrer Historie weitergeführt
 | erledigt                 | _Kennzeichnung_    | erledigte Themen (einmalig)                      |
 ```
 
+Wenn Projekt-Nr., Projekt-Name, Ort, Datum oder Ersteller im Rohtranskript fehlen,
+die Fallbacks aus `references/categories/metadaten-konvention.md` verwenden.
+`Projekt-Nr. = 000` ist dabei ein bewusster Platzhalter und kein Validator-Fehler.
+
 ## Disziplin-/Kategorie-Konvention (D/K)
 
 Standard-Kategorien (projektabhängig erweiterbar — siehe `references/categories/`):

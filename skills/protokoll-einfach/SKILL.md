@@ -37,6 +37,7 @@ Lies in dieser Reihenfolge (mit Read-Tool):
 2. `${CLAUDE_PLUGIN_ROOT}/references/categories/sprache-und-stil.md` — Stilregeln.
 3. `${CLAUDE_PLUGIN_ROOT}/references/categories/transkript-format.md` — Eingabeformat.
 4. `${CLAUDE_PLUGIN_ROOT}/references/categories/firma-kuerzel.md` — Kürzel-Verzeichnis.
+5. `${CLAUDE_PLUGIN_ROOT}/references/categories/metadaten-konvention.md` — Fallbacks für rohe Transkripte.
 
 ### 2. Transkript einlesen und analysieren
 
@@ -55,11 +56,14 @@ und — wenn genannt — den konkreten Liefertermin.
 ### 3. Header befüllen
 
 - **Projektname** / **Projekt-Nummer** / **Projekt-Beschreibung**: aus dem Transkript
-  oder vom Nutzer abfragen, wenn nichts erkennbar ist.
+  ableiten. Wenn nichts erkennbar ist, **nicht abbrechen** und nicht nachfragen:
+  Fallbacks aus `metadaten-konvention.md` verwenden (`Projekt-Nummer = 000`,
+  Projektname aus Datei/Thema oder `EBA / Allgemein`).
 - **Ort**: erstes erwähntes Ort-Wort, sonst „nicht angegeben".
 - **Gesprächsdatum**: aus Dateiname (`YYMMDD_…`) oder dem ersten Zeitstempel.
+  Wenn beides fehlt: heutiges Datum.
 - **Erstelldatum**: heutiges Datum.
-- **Ersteller**: Kürzel des Protokollerstellers.
+- **Ersteller**: Kürzel des Protokollerstellers, sonst `EBA`.
 
 Die Hinweis-Box bleibt **wortgleich** — sie erwähnt **3 Kalendertage**, nicht 5.
 
@@ -132,7 +136,8 @@ Nach dem Schreiben kurz mitteilen:
 - Anzahl der erkannten Teilnehmer.
 - Anzahl der Themen (mit Aufschlüsselung Hauptthemen / Unterpunkte).
 - Anzahl von Aufgaben mit konkreter Frist.
-- Punkte, die als unklar markiert wurden und Klärung brauchen.
+- Annahmen/Fallbacks knapp nennen, z.B. `Projekt-Nr. 000, Ort nicht angegeben`.
+- Punkte, die als unklar markiert wurden und später fachlich geprüft werden sollten.
 
 ## Anti-Pattern
 

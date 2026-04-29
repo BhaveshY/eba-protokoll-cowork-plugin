@@ -36,12 +36,20 @@ weil sie nicht zur Vorlage gehören.
 
 ### 1. Gemeinsame Header-Checks
 
-- [ ] Projekt-Nr. / Projekt-Nummer ist gesetzt und 3-stellig (oder Hinweis vom Nutzer dokumentiert).
-- [ ] Projekt-Name / Projektname ist gesetzt.
+- [ ] Projekt-Nr. / Projekt-Nummer ist gesetzt und 3-stellig. `000` ist ein
+      gültiger Fallback für rohe Transkripte ohne erkennbare Projektnummer.
+- [ ] Projekt-Name / Projektname ist gesetzt. Fallbacks wie `EBA / Allgemein`
+      sind zulässig, wenn die Annahme dokumentiert ist.
 - [ ] Datum ist im Format `TT.MM.JJ` oder `TT.MM.JJJJ` (nicht „heute", „gestern").
 - [ ] Ort ist gesetzt.
 - [ ] Ersteller-Kürzel ist gesetzt, wenn die gewählte Vorlage eine Ersteller-Spalte oder
       einen Aufstellvermerk enthält.
+
+Fehlende oder ersetzte Metadaten sind **Warnungen**, keine Fehler, wenn ein
+plausibler Fallback aus
+`${CLAUDE_PLUGIN_ROOT}/references/categories/metadaten-konvention.md` verwendet
+wurde. Nicht wegen `Projekt-Nr. = 000`, `Ort = nicht angegeben` oder
+`Ersteller = EBA` scheitern lassen.
 
 ### 2. Formatabhängige Header-Checks
 

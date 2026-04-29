@@ -29,6 +29,7 @@ Lies in dieser Reihenfolge:
 4. `${CLAUDE_PLUGIN_ROOT}/references/categories/status-codes.md` — Status- und Teilnahme-Codes.
 5. `${CLAUDE_PLUGIN_ROOT}/references/categories/sprache-und-stil.md` — Stilregeln.
 6. `${CLAUDE_PLUGIN_ROOT}/references/categories/transkript-format.md` — Eingabeformat.
+7. `${CLAUDE_PLUGIN_ROOT}/references/categories/metadaten-konvention.md` — Fallbacks für rohe Transkripte.
 
 ### 2. Vorprotokoll prüfen (wenn vorhanden)
 
@@ -51,10 +52,17 @@ Wenn kein Vorprotokoll existiert: `B = 01` (erste Besprechung) und mit Schritt 3
   hochgezählt. Wird vom Nutzer bestätigt oder überschrieben.
 - **Besprechungsthema**: aus Transkript ableiten (z.B. „Kick-Off Meeting",
   „Planungsbesprechung #11", „BIM-Koordination JF-07").
-- **Projekt-Nr.** und **Projekt-Name**: aus Transkript oder Nutzer.
-- **Ort**: aus Transkript (z.B. „Berlin", „Online", „Präsenz / Online").
-- **Datum**: aus Dateinamen oder Transkript.
-- **Zeit**: erster und letzter Zeitstempel im Transkript ergeben Anfang und Ende.
+- **Projekt-Nr.** und **Projekt-Name**: aus Transkript ableiten. Wenn nichts
+  erkennbar ist, **nicht abbrechen**: Fallbacks aus `metadaten-konvention.md`
+  verwenden (`Projekt-Nr. = 000`, Projektname aus Datei/Thema oder `EBA / Allgemein`).
+- **Ort**: aus Transkript (z.B. „Berlin", „Online", „Präsenz / Online"), sonst
+  `nicht angegeben`.
+- **Datum**: aus Dateinamen oder Transkript, sonst heutiges Datum.
+- **Zeit**: erster und letzter Zeitstempel im Transkript ergeben Anfang und Ende;
+  ohne Zeitstempel `nicht angegeben`.
+
+Fehlende Projektmetadaten ändern den Protokolltyp nicht: ein klarer Planungs-JF
+oder BIM-JF bleibt LP1-4/BIM, nur die Headerfelder bekommen Fallbacks.
 
 Die Vorbemerkungs-Box („5 Kalendertage …") bleibt **wortgleich** wie im Template.
 
@@ -181,6 +189,8 @@ Schritte:
    automatischen Selbstheilung erneut versuchen und erst danach echte Blocker
    melden.
 
+Wenn kein Projektordner ableitbar ist, `protokolle/000-RAW/` verwenden.
+
 **EBA-Dateinamen-Konvention** (wenn der Nutzer das wünscht oder im
 Projekt etabliert ist): siehe
 `${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:
@@ -206,7 +216,8 @@ Aktualisiere die State-Datei `protokolle/<projekt>/protokoll-state.json` (siehe
 - Pfad zur erzeugten Datei.
 - Pfad zur State-Datei (für Folgeprotokolle).
 - Anzahl Teilnehmer / D/K-Kategorien / Themen / offene vs. erledigte Punkte.
-- Punkte, die unklar sind und Klärung brauchen.
+- Annahmen/Fallbacks knapp nennen, z.B. `Projekt-Nr. 000, Ort nicht angegeben`.
+- Punkte, die fachlich unklar sind und später geprüft werden sollten.
 
 ## BIM-Koordinations-Sondervariante
 

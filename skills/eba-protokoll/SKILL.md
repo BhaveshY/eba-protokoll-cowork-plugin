@@ -38,7 +38,10 @@ Mit dem Read-Tool die ganze Datei einlesen. Folgende Metadaten heuristisch ablei
 - **Sprecher**: alle eindeutigen Namen vor dem ersten Doppelpunkt jeder Zeile
   (`[HH:MM:SS] <Name>: <Text>`).
 - **Projektname und -nummer**: aus dem ersten Vorkommen im Text (Sprecher nennen es
-  oft am Anfang). Wenn nichts genannt ist: später beim Nutzer rückfragen.
+  oft am Anfang). Wenn nichts genannt ist: **nicht abbrechen** und nicht sofort
+  rückfragen. Fallbacks aus
+  `${CLAUDE_PLUGIN_ROOT}/references/categories/metadaten-konvention.md` verwenden
+  (`Projekt-Nummer = 000`, Projektname aus Datei/Thema oder `EBA / Allgemein`).
 
 ### 3. Protokoll-Typ erkennen
 
@@ -52,6 +55,11 @@ Stichwortvorkommen im Themenkörper.
 Eine **LP1-4-Planungsbesprechung darf BIM-Themen enthalten**; das macht sie
 nicht zu einer BIM-Koordination. Nur wenn das Meeting *selbst* eine
 BIM-Koordination ist, gilt die BIM-Variante.
+
+Wichtig: Flexible Metadaten bedeuten **nicht** flexible Formatwahl. Fehlende
+Projekt-Nr. oder fehlender Projektname ändern nicht den Protokolltyp. Wenn ein
+rohes Transkript klar eine Baubesprechung ist, bleibt es LP5; wenn es klar ein
+Planungs-JF ist, bleibt es LP1-4. Nur die Headerfelder bekommen Fallbacks.
 
 Wende folgende Heuristik an (in dieser Reihenfolge, der erste Treffer gewinnt):
 
@@ -100,6 +108,8 @@ Wende folgende Heuristik an (in dieser Reihenfolge, der erste Treffer gewinnt):
    - 3+ Sprecher, konkrete Liefertermine im Gespräch.
    - **Aber** kein Vorprotokoll, keine Verweise auf vorherige Besprechungen,
      kein D/K-Schema im Projekt etabliert.
+   - Auch ohne Meeting-Anker verwenden, wenn ein rohes Transkript mehrere
+     Sprecher, konkrete Aufgaben/Fristen und keinen Tracking-Hinweis enthält.
 
 5. **EBA-Gesprächsnotiz ohne Projektbezug** wenn es EBA-bezogen ist, aber keine
    Projektbesprechung:
@@ -125,17 +135,22 @@ Wende folgende Heuristik an (in dieser Reihenfolge, der erste Treffer gewinnt):
      („Donnerstag", „morgen", „bis 18.03.") sind in einer Gesprächsnotiz
      **erlaubt**.
 
-7. Wenn nichts klar passt: **frage den Nutzer**.
+7. Wenn nichts klar passt: nicht wegen fehlender Metadaten blockieren. Wähle
+   das kleinste plausible Format: `gespraechsnotiz` für kurze/inhaltliche
+   Mitschnitte, `protokoll-einfach` für mehrere Sprecher mit Aufgaben/Fristen.
+   Frage nur nach, wenn LP1-4 vs. LP5 strukturell wirklich unentscheidbar ist.
 
-Stelle die erkannte Klassifikation **transparent** an den Nutzer und biete an, sie zu
-ändern, bevor das Protokoll erzeugt wird:
+Stelle die erkannte Klassifikation **transparent** dar, aber blockiere die
+Erzeugung nicht wegen fehlender Projektmetadaten und warte im Normalfall nicht
+auf Bestätigung:
 
 > „Ich erkenne dies als **Planungsprotokoll LP1-4** (Begriffe: Bauantrag, DGNB, LP3).
-> Soll ich so fortfahren oder eine andere Vorlage wählen
-> (Gesprächsnotiz / Protokoll-einfach / LP1-4 / LP5)?"
+> Ich fahre damit fort; falls das Format anders gemeint war, kann es danach mit
+> einem Format-Hint neu erzeugt werden."
 
-In **Auto-Mode** (kontinuierlicher Modus, keine Rückfragen erwünscht): Klassifikation
-ohne Rückfrage anwenden, aber im Protokoll-Header als `_(automatisch erkannt)_` vermerken.
+In **Auto-Mode** oder bei rohen Transkripten: Klassifikation ohne Rückfrage
+anwenden, Fallback-Metadaten verwenden und Annahmen in der finalen
+Zusammenfassung nennen.
 
 ### 4. An die Format-Skill delegieren
 
@@ -181,6 +196,7 @@ ist beschrieben in
 - `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-lp1-4.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-lp5.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`
+- `${CLAUDE_PLUGIN_ROOT}/references/categories/metadaten-konvention.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/disziplin-kategorien.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/firma-kuerzel.md`
 - `${CLAUDE_PLUGIN_ROOT}/references/categories/status-codes.md`

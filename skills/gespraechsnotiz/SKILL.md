@@ -24,6 +24,7 @@ Lies in dieser Reihenfolge (mit Read-Tool):
 1. `${CLAUDE_PLUGIN_ROOT}/references/templates/gespraechsnotiz.md` — die Markdown-Vorlage.
 2. `${CLAUDE_PLUGIN_ROOT}/references/categories/sprache-und-stil.md` — Stilregeln.
 3. `${CLAUDE_PLUGIN_ROOT}/references/categories/transkript-format.md` — Eingabeformat.
+4. `${CLAUDE_PLUGIN_ROOT}/references/categories/metadaten-konvention.md` — Fallbacks für rohe Transkripte.
 
 ### 2. Transkript einlesen und analysieren
 
@@ -45,12 +46,15 @@ welche Aufgabe. „Ich kümmere mich darum" → der Sprecher ist verantwortlich.
 Aus den Metadaten:
 
 - **Projektname** / **Projekt-Nummer** / **Projekt-Beschreibung**: aus dem Transkript
-  oder vom Nutzer abfragen, wenn nichts erkennbar ist.
+  ableiten. Wenn nichts erkennbar ist, **nicht abbrechen** und nicht nachfragen:
+  Fallbacks aus `metadaten-konvention.md` verwenden (`Projekt-Nummer = 000`,
+  Projektname aus Datei/Thema oder `EBA / Allgemein`).
 - **Ort**: erstes erwähntes Ort-Wort (Stadt, Büro), sonst „nicht angegeben".
 - **Gesprächsdatum**: aus Dateiname (`YYMMDD_…`) oder dem ersten Zeitstempel des Tages.
+  Wenn beides fehlt: heutiges Datum.
 - **Erstelldatum**: heutiges Datum (`<currentDate>`).
 - **Ersteller**: Kürzel des Protokollerstellers — entweder aus dem App-Sprechernamen
-  ableiten (wenn `Ich` umbenannt wurde) oder beim Nutzer rückfragen.
+  ableiten (wenn `Ich` umbenannt wurde) oder `EBA` verwenden.
 
 #### EBA-Interview / Presse / Medien ohne Projekt
 
@@ -138,7 +142,8 @@ Nach dem Schreiben kurz mitteilen:
 - Anzahl der erkannten Teilnehmer.
 - Anzahl der Themen.
 - Anzahl impliziter Aufgaben mit Verantwortlichkeit.
-- Punkte, die als unklar markiert wurden und Klärung brauchen.
+- Annahmen/Fallbacks knapp nennen, z.B. `Projekt-Nr. 000, Ort nicht angegeben`.
+- Punkte, die als unklar markiert wurden und später fachlich geprüft werden sollten.
 
 ## Anti-Pattern
 
