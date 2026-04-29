@@ -159,9 +159,10 @@ auflisten. Sonst weglassen oder als „keine" vermerken.
 - **Geprüft durch / Prüfdatum**: leer lassen — wird später von der prüfenden Person
   ausgefüllt.
 
-### 10. Ausgabe als DOCX + PDF schreiben & State aktualisieren
+### 10. Ausgabe als DOCX + PDF + XLSX schreiben & State aktualisieren
 
-**Endformat**: DOCX + PDF. **Kein Markdown** im Projekt-Ordner.
+**Endformat**: DOCX + PDF + offizielles QMG-XLSX. **Kein Markdown** im
+Projekt-Ordner.
 Auf Windows 11 mit MS Word bootstrapt der Renderer fehlende Python-Pakete
 selbst und exportiert die PDF via Word. Keine technischen Setup-Fragen an den
 Nutzer.
@@ -182,9 +183,12 @@ Schritte:
      --out-dir "protokolle/<projekt>/"
    ```
 
+   Für BIM-Koordinationen `--format protokoll-bim` verwenden.
+
 3. Der Renderer schreibt
-   `protokolle/<projekt>/eba-protokoll-lp1-4-<datum>-<projekt>.docx` und
-   die zugehörige PDF, und löscht das MD-Zwischenformat. Das Format wird vom
+   `protokolle/<projekt>/eba-protokoll-lp1-4-<datum>-<projekt>.docx`,
+   die zugehörige `.pdf` und das offizielle `.xlsx`, und löscht das
+   MD-Zwischenformat. Das Format wird vom
    Renderer als `protokoll-lp1-4` bzw. bei BIM-Ankern als `protokoll-bim`
    erkannt. Wenn der Renderer einen
    Windows-PDF-Fehler meldet, stderr lesen, denselben Befehl nach der

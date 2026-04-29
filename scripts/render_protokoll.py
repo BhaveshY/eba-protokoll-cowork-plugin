@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Render an EBA protokoll Markdown file as DOCX + PDF.
+"""Render an EBA protokoll Markdown file as DOCX + PDF (+ XLSX for LP1-4/BIM).
 
 Used by all five format skills. The Markdown is treated as an in-memory
 intermediate and is NOT preserved in the user-facing output. The deliverables
-are the .docx (always) and .pdf.
+are the .docx (always), .pdf, and for LP1-4/BIM tracking protocols the official
+Excel .xlsx workbook.
 
 Windows 11 + MS Word is the primary production path. The script self-bootstraps
 its Python dependencies in the current user environment, then exports PDF with
@@ -27,12 +28,13 @@ Exit codes:
     2 markdown could not be parsed
     3 docx generation failed
     4 PDF generation failed on Windows
+    5 XLSX generation failed for LP1-4/BIM tracking
 """
 
 from __future__ import annotations
 
 import argparse
-from copy import deepcopy
+from copy import copy, deepcopy
 import os
 import re
 import subprocess
@@ -81,7 +83,7 @@ def _bootstrap_requirements() -> bool:
     """Install renderer dependencies without user interaction.
 
     This is intentionally quiet and user-local. The Claude Code user should not
-    need to know what python-docx or pywin32 are.
+    need to know what python-docx, openpyxl, or pywin32 are.
     """
     requirements = Path(__file__).resolve().parent / "requirements.txt"
     if not requirements.exists():
@@ -106,6 +108,10 @@ try:
     from docx.enum.section import WD_ORIENTATION
     from docx.oxml.ns import qn
     from docx.oxml import OxmlElement
+    from openpyxl import load_workbook
+    from openpyxl.cell.cell import MergedCell
+    from openpyxl.utils import get_column_letter
+    from openpyxl.worksheet.cell_range import CellRange
 except ImportError:
     if not _bootstrap_requirements():
         sys.stderr.write(
@@ -120,6 +126,10 @@ except ImportError:
         from docx.enum.section import WD_ORIENTATION
         from docx.oxml.ns import qn
         from docx.oxml import OxmlElement
+        from openpyxl import load_workbook
+        from openpyxl.cell.cell import MergedCell
+        from openpyxl.utils import get_column_letter
+        from openpyxl.worksheet.cell_range import CellRange
     except ImportError as exc:
         sys.stderr.write(
             "render_protokoll.py: DOCX dependencies are still unavailable after "
@@ -139,6 +149,7 @@ QMG_TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "references" / "templat
 GESPRAECHSNOTIZ_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx"
 PROTOKOLL_EINFACH_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-PK-LP1-4-MA_230227-A.docx"
 TRACKING_WORD_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-PK-LP5-MA_230202-B.docx"
+TRACKING_EXCEL_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx"
 
 
 # ─── Markdown parsing ──────────────────────────────────────────────────────
@@ -616,6 +627,10 @@ def _clean_rows(rows: list[list[str]]) -> list[list[str]]:
     return [row for row in rows if any(cell.strip() for cell in row)]
 
 
+def _pad_row(row: list[str], length: int) -> list[str]:
+    return (row + [""] * length)[:length]
+
+
 def _is_empty_marker(value: str) -> bool:
     return value.strip() in {"", "-", "–", "—"}
 
@@ -625,6 +640,25 @@ def _tracking_data_rows(parsed: ParsedMd, heading: str) -> list[list[str]]:
     return _clean_rows(table[1:] if table else [])
 
 
+def _tracking_header(parsed: ParsedMd) -> dict[str, str]:
+    intro = parsed.sections[0] if parsed.sections else MdSection("")
+    intro_tables = _tables_from_lines(intro.lines)
+    project = _kv_from_table(intro_tables[0] if intro_tables else [])
+    meta = _kv_from_table(intro_tables[1] if len(intro_tables) > 1 else [])
+    meeting_no_match = re.search(r"Nr\.\s*([A-Za-z0-9._-]+)", intro.heading)
+    meeting_no = meeting_no_match.group(1) if meeting_no_match else ""
+    return {
+        "meeting_no": meeting_no,
+        "meeting_topic": _first_subheading(intro.lines) or parsed.subtitle or "Besprechung",
+        "notice": _quote_text_from_lines(intro.lines),
+        "project_number": _pick(project, "Projekt-Nr.", "Projekt-Nr", "Projekt-Nummer"),
+        "project_name": _pick(project, "Projekt-Name", "Projektname"),
+        "ort": _pick(meta, "Ort"),
+        "datum": _pick(meta, "Datum", "Gesprächsdatum"),
+        "zeit": _pick(meta, "Zeit"),
+    }
+
+
 def _render_tracking_template(parsed: ParsedMd, out_path: Path) -> None:
     if not TRACKING_WORD_TEMPLATE.exists():
         raise FileNotFoundError(f"Missing QMG template: {TRACKING_WORD_TEMPLATE}")
@@ -632,20 +666,15 @@ def _render_tracking_template(parsed: ParsedMd, out_path: Path) -> None:
     doc = Document(str(TRACKING_WORD_TEMPLATE))
     _trim_qmg_template_body(doc, keep_tables=4)
 
-    intro = parsed.sections[0] if parsed.sections else MdSection("")
-    intro_tables = _tables_from_lines(intro.lines)
-    project = _kv_from_table(intro_tables[0] if intro_tables else [])
-    meta = _kv_from_table(intro_tables[1] if len(intro_tables) > 1 else [])
-    meeting_no_match = re.search(r"Nr\.\s*([A-Za-z0-9._-]+)", intro.heading)
-    meeting_no = meeting_no_match.group(1) if meeting_no_match else ""
-    meeting_topic = _first_subheading(intro.lines) or parsed.subtitle or "Besprechung"
-    notice = _quote_text_from_lines(intro.lines)
-
-    project_number = _pick(project, "Projekt-Nr.", "Projekt-Nr", "Projekt-Nummer")
-    project_name = _pick(project, "Projekt-Name", "Projektname")
-    ort = _pick(meta, "Ort")
-    datum = _pick(meta, "Datum", "Gesprächsdatum")
-    zeit = _pick(meta, "Zeit")
+    header = _tracking_header(parsed)
+    meeting_no = header["meeting_no"]
+    meeting_topic = header["meeting_topic"]
+    notice = header["notice"]
+    project_number = header["project_number"]
+    project_name = header["project_name"]
+    ort = header["ort"]
+    datum = header["datum"]
+    zeit = header["zeit"]
 
     main = doc.tables[0]
     _set_tc_text(_actual_tcs(main.rows[2])[0], f"zur Besprechung Nr. {meeting_no}".strip())
@@ -767,6 +796,300 @@ def _render_tracking_template(parsed: ParsedMd, out_path: Path) -> None:
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(out_path))
+
+
+# ─── XLSX rendering for official LP1-4/BIM tracking ───────────────────────
+
+
+def _is_tracking_excel_format(parsed: ParsedMd) -> bool:
+    return parsed.detected_format in {"protokoll-lp1-4", "protokoll-bim", "protokoll-tracking"}
+
+
+def _excel_safe(value: str | None) -> str:
+    return _strip_md_inline(value or "")
+
+
+def _excel_set(cell, value: str | None) -> None:
+    if isinstance(cell, MergedCell):
+        return
+    cell.value = _excel_safe(value)
+
+
+def _excel_clear_row(ws, row_idx: int, *, max_col: int) -> None:
+    for col_idx in range(1, max_col + 1):
+        cell = ws.cell(row_idx, col_idx)
+        if not isinstance(cell, MergedCell):
+            cell.value = None
+
+
+def _excel_copy_cell(src, dst) -> None:
+    if isinstance(dst, MergedCell):
+        return
+    if src.has_style:
+        dst._style = copy(src._style)
+    if src.number_format:
+        dst.number_format = src.number_format
+    if src.comment:
+        dst.comment = copy(src.comment)
+    if src.hyperlink:
+        dst._hyperlink = copy(src.hyperlink)
+
+
+def _excel_copy_row_template(ws, source_row: int, target_row: int, *, max_col: int) -> None:
+    ws.row_dimensions[target_row].height = ws.row_dimensions[source_row].height
+    for col_idx in range(1, max_col + 1):
+        _excel_copy_cell(ws.cell(source_row, col_idx), ws.cell(target_row, col_idx))
+
+    for merged in list(ws.merged_cells.ranges):
+        if merged.min_row == merged.max_row == source_row:
+            target_ref = (
+                f"{get_column_letter(merged.min_col)}{target_row}:"
+                f"{get_column_letter(merged.max_col)}{target_row}"
+            )
+            if target_ref not in {str(rng) for rng in ws.merged_cells.ranges}:
+                try:
+                    ws.merge_cells(target_ref)
+                except ValueError:
+                    pass
+
+
+def _excel_insert_rows(ws, idx: int, amount: int) -> None:
+    merged_ranges = [CellRange(str(rng)) for rng in ws.merged_cells.ranges]
+    for merged in list(ws.merged_cells.ranges):
+        ws.unmerge_cells(str(merged))
+
+    ws.insert_rows(idx, amount)
+
+    for merged in merged_ranges:
+        if merged.min_row >= idx:
+            merged.shift(row_shift=amount)
+        elif merged.max_row >= idx:
+            merged.max_row += amount
+        ws.merge_cells(str(merged))
+
+
+def _excel_ensure_capacity(
+    ws,
+    *,
+    start_row: int,
+    capacity: int,
+    needed: int,
+    template_row: int,
+    max_col: int,
+) -> int:
+    extra = max(0, needed - capacity)
+    if extra:
+        insert_at = start_row + capacity
+        _excel_insert_rows(ws, insert_at, extra)
+        for row_idx in range(insert_at, insert_at + extra):
+            _excel_copy_row_template(ws, template_row, row_idx, max_col=max_col)
+    return extra
+
+
+def _excel_put_row(
+    ws,
+    row_idx: int,
+    values: list[str],
+    cell_indices: list[int],
+    *,
+    template_row: int,
+    max_col: int,
+) -> None:
+    if row_idx != template_row:
+        _excel_copy_row_template(ws, template_row, row_idx, max_col=max_col)
+    _excel_clear_row(ws, row_idx, max_col=max_col)
+    for value, col_idx in zip(values, cell_indices):
+        _excel_set(ws.cell(row_idx, col_idx), value)
+
+
+def _excel_fill_block(
+    ws,
+    *,
+    start_row: int,
+    capacity: int,
+    rows: list[list[str]],
+    cell_indices: list[int],
+    template_row: int,
+    max_col: int,
+) -> int:
+    extra = _excel_ensure_capacity(
+        ws,
+        start_row=start_row,
+        capacity=capacity,
+        needed=len(rows),
+        template_row=template_row,
+        max_col=max_col,
+    )
+    total_rows = max(capacity + extra, len(rows))
+    for offset in range(total_rows):
+        target_row = start_row + offset
+        if offset < len(rows):
+            _excel_put_row(
+                ws,
+                target_row,
+                rows[offset],
+                cell_indices,
+                template_row=template_row,
+                max_col=max_col,
+            )
+        else:
+            _excel_clear_row(ws, target_row, max_col=max_col)
+    return extra
+
+
+def _set_print_area(ws, last_col: str, last_row: int) -> None:
+    ws.print_area = f"A1:{last_col}{last_row}"
+
+
+def _render_tracking_excel_template(parsed: ParsedMd, out_path: Path) -> None:
+    if not TRACKING_EXCEL_TEMPLATE.exists():
+        raise FileNotFoundError(f"Missing QMG template: {TRACKING_EXCEL_TEMPLATE}")
+
+    wb = load_workbook(str(TRACKING_EXCEL_TEMPLATE))
+    header = _tracking_header(parsed)
+
+    deck = wb["Deckblatt"]
+    _excel_set(deck["A3"], f"zur Besprechung Nr. {header['meeting_no']}".strip())
+    _excel_set(deck["B6"], header["meeting_topic"])
+    _excel_set(deck["B7"], header["project_number"])
+    _excel_set(deck["B8"], header["project_name"])
+    if header["notice"]:
+        _excel_set(deck["D7"], header["notice"])
+    _excel_set(deck["B10"], header["ort"])
+    _excel_set(deck["E10"], header["datum"])
+    _excel_set(deck["E11"], header["zeit"])
+
+    teilnehmer = _tracking_data_rows(parsed, "Teilnehmer")
+    participant_extra = _excel_fill_block(
+        deck,
+        start_row=15,
+        capacity=10,
+        rows=teilnehmer,
+        cell_indices=[1, 2, 3, 4, 5, 6, 7],
+        template_row=15,
+        max_col=7,
+    )
+
+    unterlagen = _tracking_data_rows(parsed, "Besprochene Unterlagen")
+    underlagen_start = 29 + participant_extra
+    underlagen_extra = _excel_fill_block(
+        deck,
+        start_row=underlagen_start,
+        capacity=3,
+        rows=[_pad_row(row, 5) for row in unterlagen],
+        cell_indices=[1, 4, 5, 6, 7],
+        template_row=underlagen_start,
+        max_col=7,
+    )
+    _set_print_area(deck, "G", 32 + participant_extra + underlagen_extra)
+
+    protocol = wb["Protokoll"]
+    themen = _tracking_data_rows(parsed, "Besprechungsthemen")
+    topic_capacity = 18
+    topic_extra = _excel_ensure_capacity(
+        protocol,
+        start_row=4,
+        capacity=topic_capacity,
+        needed=len(themen),
+        template_row=5,
+        max_col=7,
+    )
+    total_topic_rows = max(topic_capacity + topic_extra, len(themen))
+    for offset in range(total_topic_rows):
+        row_idx = 4 + offset
+        if offset >= len(themen):
+            _excel_clear_row(protocol, row_idx, max_col=7)
+            continue
+        row = themen[offset] + [""] * 7
+        is_category = _is_empty_marker(row[1]) and _is_empty_marker(row[2])
+        if is_category:
+            _excel_put_row(
+                protocol,
+                row_idx,
+                [row[0], row[3]],
+                [1, 2],
+                template_row=4,
+                max_col=7,
+            )
+        else:
+            _excel_put_row(
+                protocol,
+                row_idx,
+                row[:7],
+                [1, 2, 3, 4, 5, 6, 7],
+                template_row=5,
+                max_col=7,
+            )
+    protocol_last = 22 + topic_extra
+    if "Protokoll" in protocol.tables:
+        protocol.tables["Protokoll"].ref = f"A2:G{protocol_last}"
+    _set_print_area(protocol, "G", protocol_last)
+
+    doku = wb["Doku_Info"]
+    termine_section = _section_by_prefix(parsed, "Termine")
+    termine: list[list[str]] = []
+    if termine_section is not None:
+        tables = _tables_from_lines(termine_section.lines)
+        termine = _clean_rows(tables[0][1:] if tables else [])
+    termine_extra = _excel_fill_block(
+        doku,
+        start_row=3,
+        capacity=3,
+        rows=termine,
+        cell_indices=[1, 4, 6, 8, 9],
+        template_row=3,
+        max_col=9,
+    )
+    doku_shift = termine_extra
+
+    aufstell = _tracking_data_rows(parsed, "Aufstellvermerk zum Dokument")
+    aufstell_by_role = {row[0].strip().lower(): row for row in aufstell if row}
+    for role, row_idx in [("ersteller", 8 + doku_shift), ("geprüft", 9 + doku_shift)]:
+        row = aufstell_by_role.get(role, [])
+        _excel_set(doku.cell(row_idx, 4), row[1] if len(row) > 1 else "")
+        _excel_set(doku.cell(row_idx, 8), row[2] if len(row) > 2 else "")
+
+    anmerkungen = _tracking_data_rows(parsed, "Nachträgliche Anmerkungen zum Dokument")
+    anmerkung = anmerkungen[0] if anmerkungen else []
+    _excel_set(doku.cell(12 + doku_shift, 3), anmerkung[0] if len(anmerkung) > 0 else "- - -")
+    _excel_set(doku.cell(12 + doku_shift, 8), anmerkung[1] if len(anmerkung) > 1 else "- - -")
+    _excel_set(doku.cell(13 + doku_shift, 3), anmerkung[2] if len(anmerkung) > 2 else "- - -")
+
+    anlagen = _tracking_data_rows(parsed, "Anlagen")
+    anlagen_start = 17 + doku_shift
+    anlagen_extra = _excel_fill_block(
+        doku,
+        start_row=anlagen_start,
+        capacity=3,
+        rows=anlagen,
+        cell_indices=[1, 5, 6, 8],
+        template_row=anlagen_start,
+        max_col=9,
+    )
+    doku_shift += anlagen_extra
+
+    kennz = _tracking_data_rows(parsed, "Kennzeichnungen im Dokument")
+    kennz_start = 23 + doku_shift
+    kennz_extra = _excel_fill_block(
+        doku,
+        start_row=kennz_start,
+        capacity=3,
+        rows=kennz,
+        cell_indices=[1, 4, 6],
+        template_row=kennz_start,
+        max_col=9,
+    )
+    _set_print_area(doku, "I", 32 + doku_shift + kennz_extra)
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    wb.save(str(out_path))
+
+
+def render_to_xlsx(parsed: ParsedMd, out_path: Path) -> bool:
+    if not _is_tracking_excel_format(parsed):
+        return False
+    _render_tracking_excel_template(parsed, out_path)
+    return True
 
 
 # ─── DOCX rendering ────────────────────────────────────────────────────────
@@ -1192,6 +1515,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--format", default=None, help="Force format (overrides auto-detect)")
     ap.add_argument("--no-pdf", action="store_true", help="Skip PDF rendering")
     ap.add_argument(
+        "--no-xlsx",
+        action="store_true",
+        help="Skip official XLSX tracking workbook generation for LP1-4/BIM",
+    )
+    ap.add_argument(
         "--pdf-optional",
         action="store_true",
         help="Do not fail if PDF conversion is unavailable on Windows",
@@ -1218,12 +1546,21 @@ def main(argv: list[str] | None = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     docx_path = out_dir / (md_path.stem + ".docx")
     pdf_path = out_dir / (md_path.stem + ".pdf")
+    xlsx_path = out_dir / (md_path.stem + ".xlsx")
 
     try:
         render_to_docx(parsed, docx_path)
     except Exception as exc:
         sys.stderr.write(f"DOCX render failed: {exc}\n")
         return 3
+
+    xlsx_ok = False
+    if not args.no_xlsx:
+        try:
+            xlsx_ok = render_to_xlsx(parsed, xlsx_path)
+        except Exception as exc:
+            sys.stderr.write(f"XLSX render failed: {exc}\n")
+            return 5
 
     pdf_ok = False
     if not args.no_pdf:
@@ -1246,6 +1583,8 @@ def main(argv: list[str] | None = None) -> int:
             pass
 
     print(f"DOCX: {docx_path}")
+    if xlsx_ok:
+        print(f"XLSX: {xlsx_path}")
     if pdf_ok:
         print(f"PDF:  {pdf_path}")
     elif not args.no_pdf:

@@ -192,11 +192,16 @@ expect(
 );
 
 const renderer = read("scripts/render_protokoll.py");
+const requirements = read("scripts/requirements.txt");
 expect(
   renderer.includes("def _bootstrap_requirements()") &&
-    renderer.includes("python-docx or pywin32") &&
+    renderer.includes("python-docx, openpyxl, or pywin32") &&
     renderer.includes("_bootstrap_package(\"pywin32>=306\")"),
-  "renderer bootstraps python-docx and pywin32 automatically",
+  "renderer bootstraps python-docx, openpyxl and pywin32 automatically",
+);
+expect(
+  requirements.includes("openpyxl>=3.1.0"),
+  "requirements include openpyxl for official tracking XLSX output",
 );
 expect(
   renderer.includes("pdf_required = sys.platform == \"win32\""),
@@ -206,11 +211,13 @@ expect(
   renderer.includes("GESPRAECHSNOTIZ_TEMPLATE") &&
     renderer.includes("PROTOKOLL_EINFACH_TEMPLATE") &&
     renderer.includes("TRACKING_WORD_TEMPLATE") &&
+    renderer.includes("TRACKING_EXCEL_TEMPLATE") &&
     renderer.includes("def _render_gespraechsnotiz_template") &&
     renderer.includes("def _render_protokoll_einfach_template") &&
     renderer.includes("def _render_tracking_template") &&
+    renderer.includes("def render_to_xlsx") &&
     renderer.includes("page numbering and EBA-CI are preserved"),
-  "renderer fills the official QMG Word templates",
+  "renderer fills the official QMG Word and Excel templates",
 );
 
 for (const skillRel of [
@@ -239,12 +246,20 @@ for (const skillRel of [
   );
 }
 
+for (const skillRel of [
+  "skills/protokoll-lp1-4/SKILL.md",
+  "skills/protokoll-fortschreiben/SKILL.md",
+]) {
+  const skill = read(skillRel);
+  expect(skill.includes("XLSX"), `${skillRel} documents tracking XLSX output`);
+}
+
 const pluginManifest = JSON.parse(read(".claude-plugin/plugin.json"));
-expect(pluginManifest.version === "0.2.4", "plugin.json bumped to 0.2.4");
+expect(pluginManifest.version === "0.2.5", "plugin.json bumped to 0.2.5");
 const market = JSON.parse(read(".claude-plugin/marketplace.json"));
 expect(
-  market.plugins[0].version === "0.2.4",
-  "marketplace.json plugin entry bumped to 0.2.4",
+  market.plugins[0].version === "0.2.5",
+  "marketplace.json plugin entry bumped to 0.2.5",
 );
 
 // Dispatcher smoke test — verify each example transcript would route to the

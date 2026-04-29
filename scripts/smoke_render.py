@@ -22,9 +22,10 @@ from xml.etree import ElementTree as ET
 
 try:
     from docx import Document
+    from openpyxl import load_workbook
 except ImportError:
     sys.stderr.write(
-        "smoke_render.py: missing dependency 'python-docx'.\n"
+        "smoke_render.py: missing dependency 'python-docx' or 'openpyxl'.\n"
         "Install with: python3 -m pip install -r scripts/requirements.txt\n"
     )
     sys.exit(3)
@@ -41,6 +42,10 @@ QMG_TEMPLATE_EXAMPLES = {
     "references/examples/beispiel-ausgabe-lp5.md",
     "references/examples/beispiel-ausgabe-bim.md",
 }
+TRACKING_XLSX_EXAMPLES = {
+    "references/examples/beispiel-ausgabe-lp1-4.md",
+    "references/examples/beispiel-ausgabe-bim.md",
+}
 
 
 def read_docx_text(path: Path) -> str:
@@ -50,6 +55,47 @@ def read_docx_text(path: Path) -> str:
         for row in table.rows:
             parts.append(" | ".join(cell.text for cell in row.cells))
     return "\n".join(parts)
+
+
+def read_xlsx_text(path: Path) -> str:
+    wb = load_workbook(path, data_only=False)
+    parts: list[str] = []
+    for sheet_name in ["Deckblatt", "Protokoll", "Doku_Info"]:
+        ws = wb[sheet_name]
+        for row in ws.iter_rows():
+            values = [str(cell.value) for cell in row if cell.value is not None]
+            if values:
+                parts.append(" | ".join(values))
+    return "\n".join(parts)
+
+
+def xlsx_template_checks(path: Path, example: str) -> list[str]:
+    failures: list[str] = []
+    wb = load_workbook(path, data_only=False)
+    expected_sheets = ["Deckblatt", "Protokoll", "Doku_Info", "Hilfe und Tipps", "intern"]
+    if wb.sheetnames != expected_sheets:
+        failures.append(f"{example}: XLSX sheet structure changed: {wb.sheetnames}")
+    if "Protokoll" not in wb["Protokoll"].tables:
+        failures.append(f"{example}: XLSX Protokoll table is missing")
+    for sheet_name in ["Deckblatt", "Protokoll", "Doku_Info"]:
+        sheet_text = "\n".join(
+            str(cell.value)
+            for row in wb[sheet_name].iter_rows()
+            for cell in row
+            if cell.value is not None
+        )
+        for placeholder in [
+            "_Vorname_",
+            "_Name_",
+            "_Firma_",
+            "_ Dokument/e, Plan/Pläne _",
+            "_Thema 01_",
+            "_Ersteller eintragen_",
+            "Besprechnungsthema A",
+        ]:
+            if placeholder in sheet_text:
+                failures.append(f"{example}: XLSX placeholder leaked into {sheet_name}: {placeholder}")
+    return failures
 
 
 def qmg_template_checks(path: Path, example: str) -> list[str]:
@@ -136,6 +182,32 @@ def render_example(example: str, required_text: list[str]) -> list[str]:
             if needle not in rendered:
                 failures.append(f"{example}: rendered DOCX missing {needle!r}")
         failures.extend(qmg_template_checks(docx_path, example))
+
+        xlsx_path = out_dir / f"{md_path.stem}.xlsx"
+        if example in TRACKING_XLSX_EXAMPLES:
+            if not xlsx_path.exists():
+                failures.append(f"{example}: tracking XLSX was not written")
+                return failures
+            rendered_xlsx = read_xlsx_text(xlsx_path)
+            for needle in {
+                "references/examples/beispiel-ausgabe-lp1-4.md": [
+                    "Planungsbesprechung — BIM, Bauantrag, Wohnfassade",
+                    "LP3-Modell (FusionLive-Upload)",
+                    "DGNB-Workshop am 14.04.26",
+                    "erledigt",
+                ],
+                "references/examples/beispiel-ausgabe-bim.md": [
+                    "BIM-Koordination JF-07",
+                    "BIMcollab-Issue-Liste",
+                    "FusionLive bleibt die verbindliche CDE",
+                    "erledigt",
+                ],
+            }[example]:
+                if needle not in rendered_xlsx:
+                    failures.append(f"{example}: rendered XLSX missing {needle!r}")
+            failures.extend(xlsx_template_checks(xlsx_path, example))
+        elif xlsx_path.exists():
+            failures.append(f"{example}: unexpected XLSX was written for non-Excel format")
     return failures
 
 

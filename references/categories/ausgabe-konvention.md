@@ -1,7 +1,9 @@
-# Ausgabe-Konvention: DOCX + PDF (kein Markdown)
+# Ausgabe-Konvention: DOCX + PDF + Tracking-XLSX (kein Markdown)
 
-Alle Protokoll-Skills schreiben als Endformat **DOCX + PDF**. Markdown ist nur
-ein **flüchtiges Zwischenformat** und wird nach dem Rendern gelöscht.
+Alle Protokoll-Skills schreiben als Endformat **DOCX + PDF**. Für
+`protokoll-lp1-4` und `protokoll-bim` schreibt der Renderer zusätzlich das
+offizielle **QMG-XLSX**. Markdown ist nur ein **flüchtiges Zwischenformat** und
+wird nach dem Rendern gelöscht.
 
 Die Produktionsumgebung ist **Windows 11 mit installiertem Microsoft Word**.
 Der Nutzer ist nicht technisch. Die Skill darf den Nutzer deshalb **nicht**
@@ -21,6 +23,7 @@ Die Ausgaben landen relativ zum aktuellen Arbeitsverzeichnis:
 protokolle/
 └── <projekt>/                 # z.B. 553-WIL/
     ├── 2026-03-24_planungsbesprechung-12.docx   # immer
+    ├── 2026-03-24_planungsbesprechung-12.xlsx   # LP1-4/BIM
     └── 2026-03-24_planungsbesprechung-12.pdf    # wenn Konverter vorhanden
 ```
 
@@ -31,9 +34,11 @@ direkt unter `protokolle/` ab. Wenn `protokolle/` nicht existiert, anlegen.
 
 ### 0. Selbstheilende Umgebung
 
-Vor dem ersten DOCX/PDF-Rendern prüft `render_protokoll.py` seine Abhängigkeiten:
+Vor dem ersten DOCX/PDF/XLSX-Rendern prüft `render_protokoll.py` seine
+Abhängigkeiten:
 
 - `python-docx` für DOCX-Erzeugung.
+- `openpyxl` für das offizielle LP1-4/BIM-XLSX.
 - `pywin32` auf Windows für den MS-Word-COM-PDF-Export.
 
 Fehlt ein Paket, installiert der Renderer es automatisch mit:
@@ -81,6 +86,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
 Wichtige Flags:
 
 - `--no-pdf` — DOCX-only, PDF-Schritt überspringen.
+- `--no-xlsx` — nur für Debugging: LP1-4/BIM-XLSX überspringen.
 - `--keep-md` — nur für Debugging: behält das MD-Zwischenformat.
 - `--out-dir <pfad>` — Zielverzeichnis (Default: neben dem MD).
 - `--format <name>` — überschreibt die Auto-Erkennung
@@ -93,6 +99,7 @@ Der Renderer gibt die finalen Pfade auf stdout aus, z.B.:
 
 ```
 DOCX: protokolle/553-WIL/2026-03-24_planungsbesprechung-12.docx
+XLSX: protokolle/553-WIL/2026-03-24_planungsbesprechung-12.xlsx
 PDF:  protokolle/553-WIL/2026-03-24_planungsbesprechung-12.pdf
 Format: protokoll-lp1-4
 ```
@@ -133,9 +140,10 @@ und PDF vorhanden sind oder ein echter Blocker vorliegt.
   `QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx`,
   `QMG-024-141_ORG-PK-LP1-4-MA_230227-A.docx` und dem
   QMG-Tracking-Word-Shell `QMG-024-141_ORG-PK-LP5-MA_230202-B.docx`.
-  LP1-4/BIM-Tracking behält die D/K|B|LN-Struktur; die offizielle Excel-Datei
-  `QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx` bleibt die native
-  Fortschreibungsreferenz.
+- LP1-4/BIM-XLSX-Ausgaben werden direkt aus
+  `QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx` erzeugt. Die Sheets
+  `Deckblatt`, `Protokoll`, `Doku_Info`, `Hilfe und Tipps` und `intern`
+  bleiben erhalten; befüllt werden nur die fachlichen Bereiche.
 - Markdown-Beispiele in `references/examples/` sind Regressionstests für den
   Renderer. Nach Änderungen an Renderer oder Skills `scripts/smoke_render.py`
   ausführen.
@@ -145,7 +153,7 @@ und PDF vorhanden sind oder ein echter Blocker vorliegt.
 ## Was beim Fortschreiben anders ist
 
 `protokoll-fortschreiben` schreibt zusätzlich die `protokoll-state.json` neben
-das DOCX. Diese JSON-Datei bleibt erhalten — sie ist KEIN flüchtiges
+die Ausgabedateien. Diese JSON-Datei bleibt erhalten — sie ist KEIN flüchtiges
 Zwischenformat, sondern die persistente Projektzustand-Datei für den
 nächsten Lauf.
 
@@ -155,6 +163,8 @@ nächsten Lauf.
   `protokolle/`-Ordner.
 - ❌ DOCX im aktuellen Verzeichnis oder auf dem Desktop ablegen — immer in
   `protokolle/<projekt>/`.
+- ❌ Bei LP1-4/BIM nur DOCX + PDF liefern — das offizielle XLSX gehört dazu,
+  außer der Nutzer verlangt ausdrücklich kein Excel.
 - ❌ Den Nutzer bitten, `pip install`, `pywin32`, LibreOffice oder andere
   technische Setup-Schritte auszuführen — der Renderer bootstrapt selbst.
 - ❌ Auf Windows mit nur DOCX antworten, wenn PDF fehlt — Word-PDF ist dort

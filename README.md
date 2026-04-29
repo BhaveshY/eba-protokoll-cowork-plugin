@@ -56,12 +56,17 @@ Das Plugin erkennt automatisch den passenden Format-Typ (Gesprächsnotiz / LP1-4
 zeigt die Erkennung transparent an, und schreibt das fertige Protokoll als
 **DOCX + PDF** nach
 `protokolle/<projekt>/<datum>_protokoll-NN_<thema>.docx` (und `.pdf`).
+Bei LP1-4/BIM-Tracking entsteht zusätzlich die offizielle QMG-Excel-Datei
+`…<thema>.xlsx`.
 Markdown wird **nicht** ins Projekt geschrieben — es ist nur ein flüchtiges
 Zwischenformat. Auf **Windows 11 mit MS Word** erzeugt der Renderer die PDF
 automatisch über Word und richtet fehlende Python-Pakete selbst ein.
 Die DOCX-Ausgabe befüllt die vorhandenen QMG-Word-Templates:
 Gesprächsnotiz, Protokoll-einfach und der QMG-Tracking-Word-Shell für LP1-4/BIM
-und LP5. Dadurch bleiben EBA-CI, Header, Footer und Seitenzahlen erhalten.
+und LP5. Die XLSX-Ausgabe für LP1-4/BIM befüllt
+`QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx` mit den Sheets `Deckblatt`,
+`Protokoll` und `Doku_Info`. Dadurch bleiben EBA-CI, Header, Footer,
+Seitenzahlen und Excel-Struktur erhalten.
 
 Rohe Transkripte dürfen unvollständig sein. Wenn Projekt-Nr., Projektname, Ort
 oder Ersteller fehlen, erzeugt das Plugin trotzdem das passende Protokoll,
@@ -132,7 +137,7 @@ plugins/eba-protokoll-cowork/
 │   ├── categories/                # D/K-Schemata, Kürzel, Status, Stil, Ausgabe-/Metadaten-Konvention
 │   └── examples/                  # Beispiel-Transkripte und -Protokolle
 ├── scripts/
-│   ├── render_protokoll.py        # MD → DOCX + PDF Renderer (von allen Skills aufgerufen)
+│   ├── render_protokoll.py        # MD → DOCX + PDF (+ XLSX für LP1-4/BIM)
 │   ├── protokoll-state.md         # State-File-Schema-Dokumentation
 │   └── validate-references.mjs    # Statische Plugin-Validierung
 └── README.md
@@ -148,8 +153,10 @@ plugins/eba-protokoll-cowork/
     └── 553-WIL/                   # je Projekt ein Ordner
         ├── 2026-03-24_protokoll-12_planungsbespr.docx   # immer
         ├── 2026-03-24_protokoll-12_planungsbespr.pdf    # wenn Konverter vorhanden
+        ├── 2026-03-24_protokoll-12_planungsbespr.xlsx   # LP1-4/BIM
         ├── 2026-04-22_protokoll-13_planungsbespr.docx
         ├── 2026-04-22_protokoll-13_planungsbespr.pdf
+        ├── 2026-04-22_protokoll-13_planungsbespr.xlsx
         └── protokoll-state.json   # Gedächtnis zwischen Sitzungen
 ```
 
@@ -197,28 +204,30 @@ echo '{"schema_version":1,"projekt":{"nr":"553","name":"WIL"}}' \
 
 Das Plugin füllt das State-File mit dem ersten Protokoll vollständig auf.
 
-## Endformat-Pipeline (DOCX + PDF)
+## Endformat-Pipeline (DOCX + PDF + Tracking-XLSX)
 
 Alle Skills delegieren das Rendering an
 `scripts/render_protokoll.py`. Der Renderer:
 
 1. Liest das vom Skill erzeugte Markdown-Zwischenformat aus `/tmp/`.
-2. Schreibt ein EBA-gestyltes DOCX (Arial, A4, oranger Akzent, graue
-   Tabellenkopfzeilen) nach `protokolle/<projekt>/`.
-3. Konvertiert die DOCX zu PDF — Reihenfolge der versuchten Konverter:
+2. Schreibt ein EBA-konformes DOCX aus den QMG-Word-Templates nach
+   `protokolle/<projekt>/`.
+3. Schreibt bei `protokoll-lp1-4` und `protokoll-bim` zusätzlich ein XLSX aus
+   der offiziellen QMG-Excel-Vorlage.
+4. Konvertiert die DOCX zu PDF — Reihenfolge der versuchten Konverter:
    1. **MS Word COM** (Windows 11, `pywin32` wird automatisch installiert)
    2. **LibreOffice headless** (Win/Mac/Linux)
    3. **macOS Pages** (nur als macOS-Dev-Fallback)
-4. Löscht das MD-Zwischenformat.
+5. Löscht das MD-Zwischenformat.
 
 Die volle Konvention steht in
 `references/categories/ausgabe-konvention.md`.
 
 **Windows-11-Nutzer müssen nichts vorbereiten.** Der Renderer prüft beim ersten
-Lauf selbst, ob `python-docx` und `pywin32` verfügbar sind, installiert fehlende
+Lauf selbst, ob `python-docx`, `openpyxl` und `pywin32` verfügbar sind, installiert fehlende
 Pakete im Benutzerkontext und nutzt danach MS Word für die PDF-Erzeugung.
 Claude Code soll technische Setup-Details intern lösen und den Nutzer erst mit
-den fertigen `.docx`- und `.pdf`-Pfaden konfrontieren.
+den fertigen `.docx`-, `.pdf`- und ggf. `.xlsx`-Pfaden konfrontieren.
 
 Wenn auf Windows keine PDF entsteht, gilt das Protokoll als nicht fertig. Der
 Renderer gibt einen Fehler zurück, damit Claude Code nachbessert statt nur ein
@@ -226,14 +235,13 @@ DOCX abzuliefern.
 
 ## Entwicklungsstand
 
-Version 0.2.4 — DOCX + PDF Output, Windows-11-First mit automatischem
+Version 0.2.5 — DOCX + PDF Output, Tracking-XLSX für LP1-4/BIM,
+Windows-11-First mit automatischem
 Dependency-Bootstrap, Metadaten-Fallbacks für rohe Transkripte und
 QMG-Template-Füllung. Deckt die vier Standardvorlagen QMG-024-141 ab
 (Gesprächsnotiz, Protokoll-einfach Word LP1-4 Stand A, Planungsprotokoll
 LP1-4/BIM mit D/K|B|LN-Tracking, Bauleitungsprotokoll LP5 Stand B). Geplant:
 
-- Separater Excel-Export für das offizielle LP1-4-Tracking-XLSX, falls neben
-  DOCX + PDF auch native Excel-Fortschreibung gewünscht wird.
 - Sondervorlage für DGNB-Workshops.
 - Visualisierung des State-Files (offene Punkte, Termine, Mängelliste) als
   HTML-Dashboard.

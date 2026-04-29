@@ -137,9 +137,10 @@ Schreibe die State-Datei neu mit:
 - `dk_schema`: aktualisiert mit ggf. neu hinzugekommenen Kategorien.
 - `letzte_mangelnummer` (nur LP5): aktualisiert.
 
-### 8. Ausgabe als DOCX + PDF schreiben & Zusammenfassung
+### 8. Ausgabe als DOCX + PDF (+ XLSX bei LP1-4/BIM) schreiben & Zusammenfassung
 
-**Endformat**: DOCX + PDF. **Kein Markdown** im Projekt-Ordner. Die
+**Endformat**: DOCX + PDF, bei `protokoll-lp1-4`/`protokoll-bim` zusätzlich
+das offizielle QMG-XLSX. **Kein Markdown** im Projekt-Ordner. Die
 `protokoll-state.json` bleibt erhalten (persistente Projektzustand-Datei).
 Auf Windows 11 mit MS Word bootstrapt der Renderer fehlende Python-Pakete
 selbst und exportiert die PDF via Word. Keine technischen Setup-Fragen an den
@@ -168,7 +169,7 @@ Schritte:
 
 Berichte dem Nutzer:
 
-- Pfade der erzeugten DOCX- und PDF-Dateien.
+- Pfade der erzeugten DOCX- und PDF-Dateien; bei LP1-4/BIM auch den XLSX-Pfad.
 - Anzahl übernommener offener Punkte ohne Änderung.
 - Anzahl Ergänzungen zu Vorpunkten (mit kurzer Auflistung der LN-Referenzen).
 - Anzahl neu eröffneter Punkte.

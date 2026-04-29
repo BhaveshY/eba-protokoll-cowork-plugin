@@ -29,8 +29,9 @@ existiert, fortschreiben; sonst neu.
    - `categories/metadaten-konvention.md`
 4. Header, Teilnehmer, Unterlagen, Themen-Tabelle (D/K|B|LN), Termine, Anlagen,
    Aufstellvermerk.
-5. Ausgabe als **DOCX + PDF** (kein Markdown im Projekt):
-   `protokolle/<projekt>/<jjjj-mm-tt>_protokoll-<NN>_<thema>.docx` und `…<thema>.pdf`.
+5. Ausgabe als **DOCX + PDF + offizielles XLSX** (kein Markdown im Projekt):
+   `protokolle/<projekt>/<jjjj-mm-tt>_protokoll-<NN>_<thema>.docx`,
+   `…<thema>.pdf` und `…<thema>.xlsx`.
    Pipeline: `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 6. State-Datei aktualisieren / anlegen: `protokolle/<projekt>/protokoll-state.json`.
 

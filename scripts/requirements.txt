@@ -7,6 +7,9 @@
 # Required — DOCX generation:
 python-docx>=1.0.0
 
+# Required — official LP1-4/BIM Excel tracking output:
+openpyxl>=3.1.0
+
 # Windows-only — enables MS Word COM PDF conversion. On Windows 11 with MS Word
 # installed, the renderer treats PDF as a required deliverable and auto-installs
 # this package if it is missing.
