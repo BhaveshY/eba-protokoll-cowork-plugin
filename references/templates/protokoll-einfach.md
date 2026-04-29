@@ -1,7 +1,8 @@
 # Vorlage: Protokoll (einfach, Word LP1-4 Stand A)
 
-QM-Index: `QMG-024-141 ORG-PK-LP1-4-MA` (Stand A, 27.02.23) — Word-Variante;
-`QMG-024-141 ORG-PK-LP1-4-EXCEL-MA` (Stand A, 20.09.24) — Excel-Variante.
+QM-Index: `QMG-024-141 ORG-PK-LP1-4-MA` (Stand A, 27.02.23) — Word-Variante.
+Die separate Excel-Variante `QMG-024-141 ORG-PK-LP1-4-EXCEL-MA` (Stand A,
+20.09.24) wird nur bei ausdrücklichem Excel-Wunsch verwendet.
 
 Verwendung: Einfache Planungsbesprechung **ohne** D/K|B|LN-Tracking.
 Zwischen-Format zwischen Gesprächsnotiz (formlos, ohne Frist) und LP1-4-Tracking

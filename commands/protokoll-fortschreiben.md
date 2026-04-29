@@ -29,8 +29,9 @@ Wenn nur Rohmetadaten fehlen, nicht abbrechen: Fallbacks aus
    Fortschreibung gibt — empfehlen, `/protokoll-lp1-4` oder `/protokoll-lp5` mit
    `--neu` zu verwenden.
 5. Themen zusammenführen (Übernahme + Ergänzung + neu).
-6. Ausgabe als **DOCX + PDF** schreiben, bei LP1-4/BIM zusätzlich **XLSX**
-   (kein Markdown im Projekt), State aktualisieren.
+6. Ausgabe formatgetreu schreiben: Word-Ursprungsformate als **DOCX + PDF**,
+   BIM/Excel-Ursprungsformate als **XLSX** (kein Markdown im Projekt), State
+   aktualisieren.
    Auf Windows 11 mit MS Word richtet der Renderer fehlende Python-Pakete selbst
    ein und PDF ist Pflicht, sofern der Nutzer nicht ausdrücklich DOCX-only verlangt.
    Pipeline: `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
@@ -44,6 +45,6 @@ Wenn nur Rohmetadaten fehlen, nicht abbrechen: Fallbacks aus
 
 ## Output
 
-- Pfade zu DOCX und PDF; bei LP1-4/BIM auch zu XLSX.
+- Pfade zu DOCX/PDF oder XLSX.
 - Aktualisierter State (`protokoll-state.json`).
 - Übersicht: übernommen / ergänzt / neu / erledigt / überfällig.

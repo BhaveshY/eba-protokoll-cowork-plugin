@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Render an EBA protokoll Markdown file as DOCX + PDF (+ official XLSX).
+"""Render an EBA protokoll Markdown file with the matching official template.
 
 Used by all five format skills. The Markdown is treated as an in-memory
 intermediate and is NOT preserved in the user-facing output. The deliverables
-are the .docx (always), .pdf, and for Protokoll-einfach/LP1-4/BIM the official
-Excel .xlsx workbook.
+follow the original QMG source format: Word templates produce .docx plus .pdf,
+while Excel templates produce .xlsx.
 
 Windows 11 + MS Word is the primary production path. The script self-bootstraps
 its Python dependencies in the current user environment, then exports PDF with
@@ -17,9 +17,8 @@ given:
     "# Protokoll" + "Besprechungsthemen" + "D/K"       -> protokoll-lp1-4 / protokoll-lp5 / protokoll-bim
 
 Output files are written next to <markdown_path>:
-    <basename>.docx
-    <basename>.pdf
-    <basename>.xlsx (Protokoll-einfach, LP1-4/BIM)
+    <basename>.docx + <basename>.pdf (Word-origin formats)
+    <basename>.xlsx (Excel-origin formats)
 
 The Markdown intermediate at <markdown_path> is removed on success unless
 --keep-md is passed.
@@ -295,8 +294,8 @@ def _detect_format(parsed: ParsedMd) -> str:
                 line for s in parsed.sections[:2] for line in [s.heading] + s.lines[:12]
             )
             if re.search(
-                r"\b(BIM-Koordination|BIM-Jour-Fixe|BIM-JF|Koordinationsmodell|BAP|BCF|IFC)\b",
-                all_text,
+                r"\b(BIM-Koordination|BIM-Jour-Fixe|BIM-JF|Koordinations-JF|BIM-Termin)\b",
+                head,
                 re.IGNORECASE,
             ):
                 return "protokoll-bim"
@@ -806,11 +805,24 @@ def _render_tracking_template(parsed: ParsedMd, out_path: Path) -> None:
 
 
 def _is_tracking_excel_format(parsed: ParsedMd) -> bool:
-    return parsed.detected_format in {"protokoll-lp1-4", "protokoll-bim", "protokoll-tracking"}
+    return parsed.detected_format in {
+        "protokoll-bim",
+        "protokoll-lp1-4-excel",
+        "protokoll-lp1-4-xlsx",
+        "protokoll-tracking-excel",
+        "protokoll-tracking-xlsx",
+    }
 
 
 def _is_simple_excel_format(parsed: ParsedMd) -> bool:
-    return parsed.detected_format == "protokoll-einfach"
+    return parsed.detected_format in {
+        "protokoll-einfach-excel",
+        "protokoll-einfach-xlsx",
+    }
+
+
+def _is_xlsx_only_format(parsed: ParsedMd) -> bool:
+    return _is_simple_excel_format(parsed) or _is_tracking_excel_format(parsed)
 
 
 def _excel_safe(value: str | None) -> str:
@@ -1458,7 +1470,6 @@ def render_to_docx(parsed: ParsedMd, out_path: Path) -> None:
     if parsed.detected_format in {
         "protokoll-tracking",
         "protokoll-lp1-4",
-        "protokoll-bim",
         "protokoll-lp5",
     }:
         _render_tracking_template(parsed, out_path)
@@ -1699,7 +1710,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument(
         "--no-xlsx",
         action="store_true",
-        help="Skip official QMG XLSX workbook generation for supported formats",
+        help="Skip XLSX generation for Excel-origin formats (debug only)",
     )
     ap.add_argument(
         "--pdf-optional",
@@ -1729,6 +1740,30 @@ def main(argv: list[str] | None = None) -> int:
     docx_path = out_dir / (md_path.stem + ".docx")
     pdf_path = out_dir / (md_path.stem + ".pdf")
     xlsx_path = out_dir / (md_path.stem + ".xlsx")
+
+    if _is_xlsx_only_format(parsed):
+        if args.no_xlsx:
+            sys.stderr.write(
+                f"Format {parsed.detected_format} is an Excel-origin QMG format; "
+                "--no-xlsx would leave no deliverable.\n"
+            )
+            return 5
+        try:
+            if not render_to_xlsx(parsed, xlsx_path):
+                raise ValueError(f"Unsupported XLSX format: {parsed.detected_format}")
+        except Exception as exc:
+            sys.stderr.write(f"XLSX render failed: {exc}\n")
+            return 5
+
+        if not args.keep_md:
+            try:
+                md_path.unlink()
+            except OSError:
+                pass
+
+        print(f"XLSX: {xlsx_path}")
+        print(f"Format: {parsed.detected_format}")
+        return 0
 
     try:
         render_to_docx(parsed, docx_path)

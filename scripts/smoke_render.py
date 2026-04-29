@@ -40,15 +40,11 @@ QMG_TEMPLATE_EXAMPLES = {
     "references/examples/beispiel-ausgabe-einfach.md",
     "references/examples/beispiel-ausgabe-lp1-4.md",
     "references/examples/beispiel-ausgabe-lp5.md",
-    "references/examples/beispiel-ausgabe-bim.md",
 }
 TRACKING_XLSX_EXAMPLES = {
-    "references/examples/beispiel-ausgabe-lp1-4.md",
     "references/examples/beispiel-ausgabe-bim.md",
 }
-SIMPLE_XLSX_EXAMPLES = {
-    "references/examples/beispiel-ausgabe-einfach.md",
-}
+XLSX_ONLY_EXAMPLES = TRACKING_XLSX_EXAMPLES
 
 
 def read_docx_text(path: Path) -> str:
@@ -230,7 +226,27 @@ def render_example(example: str, required_text: list[str]) -> list[str]:
             return failures
         if md_path.exists():
             failures.append(f"{example}: markdown intermediate was not deleted")
+
         docx_path = out_dir / f"{md_path.stem}.docx"
+        xlsx_path = out_dir / f"{md_path.stem}.xlsx"
+        if example in XLSX_ONLY_EXAMPLES:
+            if docx_path.exists():
+                failures.append(f"{example}: Excel-origin format unexpectedly wrote DOCX")
+            if not xlsx_path.exists():
+                failures.append(f"{example}: XLSX was not written")
+                return failures
+            rendered_xlsx = read_xlsx_text(xlsx_path)
+            for needle in [
+                "BIM-Koordination JF-07",
+                "BIMcollab-Issue-Liste",
+                "FusionLive bleibt die verbindliche CDE",
+                "erledigt",
+            ]:
+                if needle not in rendered_xlsx:
+                    failures.append(f"{example}: rendered XLSX missing {needle!r}")
+            failures.extend(xlsx_template_checks(xlsx_path, example))
+            return failures
+
         if not docx_path.exists():
             failures.append(f"{example}: DOCX was not written")
             return failures
@@ -240,44 +256,78 @@ def render_example(example: str, required_text: list[str]) -> list[str]:
                 failures.append(f"{example}: rendered DOCX missing {needle!r}")
         failures.extend(qmg_template_checks(docx_path, example))
 
-        xlsx_path = out_dir / f"{md_path.stem}.xlsx"
-        if example in SIMPLE_XLSX_EXAMPLES:
-            if not xlsx_path.exists():
-                failures.append(f"{example}: simple XLSX was not written")
-                return failures
-            rendered_xlsx = read_xlsx_text(xlsx_path)
-            for needle in [
+        if xlsx_path.exists():
+            failures.append(f"{example}: unexpected XLSX was written for non-Excel format")
+    return failures
+
+
+def forced_excel_formats() -> list[str]:
+    failures: list[str] = []
+    cases = [
+        (
+            "references/examples/beispiel-ausgabe-einfach.md",
+            "protokoll-einfach-excel",
+            simple_xlsx_template_checks,
+            [
                 "Kick-Off Meeting Projekt VTS-549",
                 "Projektorganisation: EBA übernimmt die Gesamtkoordination.",
                 "22.04.26",
-            ]:
-                if needle not in rendered_xlsx:
-                    failures.append(f"{example}: rendered simple XLSX missing {needle!r}")
-            failures.extend(simple_xlsx_template_checks(xlsx_path, example))
-        elif example in TRACKING_XLSX_EXAMPLES:
+            ],
+        ),
+        (
+            "references/examples/beispiel-ausgabe-lp1-4.md",
+            "protokoll-lp1-4-excel",
+            xlsx_template_checks,
+            [
+                "Planungsbesprechung — BIM, Bauantrag, Wohnfassade",
+                "LP3-Modell (FusionLive-Upload)",
+                "DGNB-Workshop am 14.04.26",
+            ],
+        ),
+    ]
+    for example, forced_format, check_fn, required_text in cases:
+        src = REPO_ROOT / example
+        with tempfile.TemporaryDirectory(prefix="eba-render-forced-xlsx-") as tmp:
+            tmp_path = Path(tmp)
+            md_path = tmp_path / src.name
+            out_dir = tmp_path / "out"
+            shutil.copy2(src, md_path)
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(RENDERER),
+                    str(md_path),
+                    "--format",
+                    forced_format,
+                    "--out-dir",
+                    str(out_dir),
+                    "--no-pdf",
+                ],
+                cwd=str(REPO_ROOT),
+                text=True,
+                capture_output=True,
+                timeout=120,
+            )
+            if result.returncode != 0:
+                failures.append(
+                    f"{example} forced {forced_format}: renderer exited "
+                    f"{result.returncode}: {result.stderr.strip()}"
+                )
+                continue
+            docx_path = out_dir / f"{md_path.stem}.docx"
+            xlsx_path = out_dir / f"{md_path.stem}.xlsx"
+            if docx_path.exists():
+                failures.append(f"{example} forced {forced_format}: unexpected DOCX was written")
             if not xlsx_path.exists():
-                failures.append(f"{example}: tracking XLSX was not written")
-                return failures
+                failures.append(f"{example} forced {forced_format}: XLSX was not written")
+                continue
             rendered_xlsx = read_xlsx_text(xlsx_path)
-            for needle in {
-                "references/examples/beispiel-ausgabe-lp1-4.md": [
-                    "Planungsbesprechung — BIM, Bauantrag, Wohnfassade",
-                    "LP3-Modell (FusionLive-Upload)",
-                    "DGNB-Workshop am 14.04.26",
-                    "erledigt",
-                ],
-                "references/examples/beispiel-ausgabe-bim.md": [
-                    "BIM-Koordination JF-07",
-                    "BIMcollab-Issue-Liste",
-                    "FusionLive bleibt die verbindliche CDE",
-                    "erledigt",
-                ],
-            }[example]:
+            for needle in required_text:
                 if needle not in rendered_xlsx:
-                    failures.append(f"{example}: rendered XLSX missing {needle!r}")
-            failures.extend(xlsx_template_checks(xlsx_path, example))
-        elif xlsx_path.exists():
-            failures.append(f"{example}: unexpected XLSX was written for non-Excel format")
+                    failures.append(
+                        f"{example} forced {forced_format}: rendered XLSX missing {needle!r}"
+                    )
+            failures.extend(check_fn(xlsx_path, f"{example} forced {forced_format}"))
     return failures
 
 
@@ -352,6 +402,7 @@ def main() -> int:
     failures: list[str] = []
     for example, required_text in checks.items():
         failures.extend(render_example(example, required_text))
+    failures.extend(forced_excel_formats())
     failures.extend(unknown_format_rejected())
 
     if failures:

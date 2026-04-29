@@ -137,14 +137,14 @@ Schreibe die State-Datei neu mit:
 - `dk_schema`: aktualisiert mit ggf. neu hinzugekommenen Kategorien.
 - `letzte_mangelnummer` (nur LP5): aktualisiert.
 
-### 8. Ausgabe als DOCX + PDF (+ XLSX bei LP1-4/BIM) schreiben & Zusammenfassung
+### 8. Ausgabe formatgetreu schreiben & Zusammenfassung
 
-**Endformat**: DOCX + PDF, bei `protokoll-lp1-4`/`protokoll-bim` zusätzlich
-das offizielle QMG-XLSX. **Kein Markdown** im Projekt-Ordner. Die
-`protokoll-state.json` bleibt erhalten (persistente Projektzustand-Datei).
-Auf Windows 11 mit MS Word bootstrapt der Renderer fehlende Python-Pakete
-selbst und exportiert die PDF via Word. Keine technischen Setup-Fragen an den
-Nutzer.
+**Endformat**: Word-Ursprungsformate als DOCX + PDF; BIM/Excel-Ursprungsformate
+als offizielles QMG-XLSX. **Kein Markdown** im Projekt-Ordner. Die
+`protokoll-state.json` bleibt erhalten (persistente Projektzustand-Datei). Auf
+Windows 11 mit MS Word bootstrapt der Renderer fehlende Python-Pakete selbst
+und exportiert Word-Ursprungs-DOCX via Word zu PDF. Keine technischen
+Setup-Fragen an den Nutzer.
 
 Schritte:
 
@@ -163,13 +163,13 @@ Schritte:
 3. Wähle den `--format`-Wert aus dem bestehenden Projekt-State bzw. dem
    erkannten Protokolltyp, damit die passende QMG-Tracking-Vorlage genutzt wird.
 4. Schreibe die aktualisierte `protokolle/<projekt>/protokoll-state.json`.
-   Wenn der Renderer einen Windows-PDF-Fehler meldet, stderr lesen, denselben
-   Befehl nach der automatischen Selbstheilung erneut versuchen und erst danach
-   echte Blocker melden.
+   Wenn der Renderer bei einem Word-Ursprungsformat einen Windows-PDF-Fehler
+   meldet, stderr lesen, denselben Befehl nach der automatischen Selbstheilung
+   erneut versuchen und erst danach echte Blocker melden.
 
 Berichte dem Nutzer:
 
-- Pfade der erzeugten DOCX- und PDF-Dateien; bei LP1-4/BIM auch den XLSX-Pfad.
+- Pfade der erzeugten DOCX/PDF- oder XLSX-Datei.
 - Anzahl übernommener offener Punkte ohne Änderung.
 - Anzahl Ergänzungen zu Vorpunkten (mit kurzer Auflistung der LN-Referenzen).
 - Anzahl neu eröffneter Punkte.

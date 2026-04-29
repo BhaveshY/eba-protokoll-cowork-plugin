@@ -29,9 +29,11 @@ existiert, fortschreiben; sonst neu.
    - `categories/metadaten-konvention.md`
 4. Header, Teilnehmer, Unterlagen, Themen-Tabelle (D/K|B|LN), Termine, Anlagen,
    Aufstellvermerk.
-5. Ausgabe als **DOCX + PDF + offizielles XLSX** (kein Markdown im Projekt):
+5. Ausgabe im Originalformat der erkannten Vorlage (kein Markdown im Projekt):
+   reguläres LP1-4/PLB-PK als **DOCX + PDF**, BIM oder explizite Excel-Variante
+   als **XLSX**.
    `protokolle/<projekt>/<jjjj-mm-tt>_protokoll-<NN>_<thema>.docx`,
-   `…<thema>.pdf` und `…<thema>.xlsx`.
+   `…<thema>.pdf` oder `…<thema>.xlsx`.
    Pipeline: `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 6. State-Datei aktualisieren / anlegen: `protokolle/<projekt>/protokoll-state.json`.
 

@@ -5,10 +5,12 @@ Protokolle nach den EBA-Vorlagen `QMG-024-141` erzeugt:
 
 | Format | QMG-Index | Verwendung |
 |--------|-----------|------------|
-| **Gesprächsnotiz** | `ORG-GESPRAECHSNOTIZ` (Stand D, 02.02.23) | Kurze formlose Notiz, ≤ 3 Sprecher, ohne Tracking. |
-| **Protokoll-einfach** | `ORG-PK-LP1-4-MA` (Word, Stand A, 27.02.23) + `ORG-PK-LP1-4-EXCEL-MA` (Excel, Stand A, 20.09.24) | Kick-Off, Workshop, einmalige Abstimmung mit Frist-Spalte aber ohne D/K-Tracking. |
-| **Planungsprotokoll LP1-4** | `ORG-PK-EXCEL-MA` (Stand C, 26.09.24) + QMG-Tracking-Word-Shell | LP1-4 Tracking-Protokoll mit D/K\|B\|LN-Schema, Status, Fortschreibung. |
-| **Bauleitungsprotokoll LP5** | `ORG-PK-LP5-MA` (Stand B, 02.02.23) | LP5 Bauleitung mit baustellenspezifischen Kategorien, Mängeln, Bemusterungen. |
+| **Gesprächsnotiz** | `ORG-GESPRAECHSNOTIZ` (Word, Stand D, 02.02.23) | Kurze formlose Notiz, ≤ 3 Sprecher, ohne Tracking. Ausgabe: DOCX + PDF. |
+| **Protokoll-einfach** | `ORG-PK-LP1-4-MA` (Word, Stand A, 27.02.23) | Kick-Off, Workshop, einmalige Abstimmung mit Frist-Spalte aber ohne D/K-Tracking. Ausgabe: DOCX + PDF. |
+| **Planungsprotokoll LP1-4 / PLB-PK** | QMG-Tracking-Word-Shell nach realem `PLB-PK`-Aufbau | LP1-4 Tracking-Protokoll mit D/K\|B\|LN-Schema, Status, Fortschreibung. Ausgabe: DOCX + PDF. |
+| **BIM / Excel-Tracking** | `ORG-PK-EXCEL-MA` (Excel, Stand C, 26.09.24) | BIM-Jour-Fixe oder explizite Excel-Tracking-Protokolle. Ausgabe: XLSX. |
+| **LP1-4 Excel einfach** | `ORG-PK-LP1-4-EXCEL-MA` (Excel, Stand A, 20.09.24) | Explizite einfache Excel-Variante mit `Gesprächsinhalt / zuständig / Frist`. Ausgabe: XLSX. |
+| **Bauleitungsprotokoll LP5** | `ORG-PK-LP5-MA` (Word, Stand B, 02.02.23) | LP5 Bauleitung mit baustellenspezifischen Kategorien, Mängeln, Bemusterungen. Ausgabe: DOCX + PDF. |
 
 Das Plugin kennt die **Fortschreibung** über mehrere Besprechungen (offene Punkte werden
 übernommen, neue Bemerkungen mit `LN = NNE` und `#NN:`-Versionsmarker als Ergänzung
@@ -52,22 +54,19 @@ landet in `transkripte/<datum>_<thema>.txt`. Dann:
 /protokoll transkripte/2026-04-22_pk-12.txt
 ```
 
-Das Plugin erkennt automatisch den passenden Format-Typ (Gesprächsnotiz / LP1-4 / LP5),
-zeigt die Erkennung transparent an, und schreibt das fertige Protokoll als
-**DOCX + PDF** nach
-`protokolle/<projekt>/<datum>_protokoll-NN_<thema>.docx` (und `.pdf`).
-Bei Protokoll-einfach und LP1-4/BIM-Tracking entsteht zusätzlich die passende
-offizielle QMG-Excel-Datei `…<thema>.xlsx`.
+Das Plugin erkennt automatisch den passenden Format-Typ (Gesprächsnotiz /
+Protokoll-einfach / LP1-4 / BIM / LP5), zeigt die Erkennung transparent an und
+schreibt das fertige Protokoll im Format der jeweiligen Originalvorlage: Word-
+Vorlagen als **DOCX + PDF**, Excel-Vorlagen als **XLSX**.
 Markdown wird **nicht** ins Projekt geschrieben — es ist nur ein flüchtiges
 Zwischenformat. Auf **Windows 11 mit MS Word** erzeugt der Renderer die PDF
 automatisch über Word und richtet fehlende Python-Pakete selbst ein.
 Die DOCX-Ausgabe befüllt die vorhandenen QMG-Word-Templates:
-Gesprächsnotiz, Protokoll-einfach und den QMG-Tracking-Word-Shell für LP1-4/BIM
-und LP5. Die einfache XLSX-Ausgabe befüllt
-`QMG-024-141_ORG-PK-LP1-4-EXCEL-MA_240920-A.xlsx`; die Tracking-XLSX-Ausgabe
-für LP1-4/BIM befüllt `QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx` mit den
-Sheets `Deckblatt`, `Protokoll` und `Doku_Info`. Dadurch bleiben EBA-CI,
-Header, Footer, Seitenzahlen und Excel-Struktur erhalten.
+Gesprächsnotiz, Protokoll-einfach, LP1-4/PLB-PK und LP5. Die Excel-Ausgabe
+befüllt die passenden Original-XLSX-Vorlagen
+`QMG-024-141_ORG-PK-LP1-4-EXCEL-MA_240920-A.xlsx` oder
+`QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx`. Dadurch bleiben EBA-CI, Header,
+Footer, Seitenzahlen und Excel-Struktur erhalten.
 
 Rohe Transkripte dürfen unvollständig sein. Wenn Projekt-Nr., Projektname, Ort
 oder Ersteller fehlen, erzeugt das Plugin trotzdem das passende Protokoll,
@@ -138,7 +137,7 @@ plugins/eba-protokoll-cowork/
 │   ├── categories/                # D/K-Schemata, Kürzel, Status, Stil, Ausgabe-/Metadaten-Konvention
 │   └── examples/                  # Beispiel-Transkripte und -Protokolle
 ├── scripts/
-│   ├── render_protokoll.py        # MD → DOCX + PDF (+ XLSX für einfach/LP1-4/BIM)
+│   ├── render_protokoll.py        # MD → DOCX+PDF oder XLSX passend zur Vorlage
 │   ├── protokoll-state.md         # State-File-Schema-Dokumentation
 │   └── validate-references.mjs    # Statische Plugin-Validierung
 └── README.md
@@ -152,12 +151,11 @@ plugins/eba-protokoll-cowork/
 │   └── 2026-04-22_pk-12.txt
 └── protokolle/                    # vom Plugin erzeugte Protokolle
     └── 553-WIL/                   # je Projekt ein Ordner
-        ├── 2026-03-24_protokoll-12_planungsbespr.docx   # immer
-        ├── 2026-03-24_protokoll-12_planungsbespr.pdf    # wenn Konverter vorhanden
-        ├── 2026-03-24_protokoll-12_planungsbespr.xlsx   # Protokoll-einfach/LP1-4/BIM
+        ├── 2026-03-24_protokoll-12_planungsbespr.docx   # Word-Vorlage
+        ├── 2026-03-24_protokoll-12_planungsbespr.pdf
+        ├── 2026-03-31_bim-pk-jf-07.xlsx                 # Excel-Vorlage
         ├── 2026-04-22_protokoll-13_planungsbespr.docx
         ├── 2026-04-22_protokoll-13_planungsbespr.pdf
-        ├── 2026-04-22_protokoll-13_planungsbespr.xlsx
         └── protokoll-state.json   # Gedächtnis zwischen Sitzungen
 ```
 
@@ -205,17 +203,17 @@ echo '{"schema_version":1,"projekt":{"nr":"553","name":"WIL"}}' \
 
 Das Plugin füllt das State-File mit dem ersten Protokoll vollständig auf.
 
-## Endformat-Pipeline (DOCX + PDF + QMG-XLSX)
+## Endformat-Pipeline (DOCX/PDF oder QMG-XLSX)
 
 Alle Skills delegieren das Rendering an
 `scripts/render_protokoll.py`. Der Renderer:
 
 1. Liest das vom Skill erzeugte Markdown-Zwischenformat aus `/tmp/`.
-2. Schreibt ein EBA-konformes DOCX aus den QMG-Word-Templates nach
+2. Schreibt bei Word-Ursprungsvorlagen ein EBA-konformes DOCX nach
    `protokolle/<projekt>/`.
-3. Schreibt bei `protokoll-einfach`, `protokoll-lp1-4` und `protokoll-bim`
-   zusätzlich ein XLSX aus der passenden offiziellen QMG-Excel-Vorlage.
-4. Konvertiert die DOCX zu PDF — Reihenfolge der versuchten Konverter:
+3. Schreibt bei Excel-Ursprungsvorlagen ein XLSX aus der passenden offiziellen
+   QMG-Excel-Vorlage.
+4. Konvertiert Word-Ursprungs-DOCX zu PDF — Reihenfolge der versuchten Konverter:
    1. **MS Word COM** (Windows 11, `pywin32` wird automatisch installiert)
    2. **LibreOffice headless** (Win/Mac/Linux)
    3. **macOS Pages** (nur als macOS-Dev-Fallback)
@@ -228,22 +226,22 @@ Die volle Konvention steht in
 Lauf selbst, ob `python-docx`, `openpyxl` und `pywin32` verfügbar sind, installiert fehlende
 Pakete im Benutzerkontext und nutzt danach MS Word für die PDF-Erzeugung.
 Claude Code soll technische Setup-Details intern lösen und den Nutzer erst mit
-den fertigen `.docx`-, `.pdf`- und ggf. `.xlsx`-Pfaden konfrontieren.
+den fertigen `.docx`/`.pdf`- oder `.xlsx`-Pfaden konfrontieren.
 
-Wenn auf Windows keine PDF entsteht, gilt das Protokoll als nicht fertig. Der
-Renderer gibt einen Fehler zurück, damit Claude Code nachbessert statt nur ein
-DOCX abzuliefern.
+Wenn bei einem Word-Ursprungsformat auf Windows keine PDF entsteht, gilt das
+Protokoll als nicht fertig. Der Renderer gibt einen Fehler zurück, damit Claude
+Code nachbessert statt nur ein DOCX abzuliefern.
 
 ## Entwicklungsstand
 
-Version 0.2.6 — DOCX + PDF Output, QMG-XLSX für Protokoll-einfach und
-Tracking-XLSX für LP1-4/BIM,
+Version 0.2.7 — formatgetreue Ausgabe: Word-Vorlagen als DOCX + PDF,
+Excel-Vorlagen als XLSX,
 Windows-11-First mit automatischem
 Dependency-Bootstrap, Metadaten-Fallbacks für rohe Transkripte und
 QMG-Template-Füllung. Deckt die Standardvorlagen QMG-024-141 ab
-(Gesprächsnotiz, Protokoll-einfach Word + Excel LP1-4 Stand A,
-Planungsprotokoll LP1-4/BIM mit D/K|B|LN-Tracking, Bauleitungsprotokoll LP5
-Stand B). Geplant:
+(Gesprächsnotiz, Protokoll-einfach Word LP1-4 Stand A, LP1-4/PLB-PK,
+BIM/Excel-Tracking, LP1-4-Excel einfach, Bauleitungsprotokoll LP5 Stand B).
+Geplant:
 
 - Sondervorlage für DGNB-Workshops.
 - Visualisierung des State-Files (offene Punkte, Termine, Mängelliste) als

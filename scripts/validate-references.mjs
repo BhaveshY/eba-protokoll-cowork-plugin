@@ -168,11 +168,11 @@ expect(
   "EBA interview example keeps fachliche Klärung inside Gesprächsinhalt rows",
 );
 
-// ─── DOCX/PDF output pipeline (v0.2) ─────────────────────────────────────
+// ─── Template-faithful output pipeline ───────────────────────────────────
 //
-// All five protocol skills must instruct Claude to produce DOCX/PDF, not
-// Markdown. A central reference describes the pipeline; every format skill
-// must cite it.
+// Protocol skills must instruct Claude to produce the original QMG source
+// format, not Markdown. A central reference describes the pipeline; every
+// format skill must cite it.
 
 expectFile("scripts/render_protokoll.py");
 expectFile("references/categories/ausgabe-konvention.md");
@@ -238,10 +238,11 @@ expect(
     renderer.includes("def _render_protokoll_einfach_template") &&
     renderer.includes("def _render_simple_excel_template") &&
     renderer.includes("def _render_tracking_template") &&
+    renderer.includes("def _is_xlsx_only_format") &&
     renderer.includes("def render_to_xlsx") &&
     renderer.includes("Refusing to render without a supported QMG template") &&
     renderer.includes("page numbering and EBA-CI are preserved"),
-  "renderer fills the official QMG Word and Excel templates and rejects generic output",
+  "renderer fills the official QMG Word and Excel templates, keeps Excel formats XLSX-only, and rejects generic output",
 );
 
 for (const skillRel of [
@@ -279,11 +280,11 @@ for (const skillRel of [
 }
 
 const pluginManifest = JSON.parse(read(".claude-plugin/plugin.json"));
-expect(pluginManifest.version === "0.2.6", "plugin.json bumped to 0.2.6");
+expect(pluginManifest.version === "0.2.7", "plugin.json bumped to 0.2.7");
 const market = JSON.parse(read(".claude-plugin/marketplace.json"));
 expect(
-  market.plugins[0].version === "0.2.6",
-  "marketplace.json plugin entry bumped to 0.2.6",
+  market.plugins[0].version === "0.2.7",
+  "marketplace.json plugin entry bumped to 0.2.7",
 );
 
 // Dispatcher smoke test — verify each example transcript would route to the

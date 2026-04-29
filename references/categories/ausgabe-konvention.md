@@ -1,9 +1,9 @@
-# Ausgabe-Konvention: DOCX + PDF + QMG-XLSX (kein Markdown)
+# Ausgabe-Konvention: DOCX/PDF oder QMG-XLSX (kein Markdown)
 
-Alle Protokoll-Skills schreiben als Endformat **DOCX + PDF**. Für
-`protokoll-einfach`, `protokoll-lp1-4` und `protokoll-bim` schreibt der Renderer
-zusätzlich das passende offizielle **QMG-XLSX**. Markdown ist nur ein
-**flüchtiges Zwischenformat** und wird nach dem Rendern gelöscht.
+Alle Protokoll-Skills schreiben das Endformat der jeweiligen Originalvorlage:
+Word-Ursprungsvorlagen als **DOCX + PDF**, Excel-Ursprungsvorlagen als
+offizielles **QMG-XLSX**. Markdown ist nur ein **flüchtiges Zwischenformat** und
+wird nach dem Rendern gelöscht.
 
 Die Produktionsumgebung ist **Windows 11 mit installiertem Microsoft Word**.
 Der Nutzer ist nicht technisch. Die Skill darf den Nutzer deshalb **nicht**
@@ -22,9 +22,9 @@ Die Ausgaben landen relativ zum aktuellen Arbeitsverzeichnis:
 ```
 protokolle/
 └── <projekt>/                 # z.B. 553-WIL/
-    ├── 2026-03-24_planungsbesprechung-12.docx   # immer
-    ├── 2026-03-24_planungsbesprechung-12.xlsx   # einfach/LP1-4/BIM
-    └── 2026-03-24_planungsbesprechung-12.pdf    # wenn Konverter vorhanden
+    ├── 2026-03-24_planungsbesprechung-12.docx   # Word-Vorlage
+    ├── 2026-03-24_planungsbesprechung-12.pdf
+    └── 2026-03-31_bim-pk-jf-07.xlsx             # Excel-Vorlage
 ```
 
 `<projekt>` ist optional. Wenn der Nutzer keinen Projektordner nennt, lege
@@ -86,7 +86,8 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
 Wichtige Flags:
 
 - `--no-pdf` — DOCX-only, PDF-Schritt überspringen.
-- `--no-xlsx` — nur für Debugging: QMG-XLSX überspringen.
+- `--no-xlsx` — nur für Debugging. Bei Excel-Ursprungsvorlagen bleibt dann kein
+  Enddokument übrig und der Renderer bricht ab.
 - `--keep-md` — nur für Debugging: behält das MD-Zwischenformat.
 - `--out-dir <pfad>` — Zielverzeichnis (Default: neben dem MD).
 - `--format <name>` — überschreibt die Auto-Erkennung
@@ -95,7 +96,7 @@ Wichtige Flags:
 
 ### 3. Ausgabe an den Nutzer
 
-Der Renderer gibt die finalen Pfade auf stdout aus, z.B.:
+Der Renderer gibt die finalen Pfade auf stdout aus, z.B. Word-Ursprung:
 
 ```
 DOCX: protokolle/553-WIL/2026-03-24_planungsbesprechung-12.docx
@@ -104,10 +105,18 @@ PDF:  protokolle/553-WIL/2026-03-24_planungsbesprechung-12.pdf
 Format: protokoll-lp1-4
 ```
 
-Falls die PDF-Zeile lautet `(skipped — no converter found ...)`, hat das
-System keinen PDF-Konverter. Auf Windows ist das ein Fehlerzustand, den Claude
-Code intern beheben soll (Renderer erneut ausführen, Word/COM-Fehler prüfen),
-nicht eine Aufgabe für den Nutzer.
+Oder Excel-Ursprung:
+
+```
+XLSX: protokolle/553-WIL/2026-03-31_bim-pk-jf-07.xlsx
+Format: protokoll-bim
+```
+
+Falls bei einem Word-Ursprungsformat die PDF-Zeile lautet
+`(skipped — no converter found ...)`, hat das System keinen PDF-Konverter. Auf
+Windows ist das ein Fehlerzustand, den Claude Code intern beheben soll
+(Renderer erneut ausführen, Word/COM-Fehler prüfen), nicht eine Aufgabe für den
+Nutzer.
 
 ## PDF-Konverter pro Plattform
 
@@ -140,11 +149,11 @@ und PDF vorhanden sind oder ein echter Blocker vorliegt.
   `QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx`,
   `QMG-024-141_ORG-PK-LP1-4-MA_230227-A.docx` und dem
   QMG-Tracking-Word-Shell `QMG-024-141_ORG-PK-LP5-MA_230202-B.docx`.
-- Protokoll-einfach-XLSX-Ausgaben werden direkt aus
+- Explizite einfache Excel-Ausgaben werden direkt aus
   `QMG-024-141_ORG-PK-LP1-4-EXCEL-MA_240920-A.xlsx` erzeugt. Dieses Workbook
   hat die einfache `Gesprächsinhalt` / `zuständig` / `Frist`-Struktur und kein
   D/K|B|LN-Tracking.
-- LP1-4/BIM-XLSX-Ausgaben werden direkt aus
+- BIM- und explizite Tracking-Excel-Ausgaben werden direkt aus
   `QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx` erzeugt. Die Sheets
   `Deckblatt`, `Protokoll`, `Doku_Info`, `Hilfe und Tipps` und `intern`
   bleiben erhalten; befüllt werden nur die fachlichen Bereiche.
@@ -170,9 +179,8 @@ nächsten Lauf.
   `protokolle/`-Ordner.
 - ❌ DOCX im aktuellen Verzeichnis oder auf dem Desktop ablegen — immer in
   `protokolle/<projekt>/`.
-- ❌ Bei Protokoll-einfach oder LP1-4/BIM nur DOCX + PDF liefern — das
-  offizielle XLSX gehört dazu, außer der Nutzer verlangt ausdrücklich kein
-  Excel.
+- ❌ Word-Vorlagen zusätzlich als XLSX ausgeben oder Excel-Vorlagen zusätzlich
+  als DOCX/PDF ausgeben — das Originalformat der QMG-Vorlage entscheidet.
 - ❌ Den Nutzer bitten, `pip install`, `pywin32`, LibreOffice oder andere
   technische Setup-Schritte auszuführen — der Renderer bootstrapt selbst.
 - ❌ Auf Windows mit nur DOCX antworten, wenn PDF fehlt — Word-PDF ist dort

@@ -1,7 +1,7 @@
 {
   "name": "eba-protokoll-cowork",
-  "version": "0.2.6",
-  "description": "Erzeugt EBA-konforme Protokolle als DOCX + PDF, plus offizielles QMG-XLSX für Protokoll-einfach und LP1-4/BIM-Tracking, aus rohen Transkripten der EBA Protokoll App. Die DOCX-Ausgabe nutzt QMG-Word-Templates; Excel-Ausgaben befüllen die passenden QMG-XLSX-Vorlagen. Windows-11-first: fehlende Metadaten werden per Fallback gefüllt, PDF via MS Word, Python-Abhängigkeiten werden automatisch gebootstrapt.",
+  "version": "0.2.7",
+  "description": "Erzeugt EBA-konforme Protokolle aus rohen Transkripten der EBA Protokoll App im Originalformat der QMG-Vorlage: Word-Vorlagen als DOCX + PDF, Excel-Vorlagen als XLSX. Die Ausgabe nutzt die passenden QMG-Word- oder QMG-XLSX-Templates. Windows-11-first: fehlende Metadaten werden per Fallback gefüllt, PDF via MS Word, Python-Abhängigkeiten werden automatisch gebootstrapt.",
   "author": {
     "name": "Eike Becker_Architekten",
     "email": "BhaveshYeole@eb-a.de"

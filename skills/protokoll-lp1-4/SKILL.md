@@ -159,13 +159,13 @@ auflisten. Sonst weglassen oder als „keine" vermerken.
 - **Geprüft durch / Prüfdatum**: leer lassen — wird später von der prüfenden Person
   ausgefüllt.
 
-### 10. Ausgabe als DOCX + PDF + XLSX schreiben & State aktualisieren
+### 10. Ausgabe formatgetreu schreiben & State aktualisieren
 
-**Endformat**: DOCX + PDF + offizielles QMG-XLSX. **Kein Markdown** im
-Projekt-Ordner.
-Auf Windows 11 mit MS Word bootstrapt der Renderer fehlende Python-Pakete
-selbst und exportiert die PDF via Word. Keine technischen Setup-Fragen an den
-Nutzer.
+**Endformat**: reguläres LP1-4/PLB-PK als DOCX + PDF; BIM-Koordination oder
+explizite Excel-Variante als offizielles QMG-XLSX. **Kein Markdown** im
+Projekt-Ordner. Auf Windows 11 mit MS Word bootstrapt der Renderer fehlende
+Python-Pakete selbst und exportiert Word-Ursprungs-DOCX via Word zu PDF. Keine
+technischen Setup-Fragen an den Nutzer.
 
 Schritte:
 
@@ -183,17 +183,15 @@ Schritte:
      --out-dir "protokolle/<projekt>/"
    ```
 
-   Für BIM-Koordinationen `--format protokoll-bim` verwenden.
+   Für BIM-Koordinationen `--format protokoll-bim` verwenden; das ist ein
+   Excel-Ursprungsformat und schreibt nur `.xlsx`.
 
 3. Der Renderer schreibt
-   `protokolle/<projekt>/eba-protokoll-lp1-4-<datum>-<projekt>.docx`,
-   die zugehörige `.pdf` und das offizielle `.xlsx`, und löscht das
-   MD-Zwischenformat. Das Format wird vom
-   Renderer als `protokoll-lp1-4` bzw. bei BIM-Ankern als `protokoll-bim`
-   erkannt. Wenn der Renderer einen
-   Windows-PDF-Fehler meldet, stderr lesen, denselben Befehl nach der
-   automatischen Selbstheilung erneut versuchen und erst danach echte Blocker
-   melden.
+   bei `protokoll-lp1-4` die `.docx` und `.pdf`, bei `protokoll-bim` die
+   `.xlsx`, und löscht das MD-Zwischenformat. Wenn der Renderer für ein
+   Word-Ursprungsformat einen Windows-PDF-Fehler meldet, stderr lesen,
+   denselben Befehl nach der automatischen Selbstheilung erneut versuchen und
+   erst danach echte Blocker melden.
 
 Wenn kein Projektordner ableitbar ist, `protokolle/000-RAW/` verwenden.
 
@@ -219,7 +217,7 @@ Aktualisiere die State-Datei `protokolle/<projekt>/protokoll-state.json` (siehe
 
 ### 11. Zusammenfassung an den Nutzer
 
-- Pfad zur erzeugten Datei.
+- Pfade zur erzeugten DOCX/PDF- oder XLSX-Datei.
 - Pfad zur State-Datei (für Folgeprotokolle).
 - Anzahl Teilnehmer / D/K-Kategorien / Themen / offene vs. erledigte Punkte.
 - Annahmen/Fallbacks knapp nennen, z.B. `Projekt-Nr. 000, Ort nicht angegeben`.
