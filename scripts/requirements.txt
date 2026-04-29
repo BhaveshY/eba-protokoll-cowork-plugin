@@ -1,11 +1,13 @@
 # Python dependencies for the EBA Protokoll Cowork plugin.
-# Install once per environment with:
-#   pip install -r scripts/requirements.txt
+#
+# End users do not install this manually. scripts/render_protokoll.py reads this
+# file and bootstraps the packages in the current user environment when needed.
+# Keep this list small so first-run setup remains fast in Claude Code.
 
 # Required — DOCX generation:
 python-docx>=1.0.0
 
-# Optional — Windows-only, enables MS Word COM PDF conversion (preferred on
-# Windows when MS Word is installed). Without this AND without LibreOffice,
-# the PDF step is skipped and only the DOCX is produced.
+# Windows-only — enables MS Word COM PDF conversion. On Windows 11 with MS Word
+# installed, the renderer treats PDF as a required deliverable and auto-installs
+# this package if it is missing.
 pywin32>=306; platform_system == "Windows"

@@ -141,8 +141,12 @@ dem `E`-Suffix als Ergänzung markiert.
 
 ### 6. Ausgabe ablegen
 
-**Endformat: DOCX (immer) und PDF (wenn ein Konverter — Windows: LibreOffice
-oder MS Word — verfügbar ist). Kein Markdown im Projekt-Ordner.**
+**Endformat: DOCX + PDF. Kein Markdown im Projekt-Ordner.**
+
+Produktionsannahme: Windows 11 mit installiertem MS Word. Der Renderer
+installiert fehlende Python-Pakete (`python-docx`, auf Windows `pywin32`)
+automatisch im Benutzerkontext und nutzt Word für den PDF-Export. Stelle dem
+Nutzer keine technischen Setup-Fragen.
 
 Default-Speicherort:
 `protokolle/<jjjj-mm-tt>_<projekt>_<typ>.docx` (+ `.pdf`) relativ zum aktuellen

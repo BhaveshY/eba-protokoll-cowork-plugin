@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Smoke-test the DOCX renderer against repository examples.
 
-Install dependencies first:
+Developer test dependencies:
     python3 -m pip install -r scripts/requirements.txt
 
 This test intentionally uses --no-pdf so it is independent of Word,
 LibreOffice, or Pages. PDF conversion is environment-dependent; DOCX content
-preservation is the renderer contract this script locks down.
+preservation is the renderer contract this script locks down. End users do not
+run this; render_protokoll.py bootstraps its own dependencies.
 """
 
 from __future__ import annotations

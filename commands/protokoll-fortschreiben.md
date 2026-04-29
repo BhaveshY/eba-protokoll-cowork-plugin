@@ -28,6 +28,8 @@ Arbeitsverzeichnis).
    `--neu` zu verwenden.
 5. Themen zusammenführen (Übernahme + Ergänzung + neu).
 6. Ausgabe als **DOCX + PDF** schreiben (kein Markdown im Projekt), State aktualisieren.
+   Auf Windows 11 mit MS Word richtet der Renderer fehlende Python-Pakete selbst
+   ein und PDF ist Pflicht, sofern der Nutzer nicht ausdrücklich DOCX-only verlangt.
    Pipeline: `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 ## Verwendung
@@ -39,6 +41,6 @@ Arbeitsverzeichnis).
 
 ## Output
 
-- Pfade zu DOCX (und PDF, wenn erzeugt).
+- Pfade zu DOCX und PDF.
 - Aktualisierter State (`protokoll-state.json`).
 - Übersicht: übernommen / ergänzt / neu / erledigt / überfällig.

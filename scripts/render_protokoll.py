@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Render an EBA protokoll Markdown file as DOCX (and optionally PDF).
+"""Render an EBA protokoll Markdown file as DOCX + PDF.
 
 Used by all five format skills. The Markdown is treated as an in-memory
 intermediate and is NOT preserved in the user-facing output. The deliverables
-are the .docx (always) and .pdf (when a converter is available).
+are the .docx (always) and .pdf.
 
-Usage:
-    python3 render_protokoll.py <markdown_path> [--format <fmt>] [--no-pdf]
+Windows 11 + MS Word is the primary production path. The script self-bootstraps
+its Python dependencies in the current user environment, then exports PDF with
+MS Word COM via pywin32. LibreOffice and macOS Pages are fallback converters.
 
 The script auto-detects the format from the Markdown header if --format is not
 given:
@@ -16,15 +17,16 @@ given:
 
 Output files are written next to <markdown_path>:
     <basename>.docx
-    <basename>.pdf  (if Pages or LibreOffice is available)
+    <basename>.pdf
 
 The Markdown intermediate at <markdown_path> is removed on success unless
 --keep-md is passed.
 
 Exit codes:
-    0 success (DOCX written; PDF best-effort)
+    0 success (DOCX written; PDF written or explicitly optional)
     2 markdown could not be parsed
     3 docx generation failed
+    4 PDF generation failed on Windows
 """
 
 from __future__ import annotations
@@ -38,6 +40,63 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
+
+def _in_virtualenv() -> bool:
+    return sys.prefix != getattr(sys, "base_prefix", sys.prefix)
+
+
+def _run_pip_install(args: list[str]) -> bool:
+    cmd = [sys.executable, "-m", "pip", "install", "--disable-pip-version-check"]
+    if not _in_virtualenv():
+        cmd.append("--user")
+    cmd.extend(args)
+    try:
+        result = subprocess.run(
+            cmd,
+            text=True,
+            capture_output=True,
+            timeout=300,
+        )
+        if result.returncode == 0:
+            return True
+        sys.stderr.write(result.stderr.strip() + "\n")
+    except Exception as exc:
+        sys.stderr.write(f"Dependency bootstrap failed: {exc}\n")
+    return False
+
+
+def _ensure_pip() -> None:
+    check = subprocess.run(
+        [sys.executable, "-m", "pip", "--version"],
+        text=True,
+        capture_output=True,
+    )
+    if check.returncode == 0:
+        return
+    subprocess.run([sys.executable, "-m", "ensurepip", "--upgrade"], check=False)
+
+
+def _bootstrap_requirements() -> bool:
+    """Install renderer dependencies without user interaction.
+
+    This is intentionally quiet and user-local. The Claude Code user should not
+    need to know what python-docx or pywin32 are.
+    """
+    requirements = Path(__file__).resolve().parent / "requirements.txt"
+    if not requirements.exists():
+        sys.stderr.write(f"Missing requirements file: {requirements}\n")
+        return False
+    _ensure_pip()
+    sys.stderr.write("Renderer dependency bootstrap: installing required packages...\n")
+    return _run_pip_install(["--upgrade", "-r", str(requirements)])
+
+
+def _bootstrap_package(package: str) -> bool:
+    _ensure_pip()
+    sys.stderr.write(f"Renderer dependency bootstrap: installing {package}...\n")
+    return _run_pip_install(["--upgrade", package])
+
+
 try:
     from docx import Document
     from docx.shared import Pt, Cm, RGBColor, Mm
@@ -47,11 +106,25 @@ try:
     from docx.oxml.ns import qn
     from docx.oxml import OxmlElement
 except ImportError:
-    sys.stderr.write(
-        "render_protokoll.py: missing dependency 'python-docx'.\n"
-        "Install with:  pip install python-docx\n"
-    )
-    sys.exit(3)
+    if not _bootstrap_requirements():
+        sys.stderr.write(
+            "render_protokoll.py: could not install required DOCX dependencies.\n"
+        )
+        sys.exit(3)
+    try:
+        from docx import Document
+        from docx.shared import Pt, Cm, RGBColor, Mm
+        from docx.enum.table import WD_ALIGN_VERTICAL, WD_ROW_HEIGHT_RULE
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from docx.enum.section import WD_ORIENTATION
+        from docx.oxml.ns import qn
+        from docx.oxml import OxmlElement
+    except ImportError as exc:
+        sys.stderr.write(
+            "render_protokoll.py: DOCX dependencies are still unavailable after "
+            f"bootstrap: {exc}\n"
+        )
+        sys.exit(3)
 
 
 # EBA brand colors lifted from the QMG-024-141 templates' "intern" page:
@@ -511,20 +584,28 @@ def render_to_pdf(docx_path: Path, pdf_path: Path) -> bool:
       3. **macOS Pages** via AppleScript — fallback for macOS development.
 
     All three are graceful: if the converter isn't available, fall through
-    to the next. If none are available, the function returns False and the
-    caller proceeds with a DOCX-only deliverable.
+    to the next. On Windows, pywin32 is installed automatically if it is
+    missing and MS Word is available.
     """
     # 1. Word COM on Windows
     if sys.platform == "win32":
         try:
-            import win32com.client  # type: ignore[import-not-found]
+            try:
+                import win32com.client  # type: ignore[import-not-found]
+            except ImportError:
+                if not _bootstrap_package("pywin32>=306"):
+                    raise
+                import win32com.client  # type: ignore[import-not-found]
 
             word = win32com.client.Dispatch("Word.Application")
             word.Visible = False
             try:
                 doc = word.Documents.Open(str(docx_path))
-                # 17 == wdFormatPDF
-                doc.SaveAs(str(pdf_path), FileFormat=17)
+                # 17 == wdExportFormatPDF / wdFormatPDF.
+                try:
+                    doc.ExportAsFixedFormat(str(pdf_path), ExportFormat=17)
+                except Exception:
+                    doc.SaveAs(str(pdf_path), FileFormat=17)
                 doc.Close(SaveChanges=False)
             finally:
                 word.Quit()
@@ -606,6 +687,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("md_path", type=Path, help="Markdown file to render")
     ap.add_argument("--format", default=None, help="Force format (overrides auto-detect)")
     ap.add_argument("--no-pdf", action="store_true", help="Skip PDF rendering")
+    ap.add_argument(
+        "--pdf-optional",
+        action="store_true",
+        help="Do not fail if PDF conversion is unavailable on Windows",
+    )
     ap.add_argument("--keep-md", action="store_true", help="Don't delete the MD intermediate")
     ap.add_argument(
         "--out-dir",
@@ -639,6 +725,16 @@ def main(argv: list[str] | None = None) -> int:
     if not args.no_pdf:
         pdf_ok = render_to_pdf(docx_path, pdf_path)
 
+    pdf_required = sys.platform == "win32" and not args.no_pdf and not args.pdf_optional
+    if pdf_required and not pdf_ok:
+        sys.stderr.write(
+            "PDF render failed on Windows. The renderer already attempted "
+            "user-local dependency bootstrap for pywin32 and MS Word COM export. "
+            "Ensure Microsoft Word can open normally in this Windows user account, "
+            "then rerun the same command.\n"
+        )
+        return 4
+
     if not args.keep_md:
         try:
             md_path.unlink()
@@ -650,9 +746,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"PDF:  {pdf_path}")
     elif not args.no_pdf:
         print(
-            "PDF:  (skipped — no converter available. On Windows install "
-            "LibreOffice from https://www.libreoffice.org/ or have MS Word "
-            "+ pywin32 installed.)"
+            "PDF:  (skipped — no converter available in this environment. "
+            "On Windows this would be a hard failure unless --pdf-optional "
+            "is used.)"
         )
     print(f"Format: {parsed.detected_format}")
     return 0

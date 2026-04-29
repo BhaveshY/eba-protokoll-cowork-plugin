@@ -153,8 +153,10 @@ auflisten. Sonst weglassen oder als „keine" vermerken.
 
 ### 10. Ausgabe als DOCX + PDF schreiben & State aktualisieren
 
-**Endformat**: DOCX (immer) und PDF (wenn ein Konverter verfügbar ist —
-Windows: LibreOffice oder MS Word). **Kein Markdown** im Projekt-Ordner.
+**Endformat**: DOCX + PDF. **Kein Markdown** im Projekt-Ordner.
+Auf Windows 11 mit MS Word bootstrapt der Renderer fehlende Python-Pakete
+selbst und exportiert die PDF via Word. Keine technischen Setup-Fragen an den
+Nutzer.
 
 Schritte:
 
@@ -174,7 +176,10 @@ Schritte:
 3. Der Renderer schreibt
    `protokolle/<projekt>/eba-protokoll-lp1-4-<datum>-<projekt>.docx` und
    die zugehörige PDF, und löscht das MD-Zwischenformat. Das Format wird vom
-   Renderer als `protokoll-tracking` erkannt.
+   Renderer als `protokoll-tracking` erkannt. Wenn der Renderer einen
+   Windows-PDF-Fehler meldet, stderr lesen, denselben Befehl nach der
+   automatischen Selbstheilung erneut versuchen und erst danach echte Blocker
+   melden.
 
 **EBA-Dateinamen-Konvention** (wenn der Nutzer das wünscht oder im
 Projekt etabliert ist): siehe

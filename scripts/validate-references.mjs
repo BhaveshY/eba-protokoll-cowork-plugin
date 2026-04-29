@@ -147,6 +147,23 @@ expect(
   ausgabeKonvention.includes("LibreOffice") && ausgabeKonvention.includes("MS Word"),
   "ausgabe-konvention documents Windows PDF converter options",
 );
+expect(
+  ausgabeKonvention.includes("Selbstheilende Umgebung") &&
+    ausgabeKonvention.includes("keinen separaten Setup-Schritt"),
+  "ausgabe-konvention documents self-healing setup for nontechnical users",
+);
+
+const renderer = read("scripts/render_protokoll.py");
+expect(
+  renderer.includes("def _bootstrap_requirements()") &&
+    renderer.includes("python-docx or pywin32") &&
+    renderer.includes("_bootstrap_package(\"pywin32>=306\")"),
+  "renderer bootstraps python-docx and pywin32 automatically",
+);
+expect(
+  renderer.includes("pdf_required = sys.platform == \"win32\""),
+  "renderer treats PDF as required on Windows",
+);
 
 for (const skillRel of [
   "skills/gespraechsnotiz/SKILL.md",
@@ -171,11 +188,11 @@ for (const skillRel of [
 }
 
 const pluginManifest = JSON.parse(read(".claude-plugin/plugin.json"));
-expect(pluginManifest.version === "0.2.0", "plugin.json bumped to 0.2.0");
+expect(pluginManifest.version === "0.2.1", "plugin.json bumped to 0.2.1");
 const market = JSON.parse(read(".claude-plugin/marketplace.json"));
 expect(
-  market.plugins[0].version === "0.2.0",
-  "marketplace.json plugin entry bumped to 0.2.0",
+  market.plugins[0].version === "0.2.1",
+  "marketplace.json plugin entry bumped to 0.2.1",
 );
 
 // Dispatcher smoke test — verify each example transcript would route to the

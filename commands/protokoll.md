@@ -30,15 +30,15 @@ Das ist entweder:
 
 3. Speicherort default:
    `protokolle/<jjjj-mm-tt>_<projekt>_<typ>.docx` (+ `.pdf`) relativ zum
-   aktuellen Arbeitsverzeichnis. Das **DOCX wird immer erzeugt**; die **PDF
-   wenn ein Konverter verfügbar ist** (Windows: LibreOffice oder MS Word).
-   **Kein Markdown** im Projekt.
+   aktuellen Arbeitsverzeichnis. **DOCX und PDF sind die Endausgabe**.
+   Auf Windows 11 mit MS Word erzeugt der Renderer die PDF automatisch und
+   bootstrapt fehlende Python-Pakete selbst. **Kein Markdown** im Projekt.
 
 4. Wenn der Nutzer in seinem Argument einen Speicherort angibt (`--out <pfad>`),
    diesen verwenden.
 
 5. Am Ende **zusammenfassen**:
-   - Pfade zu DOCX (und PDF, wenn erzeugt).
+   - Pfade zu DOCX und PDF.
    - Erkannter Format-Typ.
    - Anzahl Teilnehmer / Themen / offene vs. erledigte Punkte.
    - Punkte, die unklar sind und Klärung brauchen.
@@ -46,7 +46,8 @@ Das ist entweder:
 ## Wichtig
 
 - Niemals den ursprünglichen Transkript verändern.
-- Ausgabe ist **DOCX + PDF** — nicht Markdown. Pipeline:
+- Ausgabe ist **DOCX + PDF** — nicht Markdown. Keine technischen Setup-Fragen
+  an den Nutzer; der Renderer heilt Abhängigkeiten selbst. Pipeline:
   `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 - Bei Format-Konflikten (z.B. Nutzer sagt LP1-4, Transkript klingt nach Gesprächsnotiz):
   Hinweis geben, aber **dem Nutzer-Hint folgen**.

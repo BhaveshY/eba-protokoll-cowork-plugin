@@ -77,8 +77,10 @@ Bei Unterthemen: `Thema 01`, `Thema 01.1`, `Thema 01.2`, `Thema 02`, …
 
 ### 6. Ausgabe als DOCX + PDF schreiben
 
-**Endformat**: DOCX (immer) und PDF (wenn ein Konverter verfügbar ist —
-Windows: LibreOffice oder MS Word). **Kein Markdown** im Projekt-Ordner.
+**Endformat**: DOCX + PDF. **Kein Markdown** im Projekt-Ordner.
+Auf Windows 11 mit MS Word bootstrapt der Renderer fehlende Python-Pakete
+selbst und exportiert die PDF via Word. Keine technischen Setup-Fragen an den
+Nutzer.
 
 Schritte:
 
@@ -99,7 +101,9 @@ Schritte:
 3. Der Renderer schreibt
    `protokolle/eba-gespraechsnotiz-<datum>-<kuerzel>.docx` und
    `protokolle/eba-gespraechsnotiz-<datum>-<kuerzel>.pdf`,
-   und löscht das MD-Zwischenformat.
+   und löscht das MD-Zwischenformat. Wenn der Renderer einen Windows-PDF-Fehler
+   meldet, stderr lesen, denselben Befehl nach der automatischen Selbstheilung
+   erneut versuchen und erst danach echte Blocker melden.
 
 **EBA-Dateinamen-Konvention** (wenn vom Nutzer gewünscht): siehe
 `${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:

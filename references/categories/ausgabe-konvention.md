@@ -1,8 +1,12 @@
 # Ausgabe-Konvention: DOCX + PDF (kein Markdown)
 
-Alle Protokoll-Skills schreiben als Endformat **DOCX** (immer) und **PDF**
-(soweit ein Konverter — Pages oder LibreOffice — verfügbar ist). Markdown ist
-nur ein **flüchtiges Zwischenformat** und wird nach dem Rendern gelöscht.
+Alle Protokoll-Skills schreiben als Endformat **DOCX + PDF**. Markdown ist nur
+ein **flüchtiges Zwischenformat** und wird nach dem Rendern gelöscht.
+
+Die Produktionsumgebung ist **Windows 11 mit installiertem Microsoft Word**.
+Der Nutzer ist nicht technisch. Die Skill darf den Nutzer deshalb **nicht**
+nach Python-Paketen, `pip`, `pywin32`, LibreOffice oder Konverterdetails fragen.
+Der Renderer kümmert sich selbst darum.
 
 Diese Datei beschreibt die einheitliche Rendering-Pipeline. Die
 format-spezifischen Skills (`gespraechsnotiz`, `protokoll-einfach`,
@@ -24,6 +28,23 @@ protokolle/
 direkt unter `protokolle/` ab. Wenn `protokolle/` nicht existiert, anlegen.
 
 ## Pipeline-Schritte
+
+### 0. Selbstheilende Umgebung
+
+Vor dem ersten DOCX/PDF-Rendern prüft `render_protokoll.py` seine Abhängigkeiten:
+
+- `python-docx` für DOCX-Erzeugung.
+- `pywin32` auf Windows für den MS-Word-COM-PDF-Export.
+
+Fehlt ein Paket, installiert der Renderer es automatisch mit:
+
+```bash
+python -m pip install --user --upgrade -r scripts/requirements.txt
+```
+
+In einer virtuellen Umgebung wird `--user` automatisch weggelassen. Die Skill
+soll **keinen separaten Setup-Schritt** an den Nutzer delegieren. Einfach den
+Renderer ausführen; er bootstrapt beim ersten Lauf und ist danach schnell.
 
 ### 1. Inhalt als Markdown im Zwischenpfad erzeugen
 
@@ -76,7 +97,9 @@ Format: protokoll-tracking
 ```
 
 Falls die PDF-Zeile lautet `(skipped — no converter found ...)`, hat das
-System weder Pages noch LibreOffice. Das DOCX ist trotzdem geschrieben.
+System keinen PDF-Konverter. Auf Windows ist das ein Fehlerzustand, den Claude
+Code intern beheben soll (Renderer erneut ausführen, Word/COM-Fehler prüfen),
+nicht eine Aufgabe für den Nutzer.
 
 ## PDF-Konverter pro Plattform
 
@@ -85,19 +108,31 @@ erste funktionierende gewinnt:
 
 | Plattform | Bevorzugt | Setup |
 |-----------|-----------|-------|
-| **Windows** | MS Word COM | `pip install pywin32` (wenn Word installiert ist) |
-| **Windows** | LibreOffice headless | LibreOffice von https://www.libreoffice.org/ installieren |
+| **Windows 11** | MS Word COM | automatisch via `pywin32`-Bootstrap |
+| **Windows 11** | LibreOffice headless | Fallback, falls bereits vorhanden |
 | Linux       | LibreOffice headless | `apt install libreoffice` oder gleichwertig |
 | macOS       | LibreOffice headless | `brew install --cask libreoffice` |
 | macOS (dev) | Pages via osascript | nur Fallback für Entwicklung |
 
-**Empfohlener Setup für Windows-Produktion**: LibreOffice installieren. Damit
-funktioniert die PDF-Erzeugung sofort und unabhängig davon, ob MS Word
-vorhanden ist.
+**Windows-Produktion**: MS Word ist der bevorzugte Pfad. Wenn Word installiert
+ist, soll PDF-Erzeugung ohne Nutzerinteraktion funktionieren.
 
-Wenn kein Konverter gefunden wird, gibt der Renderer nur das DOCX aus — das
-DOCX lässt sich manuell in MS Word/LibreOffice öffnen und dort als PDF
-exportieren.
+Wenn auf Windows kein PDF entsteht, ist das Ergebnis **nicht fertig**. Claude
+Code soll den Fehler aus stderr lesen, denselben Renderbefehl nach
+Selbstheilung erneut versuchen und dem Nutzer erst dann antworten, wenn DOCX
+und PDF vorhanden sind oder ein echter Blocker vorliegt.
+
+## Qualitätsanspruch
+
+- Inhaltliche Struktur, Standardtexte, Tabellenblöcke und Kennzeichnungen müssen
+  den QMG-024-141-Referenzen entsprechen.
+- Die offiziellen Dateien in `references/templates/qmg/` sind die fachliche
+  Layout- und Wortlaut-Referenz.
+- Markdown-Beispiele in `references/examples/` sind Regressionstests für den
+  Renderer. Nach Änderungen an Renderer oder Skills `scripts/smoke_render.py`
+  ausführen.
+- Keine frei erfundenen Felder, keine ausgelassenen Header- oder Endblöcke, kein
+  Markdown im Projektordner.
 
 ## Was beim Fortschreiben anders ist
 
@@ -112,6 +147,10 @@ nächsten Lauf.
   `protokolle/`-Ordner.
 - ❌ DOCX im aktuellen Verzeichnis oder auf dem Desktop ablegen — immer in
   `protokolle/<projekt>/`.
+- ❌ Den Nutzer bitten, `pip install`, `pywin32`, LibreOffice oder andere
+  technische Setup-Schritte auszuführen — der Renderer bootstrapt selbst.
+- ❌ Auf Windows mit nur DOCX antworten, wenn PDF fehlt — Word-PDF ist dort
+  Pflicht, außer der Nutzer verlangt ausdrücklich DOCX-only.
 - ❌ Den Renderer überspringen, wenn nur DOCX gefordert ist — auch dann via
   `--no-pdf` aufrufen, damit die Konvention konsistent bleibt.
 - ❌ `--keep-md` standardmäßig setzen — nur bei Debugging.

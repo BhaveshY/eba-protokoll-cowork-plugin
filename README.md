@@ -57,9 +57,8 @@ zeigt die Erkennung transparent an, und schreibt das fertige Protokoll als
 **DOCX + PDF** nach
 `protokolle/<projekt>/<datum>_protokoll-NN_<thema>.docx` (und `.pdf`).
 Markdown wird **nicht** ins Projekt geschrieben — es ist nur ein flüchtiges
-Zwischenformat. Die PDF-Erzeugung benötigt einen Konverter; auf Windows
-empfohlen: **LibreOffice** (https://www.libreoffice.org/) oder **MS Word**
-mit `pywin32`.
+Zwischenformat. Auf **Windows 11 mit MS Word** erzeugt der Renderer die PDF
+automatisch über Word und richtet fehlende Python-Pakete selbst ein.
 
 Wenn du das Format explizit setzen willst:
 
@@ -196,7 +195,7 @@ Alle Skills delegieren das Rendering an
 2. Schreibt ein EBA-gestyltes DOCX (Arial, A4, oranger Akzent, graue
    Tabellenkopfzeilen) nach `protokolle/<projekt>/`.
 3. Konvertiert die DOCX zu PDF — Reihenfolge der versuchten Konverter:
-   1. **MS Word COM** (Windows, mit `pywin32`)
+   1. **MS Word COM** (Windows 11, `pywin32` wird automatisch installiert)
    2. **LibreOffice headless** (Win/Mac/Linux)
    3. **macOS Pages** (nur als macOS-Dev-Fallback)
 4. Löscht das MD-Zwischenformat.
@@ -204,31 +203,26 @@ Alle Skills delegieren das Rendering an
 Die volle Konvention steht in
 `references/categories/ausgabe-konvention.md`.
 
-**Setup auf Windows** (einmalig pro Maschine):
+**Windows-11-Nutzer müssen nichts vorbereiten.** Der Renderer prüft beim ersten
+Lauf selbst, ob `python-docx` und `pywin32` verfügbar sind, installiert fehlende
+Pakete im Benutzerkontext und nutzt danach MS Word für die PDF-Erzeugung.
+Claude Code soll technische Setup-Details intern lösen und den Nutzer erst mit
+den fertigen `.docx`- und `.pdf`-Pfaden konfrontieren.
 
-```powershell
-pip install -r scripts\requirements.txt
-```
-
-Plus eine PDF-Konverter-Option:
-
-- **LibreOffice** (empfohlen, einfacher Setup):
-  Download von https://www.libreoffice.org/, installieren — fertig.
-- **MS Word**: wenn bereits installiert, wird automatisch via `pywin32`
-  genutzt (das `requirements.txt` installiert das Paket auf Windows).
-
-Ohne PDF-Konverter wird nur die DOCX erzeugt; sie lässt sich manuell in
-Word/LibreOffice öffnen und dort als PDF exportieren.
+Wenn auf Windows keine PDF entsteht, gilt das Protokoll als nicht fertig. Der
+Renderer gibt einen Fehler zurück, damit Claude Code nachbessert statt nur ein
+DOCX abzuliefern.
 
 ## Entwicklungsstand
 
-Version 0.2.0 — DOCX + PDF Output, Windows-First. Deckt die vier
+Version 0.2.1 — DOCX + PDF Output, Windows-11-First mit automatischem
+Dependency-Bootstrap. Deckt die vier
 Standardvorlagen QMG-024-141 ab (Gesprächsnotiz, Protokoll-einfach Word LP1-4
 Stand A, Planungsprotokoll LP1-4 Stand C / BIM-Subvariante,
 Bauleitungsprotokoll LP5 Stand B). Geplant:
 
-- Direkte Befüllung der QMG-024-141-Templates statt Fresh-DOCX
-  (höchste Layout-Treue, Phase 2).
+- Weitere Annäherung an die QMG-024-141-Original-Templates durch direkte
+  Template-Befüllung, falls höhere Layout-Treue nötig wird.
 - Sondervorlage für DGNB-Workshops.
 - Visualisierung des State-Files (offene Punkte, Termine, Mängelliste) als
   HTML-Dashboard.
