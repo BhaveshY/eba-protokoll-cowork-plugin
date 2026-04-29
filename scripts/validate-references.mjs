@@ -74,10 +74,14 @@ expect(lp5StatusRows.length === 4, "LP5 example has exactly the four Kennzeichnu
 
 expectFile("references/examples/beispiel-transkript-bim.txt");
 expectFile("references/examples/beispiel-ausgabe-bim.md");
+expectFile("references/examples/beispiel-transkript-eba-interview.txt");
+expectFile("references/examples/beispiel-ausgabe-eba-interview.md");
 
 const readme = read("README.md");
 expect(readme.includes("beispiel-transkript-bim.txt"), "README lists the BIM transcript example");
 expect(readme.includes("beispiel-ausgabe-bim.md"), "README lists the BIM output example");
+expect(readme.includes("beispiel-transkript-eba-interview.txt"), "README lists the EBA interview transcript example");
+expect(readme.includes("beispiel-ausgabe-eba-interview.md"), "README lists the EBA interview output example");
 
 const bim = read("references/examples/beispiel-ausgabe-bim.md");
 expect(bim.includes("### BIM-Koordination JF-07"), "BIM output names the BIM JF variant");
@@ -124,6 +128,24 @@ expect(
   lp5Skill.includes("Do not use for pure BIM-Koordination"),
   "LP5 skill description excludes pure BIM coordination",
 );
+expect(
+  autoSkill.includes("EBA-Gesprächsnotiz ohne Projektbezug") &&
+    autoSkill.includes("ARD/ZDF/rbb/Deutschlandfunk/Magazin") &&
+    autoSkill.includes("Projekt-Nummer = 000"),
+  "auto-detection supports EBA media/interview notes without project metadata",
+);
+
+const gespraechsnotizSkill = read("skills/gespraechsnotiz/SKILL.md");
+expect(
+  gespraechsnotizSkill.includes("EBA-Interview / Presse / Medien ohne Projekt") &&
+    gespraechsnotizSkill.includes("Nicht abbrechen und nicht nach Projektmetadaten fragen") &&
+    gespraechsnotizSkill.includes("Projekt-Nummer**: `000`"),
+  "Gesprächsnotiz skill documents non-project EBA interview defaults",
+);
+
+const interview = read("references/examples/beispiel-ausgabe-eba-interview.md");
+expect(interview.includes("| Projekt-Nummer     | 000"), "EBA interview example uses project number 000");
+expect(interview.includes("ARD Morgenmagazin / Studio Berlin"), "EBA interview example derives the source/location");
 
 // ─── DOCX/PDF output pipeline (v0.2) ─────────────────────────────────────
 //
@@ -221,11 +243,15 @@ function classifyTranscript(text, filename) {
     /(Kick-Off|Kickoff|Workshop|Erstgespräch|Auftaktbesprechung|\bAuftakt\b|Erstbesprechung)/i.test(head);
   const priorRefs =
     /(letztes Mal|letzte Woche|aus #\d+|LN\s?\d+E|Besprechung Nr\.|Punkt von letzter Woche)/i.test(text);
+  const ebaInterviewAnchor =
+    /(ARD|ZDF|rbb|Deutschlandfunk|Morgenmagazin|Interview|Pressegespräch|Redaktion|Moderator|Journalist)/i.test(head) &&
+    /(Eike Becker|EBA|Eike Becker_Architekten|Architekt)/i.test(text);
 
   if (bimAnchor) return "protokoll-lp1-4-bim";
   if (lp5Anchor) return "protokoll-lp5";
   if (priorRefs || lp14Anchor) return "protokoll-lp1-4";
   if (einfachAnchor && speakers.size >= 3) return "protokoll-einfach";
+  if (ebaInterviewAnchor) return "gespraechsnotiz";
   if (
     wordCount < 1500 &&
     speakers.size <= 3 &&
@@ -241,6 +267,7 @@ function classifyTranscript(text, filename) {
 
 const dispatchCases = [
   { file: "references/examples/beispiel-transkript-gespraechsnotiz.txt", expect: "gespraechsnotiz" },
+  { file: "references/examples/beispiel-transkript-eba-interview.txt", expect: "gespraechsnotiz" },
   { file: "references/examples/beispiel-transkript-einfach.txt", expect: "protokoll-einfach" },
   { file: "references/examples/beispiel-transkript-lp1-4.txt", expect: "protokoll-lp1-4" },
   { file: "references/examples/beispiel-transkript-lp5.txt", expect: "protokoll-lp5" },

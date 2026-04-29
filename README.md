@@ -150,6 +150,8 @@ Im `references/examples/`-Ordner:
 
 - `beispiel-transkript-gespraechsnotiz.txt` + `beispiel-ausgabe-gespraechsnotiz.md` —
   einfache 90-Sekunden-Abstimmung.
+- `beispiel-transkript-eba-interview.txt` + `beispiel-ausgabe-eba-interview.md` —
+  EBA-bezogenes Medien-/Interviewbeispiel ohne Projekt-Nr. mit Gesprächsnotiz-Defaults.
 - `beispiel-transkript-einfach.txt` + `beispiel-ausgabe-einfach.md` — Kick-Off
   Meeting mit 4 Teilnehmern, 5 Themen + Unterpunkten, kombinierte Frist-Spalte.
 - `beispiel-transkript-lp1-4.txt` + `beispiel-ausgabe-lp1-4.md` — Planungsbesprechung

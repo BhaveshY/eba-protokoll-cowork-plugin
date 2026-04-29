@@ -5,7 +5,9 @@ description: >-
   "conversation note", "kurzes Protokoll", "informelle Notiz", or has a short
   transcript (under ~1500 words, ≤3 speakers, no LP-specific vocabulary) that
   should be turned into the simple EBA Gesprächsnotiz format (no D/K|B|LN
-  tracking, no status column).
+  tracking, no status column). Also use for EBA-related external interviews,
+  press conversations, TV/radio/podcast transcripts, and editorial calls where
+  there is no project number.
 ---
 
 # Gesprächsnotiz erstellen
@@ -49,6 +51,22 @@ Aus den Metadaten:
 - **Erstelldatum**: heutiges Datum (`<currentDate>`).
 - **Ersteller**: Kürzel des Protokollerstellers — entweder aus dem App-Sprechernamen
   ableiten (wenn `Ich` umbenannt wurde) oder beim Nutzer rückfragen.
+
+#### EBA-Interview / Presse / Medien ohne Projekt
+
+Wenn der Text EBA-bezogen ist, aber **kein Projektmeeting** und keine Projekt-Nr.
+enthält (z.B. ARD Morgenmagazin, TV-/Radio-Interview, Pressegespräch):
+
+- Nicht abbrechen und nicht nach Projektmetadaten fragen.
+- **Projektname**: `EBA`
+- **Projekt-Nummer**: `000`
+- **Projekt-Beschreibung**: `EBA allgemein / Medien- und Interviewnotiz`
+- **Ort**: Quelle/Format aus dem Text, z.B. `ARD Morgenmagazin / Studio Berlin`.
+  Wenn nur ein Sender/Format erkennbar ist, diesen verwenden.
+- **Ersteller**: `EBA`, wenn kein persönliches Kürzel erkennbar ist.
+- **Teilnehmer**: Moderator/Journalist/Redaktion und EBA-Sprecher aufnehmen.
+- **Zuständig**: `Info` für reine Inhaltsdokumentation; `EBA` nur bei internen
+  Anschlussaufgaben.
 
 ### 4. Teilnehmer- und Verteilertabelle erstellen
 

@@ -101,7 +101,22 @@ Wende folgende Heuristik an (in dieser Reihenfolge, der erste Treffer gewinnt):
    - **Aber** kein Vorprotokoll, keine Verweise auf vorherige Besprechungen,
      kein D/K-Schema im Projekt etabliert.
 
-5. **Gesprächsnotiz** wenn alle gelten:
+5. **EBA-Gesprächsnotiz ohne Projektbezug** wenn es EBA-bezogen ist, aber keine
+   Projektbesprechung:
+   - Beispiele: Interview, Pressegespräch, Redaktionstermin, Podcast, Radio- oder
+     TV-Beitrag, ARD/ZDF/rbb/Deutschlandfunk/Magazin.
+   - Sprecherrollen wie `Moderator`, `Redaktion`, `Journalist`, `Interviewer`,
+     `Eike Becker`, `EBA`, `Architekt`.
+   - Kein Projekt-Meeting-Anker für BIM, LP5, LP1-4 oder Kick-Off.
+
+   → Verwende **Gesprächsnotiz**, nicht abbrechen. Fehlende Projektfelder werden
+   mit EBA-Defaults befüllt:
+   `Projektname = EBA`, `Projekt-Nummer = 000`,
+   `Projekt-Beschreibung = EBA allgemein / Medien- und Interviewnotiz`.
+   Ort/Quelle aus dem Text ableiten (z.B. `ARD Morgenmagazin / Studio Berlin`),
+   sonst `nicht angegeben`. Ersteller default `EBA`, wenn kein Kürzel erkennbar ist.
+
+6. **Gesprächsnotiz** wenn alle gelten:
    - Transkript ist kürzer als ~1500 Wörter (≈ 10 Min Gespräch).
    - Höchstens 3 Sprecher.
    - **Kein** Meeting-Anker für BIM, LP5, LP1-4 oder Kick-Off.
@@ -110,7 +125,7 @@ Wende folgende Heuristik an (in dieser Reihenfolge, der erste Treffer gewinnt):
      („Donnerstag", „morgen", „bis 18.03.") sind in einer Gesprächsnotiz
      **erlaubt**.
 
-6. Wenn nichts klar passt: **frage den Nutzer**.
+7. Wenn nichts klar passt: **frage den Nutzer**.
 
 Stelle die erkannte Klassifikation **transparent** an den Nutzer und biete an, sie zu
 ändern, bevor das Protokoll erzeugt wird:
