@@ -111,6 +111,7 @@ Schritte:
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
      "/tmp/eba-protokoll-einfach-<datum>-<kuerzel>.md" \
+     --format protokoll-einfach \
      --out-dir "protokolle/"
    ```
 

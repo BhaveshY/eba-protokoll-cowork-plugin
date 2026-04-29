@@ -33,6 +33,14 @@ except ImportError:
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RENDERER = REPO_ROOT / "scripts" / "render_protokoll.py"
 W_NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+QMG_TEMPLATE_EXAMPLES = {
+    "references/examples/beispiel-ausgabe-gespraechsnotiz.md",
+    "references/examples/beispiel-ausgabe-eba-interview.md",
+    "references/examples/beispiel-ausgabe-einfach.md",
+    "references/examples/beispiel-ausgabe-lp1-4.md",
+    "references/examples/beispiel-ausgabe-lp5.md",
+    "references/examples/beispiel-ausgabe-bim.md",
+}
 
 
 def read_docx_text(path: Path) -> str:
@@ -45,7 +53,7 @@ def read_docx_text(path: Path) -> str:
 
 
 def qmg_template_checks(path: Path, example: str) -> list[str]:
-    if "gespraechsnotiz" not in example and "eba-interview" not in example:
+    if example not in QMG_TEMPLATE_EXAMPLES:
         return []
     failures: list[str] = []
     with ZipFile(path) as z:
@@ -55,7 +63,7 @@ def qmg_template_checks(path: Path, example: str) -> list[str]:
             return [f"{example}: DOCX has no body"]
         body_tables = body.findall("w:tbl", W_NS)
         if len(body_tables) != 4:
-            failures.append(f"{example}: Gesprächsnotiz should keep exactly 4 QMG body tables")
+            failures.append(f"{example}: rendered output should keep exactly 4 QMG body tables")
         xml_blob = "\n".join(
             z.read(name).decode("utf-8", "ignore")
             for name in names
@@ -64,6 +72,17 @@ def qmg_template_checks(path: Path, example: str) -> list[str]:
         for internal_marker in ["Hilfe und Tipps", "Dokument-Raster", "Diese Zeile bitte nicht löschen"]:
             if internal_marker in xml_blob:
                 failures.append(f"{example}: internal QMG helper page leaked into output")
+        for placeholder in [
+            "_Vorname_",
+            "_Name_",
+            "_Firma_",
+            "_ Dokument/e, Plan/Pläne _",
+            "_Thema 01_",
+            "_Beschreibung einfügen_",
+            "Besprechnungsthema A",
+        ]:
+            if placeholder in xml_blob:
+                failures.append(f"{example}: QMG placeholder leaked into output: {placeholder}")
         headers = [name for name in names if name.startswith("word/header")]
         footers = [name for name in names if name.startswith("word/footer")]
         if not headers:
@@ -130,11 +149,12 @@ def main() -> int:
         "references/examples/beispiel-ausgabe-einfach.md": [
             "Protokoll",
             "Kick-Off Meeting Projekt VTS-549",
-            "Zuständig / Frist",
+            "Zuständig/Frist",
         ],
         "references/examples/beispiel-ausgabe-lp1-4.md": [
             "zur Besprechung Nr. 12",
             "Planungsbesprechung — BIM, Bauantrag, Wohnfassade",
+            "LP3-Modell (FusionLive-Upload)",
             "Ort | Online",
             "Datum | 24.03.26",
             "Zeit | 09:00 – 09:07",
@@ -145,11 +165,13 @@ def main() -> int:
             "zur Besprechung Nr. 8",
             "Baubesprechung — Rohbau, Mängel, Brandschutz",
             "Witterung",
+            "Schalungsplan UG1, UG2",
             "M-048",
         ],
         "references/examples/beispiel-ausgabe-bim.md": [
             "zur Besprechung Nr. 07",
             "BIM-Koordination JF-07",
+            "BIMcollab-Issue-Liste",
             "Ort | Online",
             "D/K | B | LN",
         ],

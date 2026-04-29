@@ -178,13 +178,15 @@ Schritte:
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
      "/tmp/eba-protokoll-lp1-4-<datum>-<projekt>.md" \
+     --format protokoll-lp1-4 \
      --out-dir "protokolle/<projekt>/"
    ```
 
 3. Der Renderer schreibt
    `protokolle/<projekt>/eba-protokoll-lp1-4-<datum>-<projekt>.docx` und
    die zugehörige PDF, und löscht das MD-Zwischenformat. Das Format wird vom
-   Renderer als `protokoll-tracking` erkannt. Wenn der Renderer einen
+   Renderer als `protokoll-lp1-4` bzw. bei BIM-Ankern als `protokoll-bim`
+   erkannt. Wenn der Renderer einen
    Windows-PDF-Fehler meldet, stderr lesen, denselben Befehl nach der
    automatischen Selbstheilung erneut versuchen und erst danach echte Blocker
    melden.

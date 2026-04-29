@@ -84,7 +84,8 @@ Wichtige Flags:
 - `--keep-md` — nur für Debugging: behält das MD-Zwischenformat.
 - `--out-dir <pfad>` — Zielverzeichnis (Default: neben dem MD).
 - `--format <name>` — überschreibt die Auto-Erkennung
-  (`gespraechsnotiz` / `protokoll-einfach` / `protokoll-tracking`).
+  (`gespraechsnotiz` / `protokoll-einfach` / `protokoll-lp1-4` /
+  `protokoll-bim` / `protokoll-lp5`).
 
 ### 3. Ausgabe an den Nutzer
 
@@ -93,7 +94,7 @@ Der Renderer gibt die finalen Pfade auf stdout aus, z.B.:
 ```
 DOCX: protokolle/553-WIL/2026-03-24_planungsbesprechung-12.docx
 PDF:  protokolle/553-WIL/2026-03-24_planungsbesprechung-12.pdf
-Format: protokoll-tracking
+Format: protokoll-lp1-4
 ```
 
 Falls die PDF-Zeile lautet `(skipped — no converter found ...)`, hat das
@@ -128,9 +129,13 @@ und PDF vorhanden sind oder ein echter Blocker vorliegt.
   den QMG-024-141-Referenzen entsprechen.
 - Die offiziellen Dateien in `references/templates/qmg/` sind die fachliche
   Layout- und Wortlaut-Referenz.
-- Gesprächsnotizen werden direkt aus
-  `QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx` erzeugt, damit Header,
-  Footer, Seitenzahlen und EBA-CI erhalten bleiben.
+- DOCX-Ausgaben werden aus den vorhandenen QMG-Word-Templates erzeugt:
+  `QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx`,
+  `QMG-024-141_ORG-PK-LP1-4-MA_230227-A.docx` und dem
+  QMG-Tracking-Word-Shell `QMG-024-141_ORG-PK-LP5-MA_230202-B.docx`.
+  LP1-4/BIM-Tracking behält die D/K|B|LN-Struktur; die offizielle Excel-Datei
+  `QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx` bleibt die native
+  Fortschreibungsreferenz.
 - Markdown-Beispiele in `references/examples/` sind Regressionstests für den
   Renderer. Nach Änderungen an Renderer oder Skills `scripts/smoke_render.py`
   ausführen.

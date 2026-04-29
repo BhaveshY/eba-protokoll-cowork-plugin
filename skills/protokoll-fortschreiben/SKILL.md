@@ -155,10 +155,13 @@ Schritte:
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
      "/tmp/eba-protokoll-fortschreibung-<datum>-<projekt>.md" \
+     --format <protokoll-lp1-4|protokoll-bim|protokoll-lp5> \
      --out-dir "protokolle/<projekt>/"
    ```
 
-3. Schreibe die aktualisierte `protokolle/<projekt>/protokoll-state.json`.
+3. Wähle den `--format`-Wert aus dem bestehenden Projekt-State bzw. dem
+   erkannten Protokolltyp, damit die passende QMG-Tracking-Vorlage genutzt wird.
+4. Schreibe die aktualisierte `protokolle/<projekt>/protokoll-state.json`.
    Wenn der Renderer einen Windows-PDF-Fehler meldet, stderr lesen, denselben
    Befehl nach der automatischen Selbstheilung erneut versuchen und erst danach
    echte Blocker melden.

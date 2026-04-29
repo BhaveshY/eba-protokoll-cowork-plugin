@@ -204,9 +204,13 @@ expect(
 );
 expect(
   renderer.includes("GESPRAECHSNOTIZ_TEMPLATE") &&
+    renderer.includes("PROTOKOLL_EINFACH_TEMPLATE") &&
+    renderer.includes("TRACKING_WORD_TEMPLATE") &&
     renderer.includes("def _render_gespraechsnotiz_template") &&
+    renderer.includes("def _render_protokoll_einfach_template") &&
+    renderer.includes("def _render_tracking_template") &&
     renderer.includes("page numbering and EBA-CI are preserved"),
-  "renderer fills the official Gesprächsnotiz QMG template",
+  "renderer fills the official QMG Word templates",
 );
 
 for (const skillRel of [
@@ -236,11 +240,11 @@ for (const skillRel of [
 }
 
 const pluginManifest = JSON.parse(read(".claude-plugin/plugin.json"));
-expect(pluginManifest.version === "0.2.3", "plugin.json bumped to 0.2.3");
+expect(pluginManifest.version === "0.2.4", "plugin.json bumped to 0.2.4");
 const market = JSON.parse(read(".claude-plugin/marketplace.json"));
 expect(
-  market.plugins[0].version === "0.2.3",
-  "marketplace.json plugin entry bumped to 0.2.3",
+  market.plugins[0].version === "0.2.4",
+  "marketplace.json plugin entry bumped to 0.2.4",
 );
 
 // Dispatcher smoke test — verify each example transcript would route to the

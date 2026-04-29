@@ -135,6 +135,7 @@ Schritte:
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
      "/tmp/eba-protokoll-lp5-<datum>-<projekt>.md" \
+     --format protokoll-lp5 \
      --out-dir "protokolle/<projekt>/"
    ```
 

@@ -13,7 +13,7 @@ The script auto-detects the format from the Markdown header if --format is not
 given:
     "# Gesprächsnotiz"          -> gespraechsnotiz
     "# Protokoll" + "Gesprächsinhalt" + "Frist" header -> protokoll-einfach
-    "# Protokoll" + "Besprechungsthemen" + "D/K"       -> protokoll-lp1-4 / -lp5 / -bim
+    "# Protokoll" + "Besprechungsthemen" + "D/K"       -> protokoll-lp1-4 / protokoll-lp5 / protokoll-bim
 
 Output files are written next to <markdown_path>:
     <basename>.docx
@@ -137,6 +137,8 @@ EBA_TEXT_GREY = "404040"
 
 QMG_TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "references" / "templates" / "qmg"
 GESPRAECHSNOTIZ_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx"
+PROTOKOLL_EINFACH_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-PK-LP1-4-MA_230227-A.docx"
+TRACKING_WORD_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-PK-LP5-MA_230202-B.docx"
 
 
 # ─── Markdown parsing ──────────────────────────────────────────────────────
@@ -274,9 +276,23 @@ def _detect_format(parsed: ParsedMd) -> str:
             line for s in parsed.sections for line in [s.heading] + s.lines
         )
         if "D/K" in all_text and "Besprechungsthemen" in all_text:
-            # tracking format - distinguishing lp1-4 / lp5 / bim happens later
-            # by inspecting D/K column values; for rendering they're identical
-            return "protokoll-tracking"
+            head = "\n".join(
+                line for s in parsed.sections[:2] for line in [s.heading] + s.lines[:12]
+            )
+            if re.search(
+                r"\b(BIM-Koordination|BIM-Jour-Fixe|BIM-JF|Koordinationsmodell|BAP|BCF|IFC)\b",
+                all_text,
+                re.IGNORECASE,
+            ):
+                return "protokoll-bim"
+            if re.search(
+                r"\b(Baubesprechung|Baustelle|Mängel|M-\d+|Witterung|Rohbau|Polier|"
+                r"Gewerk|Abnahme|Bemusterung|Objektüberwachung)\b",
+                head + "\n" + all_text,
+                re.IGNORECASE,
+            ):
+                return "protokoll-lp5"
+            return "protokoll-lp1-4"
         if "Gesprächsinhalt" in all_text:
             return "protokoll-einfach"
     return "unknown"
@@ -296,12 +312,64 @@ def _first_table_from_section(parsed: ParsedMd, heading: str) -> list[list[str]]
     return []
 
 
+def _tables_from_lines(lines: list[str]) -> list[list[list[str]]]:
+    tables: list[list[list[str]]] = []
+    block: list[str] = []
+    for line in lines:
+        if line.lstrip().startswith("|"):
+            block.append(line)
+        elif block:
+            tables.append(_parse_md_table(block))
+            block = []
+    if block:
+        tables.append(_parse_md_table(block))
+    return [table for table in tables if table]
+
+
+def _section_by_prefix(parsed: ParsedMd, prefix: str) -> MdSection | None:
+    prefix = prefix.lower()
+    for section in parsed.sections:
+        if section.heading.strip().lower().startswith(prefix):
+            return section
+    return None
+
+
+def _quote_text_from_lines(lines: list[str]) -> str:
+    quote: list[str] = []
+    for line in lines:
+        stripped = line.lstrip()
+        if stripped.startswith(">"):
+            quote.append(re.sub(r"^>\s?", "", stripped).strip())
+        elif quote and stripped:
+            break
+    return _strip_md_inline(" ".join(quote).strip())
+
+
+def _first_subheading(lines: list[str]) -> str:
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("### "):
+            return _strip_md_inline(stripped[4:].strip())
+    return ""
+
+
 def _kv_from_table(table: list[list[str]]) -> dict[str, str]:
     values: dict[str, str] = {}
     for row in table:
         if len(row) >= 2:
             values[row[0].strip()] = row[1].strip()
     return values
+
+
+def _pick(values: dict[str, str], *keys: str) -> str:
+    normalized = {
+        re.sub(r"[\s.\-_/]+", "", key).lower(): value for key, value in values.items()
+    }
+    for key in keys:
+        value = normalized.get(re.sub(r"[\s.\-_/]+", "", key).lower())
+        if value is not None:
+            return value
+    return ""
 
 
 def _actual_tcs(row_or_tr) -> list:
@@ -371,16 +439,47 @@ def _append_row_from_template(table, template_tr):
     return new_tr
 
 
+def _fill_row_cells(tr, values: list[str], cell_indices: list[int]) -> None:
+    cells = _actual_tcs(tr)
+    for value, cell_idx in zip(values, cell_indices):
+        if cell_idx < len(cells):
+            _set_tc_text(cells[cell_idx], value)
+
+
 def _fill_grid_table(table, rows: list[list[str]], *, start_row: int, cell_indices: list[int]) -> None:
     templates = [deepcopy(row._tr) for row in table.rows[start_row:]]
     fallback = templates[0] if templates else deepcopy(table.rows[-1]._tr)
     _delete_rows_after(table, start_row - 1)
     for values in rows:
         tr = _append_row_from_template(table, fallback)
-        cells = _actual_tcs(tr)
-        for value, cell_idx in zip(values, cell_indices):
-            if cell_idx < len(cells):
-                _set_tc_text(cells[cell_idx], value)
+        _fill_row_cells(tr, values, cell_indices)
+
+
+def _replace_row_range(
+    table,
+    start_idx: int,
+    end_idx: int,
+    rows: list[list[str]],
+    *,
+    cell_indices: list[int],
+    template_idx: int | None = None,
+) -> None:
+    existing_rows = list(table.rows)
+    if start_idx >= len(existing_rows) or end_idx < start_idx:
+        return
+    end_idx = min(end_idx, len(existing_rows) - 1)
+    template_source = existing_rows[template_idx if template_idx is not None else start_idx]._tr
+    template_tr = deepcopy(template_source)
+    anchor = existing_rows[end_idx + 1]._tr if end_idx + 1 < len(existing_rows) else None
+    for row in reversed(existing_rows[start_idx : end_idx + 1]):
+        row._tr.getparent().remove(row._tr)
+    for values in rows:
+        new_tr = deepcopy(template_tr)
+        _fill_row_cells(new_tr, values, cell_indices)
+        if anchor is not None:
+            anchor.addprevious(new_tr)
+        else:
+            table._tbl.append(new_tr)
 
 
 def _fill_gespraechsinhalt_table(table, rows: list[list[str]]) -> None:
@@ -399,7 +498,7 @@ def _fill_gespraechsinhalt_table(table, rows: list[list[str]]) -> None:
                 _set_tc_text(cells[cell_idx], value)
 
 
-def _trim_gespraechsnotiz_template_body(doc) -> None:
+def _trim_qmg_template_body(doc, *, keep_tables: int = 4) -> None:
     """Keep only the official front document and discard QMG help/internal pages."""
     body = doc._body._body
     children = list(body)
@@ -420,7 +519,7 @@ def _trim_gespraechsnotiz_template_body(doc) -> None:
     for idx, child in enumerate(children):
         if child.tag == qn("w:tbl"):
             table_count += 1
-            if table_count == 4:
+            if table_count == keep_tables:
                 cut_index = idx + 1
                 break
     for child in children[cut_index:]:
@@ -432,12 +531,18 @@ def _trim_gespraechsnotiz_template_body(doc) -> None:
     body.append(first_sect_pr)
 
 
-def _render_gespraechsnotiz_template(parsed: ParsedMd, out_path: Path) -> None:
-    if not GESPRAECHSNOTIZ_TEMPLATE.exists():
-        raise FileNotFoundError(f"Missing QMG template: {GESPRAECHSNOTIZ_TEMPLATE}")
+def _render_simple_word_template(
+    parsed: ParsedMd,
+    out_path: Path,
+    *,
+    template_path: Path,
+    default_title: str,
+) -> None:
+    if not template_path.exists():
+        raise FileNotFoundError(f"Missing QMG template: {template_path}")
 
-    doc = Document(str(GESPRAECHSNOTIZ_TEMPLATE))
-    _trim_gespraechsnotiz_template_body(doc)
+    doc = Document(str(template_path))
+    _trim_qmg_template_body(doc, keep_tables=4)
 
     project = _kv_from_table(parsed.header_tables[0] if parsed.header_tables else [])
     meta_table = parsed.header_tables[1] if len(parsed.header_tables) > 1 else []
@@ -449,7 +554,7 @@ def _render_gespraechsnotiz_template(parsed: ParsedMd, out_path: Path) -> None:
     subtitle = parsed.subtitle or project_desc
 
     main = doc.tables[0]
-    _set_tc_text(_actual_tcs(main.rows[0])[0], parsed.title or "Gesprächsnotiz")
+    _set_tc_text(_actual_tcs(main.rows[0])[0], parsed.title or default_title)
     _set_tc_text(_actual_tcs(main.rows[1])[0], subtitle)
     _set_tc_text(_actual_tcs(main.rows[2])[2], project_name)
     _set_tc_text(_actual_tcs(main.rows[3])[2], project_number)
@@ -479,6 +584,181 @@ def _render_gespraechsnotiz_template(parsed: ParsedMd, out_path: Path) -> None:
         "_Ort_": meta.get("Ort", ""),
         "_tt.mm.jj_": meta.get("Gesprächsdatum", ""),
         "_Ersteller_": meta.get("Ersteller", ""),
+    }
+    _replace_visible_text(doc._element, replacements)
+    for part in doc.part.related_parts.values():
+        if part.partname.startswith("/word/header") or part.partname.startswith("/word/footer"):
+            _replace_visible_text(part._element, replacements)
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    doc.save(str(out_path))
+
+
+def _render_gespraechsnotiz_template(parsed: ParsedMd, out_path: Path) -> None:
+    _render_simple_word_template(
+        parsed,
+        out_path,
+        template_path=GESPRAECHSNOTIZ_TEMPLATE,
+        default_title="Gesprächsnotiz",
+    )
+
+
+def _render_protokoll_einfach_template(parsed: ParsedMd, out_path: Path) -> None:
+    _render_simple_word_template(
+        parsed,
+        out_path,
+        template_path=PROTOKOLL_EINFACH_TEMPLATE,
+        default_title="Protokoll",
+    )
+
+
+def _clean_rows(rows: list[list[str]]) -> list[list[str]]:
+    return [row for row in rows if any(cell.strip() for cell in row)]
+
+
+def _is_empty_marker(value: str) -> bool:
+    return value.strip() in {"", "-", "–", "—"}
+
+
+def _tracking_data_rows(parsed: ParsedMd, heading: str) -> list[list[str]]:
+    table = _first_table_from_section(parsed, heading)
+    return _clean_rows(table[1:] if table else [])
+
+
+def _render_tracking_template(parsed: ParsedMd, out_path: Path) -> None:
+    if not TRACKING_WORD_TEMPLATE.exists():
+        raise FileNotFoundError(f"Missing QMG template: {TRACKING_WORD_TEMPLATE}")
+
+    doc = Document(str(TRACKING_WORD_TEMPLATE))
+    _trim_qmg_template_body(doc, keep_tables=4)
+
+    intro = parsed.sections[0] if parsed.sections else MdSection("")
+    intro_tables = _tables_from_lines(intro.lines)
+    project = _kv_from_table(intro_tables[0] if intro_tables else [])
+    meta = _kv_from_table(intro_tables[1] if len(intro_tables) > 1 else [])
+    meeting_no_match = re.search(r"Nr\.\s*([A-Za-z0-9._-]+)", intro.heading)
+    meeting_no = meeting_no_match.group(1) if meeting_no_match else ""
+    meeting_topic = _first_subheading(intro.lines) or parsed.subtitle or "Besprechung"
+    notice = _quote_text_from_lines(intro.lines)
+
+    project_number = _pick(project, "Projekt-Nr.", "Projekt-Nr", "Projekt-Nummer")
+    project_name = _pick(project, "Projekt-Name", "Projektname")
+    ort = _pick(meta, "Ort")
+    datum = _pick(meta, "Datum", "Gesprächsdatum")
+    zeit = _pick(meta, "Zeit")
+
+    main = doc.tables[0]
+    _set_tc_text(_actual_tcs(main.rows[2])[0], f"zur Besprechung Nr. {meeting_no}".strip())
+    _set_tc_text(_actual_tcs(main.rows[5])[1], meeting_topic)
+    _set_tc_text(_actual_tcs(main.rows[6])[1], project_number)
+    if notice:
+        _set_tc_text(_actual_tcs(main.rows[6])[3], notice)
+    _set_tc_text(_actual_tcs(main.rows[7])[1], project_name)
+    _set_tc_text(_actual_tcs(main.rows[9])[1], ort)
+    _set_tc_text(_actual_tcs(main.rows[9])[4], datum)
+    _set_tc_text(_actual_tcs(main.rows[10])[4], zeit)
+
+    unterlagen = _tracking_data_rows(parsed, "Besprochene Unterlagen")
+    _replace_row_range(
+        main,
+        28,
+        30,
+        unterlagen,
+        cell_indices=[0, 1, 2, 3, 4],
+        template_idx=28,
+    )
+
+    teilnehmer = _tracking_data_rows(parsed, "Teilnehmer")
+    _replace_row_range(
+        main,
+        14,
+        23,
+        teilnehmer,
+        cell_indices=[0, 1, 2, 3, 4, 5, 6],
+        template_idx=14,
+    )
+
+    themen = _tracking_data_rows(parsed, "Besprechungsthemen")
+    theme_table = doc.tables[1]
+    category_template = deepcopy(theme_table.rows[3]._tr)
+    topic_template = deepcopy(theme_table.rows[4]._tr)
+    _delete_rows_after(theme_table, 1)
+    for row in themen:
+        padded = row + [""] * (7 - len(row))
+        is_category = _is_empty_marker(padded[1]) and _is_empty_marker(padded[2])
+        tr = _append_row_from_template(
+            theme_table,
+            category_template if is_category else topic_template,
+        )
+        if is_category:
+            _fill_row_cells(tr, [padded[0], padded[3]], [0, 1])
+        else:
+            _fill_row_cells(tr, padded[:7], [0, 1, 2, 3, 4, 5, 6])
+
+    termine_section = _section_by_prefix(parsed, "Termine")
+    termine = []
+    if termine_section is not None:
+        tables = _tables_from_lines(termine_section.lines)
+        termine = _clean_rows(tables[0][1:] if tables else [])
+    _replace_row_range(
+        doc.tables[2],
+        2,
+        4,
+        termine,
+        cell_indices=[0, 1, 3, 4, 5],
+        template_idx=2,
+    )
+
+    tail = doc.tables[3]
+    aufstell = _tracking_data_rows(parsed, "Aufstellvermerk zum Dokument")
+    aufstell_by_role = {row[0].strip().lower(): row for row in aufstell if row}
+    for role, row_idx in [("ersteller", 2), ("geprüft", 3)]:
+        row = aufstell_by_role.get(role, [])
+        cells = _actual_tcs(tail.rows[row_idx])
+        if len(cells) > 1:
+            _set_tc_text(cells[1], row[1] if len(row) > 1 else "")
+        if len(cells) > 5:
+            _set_tc_text(cells[5], row[2] if len(row) > 2 else "")
+
+    anmerkungen = _tracking_data_rows(parsed, "Nachträgliche Anmerkungen zum Dokument")
+    anmerkung = anmerkungen[0] if anmerkungen else []
+    row6 = _actual_tcs(tail.rows[6])
+    row7 = _actual_tcs(tail.rows[7])
+    if len(row6) > 1:
+        _set_tc_text(row6[1], anmerkung[0] if len(anmerkung) > 0 else "- - -")
+    if len(row6) > 5:
+        _set_tc_text(row6[5], anmerkung[1] if len(anmerkung) > 1 else "- - -")
+    if len(row7) > 1:
+        _set_tc_text(row7[1], anmerkung[2] if len(anmerkung) > 2 else "- - -")
+
+    kennz = _tracking_data_rows(parsed, "Kennzeichnungen im Dokument")
+    _replace_row_range(
+        tail,
+        17,
+        19,
+        kennz,
+        cell_indices=[0, 1, 3],
+        template_idx=17,
+    )
+
+    anlagen = _tracking_data_rows(parsed, "Anlagen")
+    _replace_row_range(
+        tail,
+        11,
+        13,
+        anlagen,
+        cell_indices=[0, 1, 2, 4],
+        template_idx=11,
+    )
+
+    replacements = {
+        "_Prj.-Nr._": project_number,
+        "_Prj.-Name_": project_name,
+        "_Besprechungsthema_": meeting_topic,
+        "zur Besprechung Nr. XX": f"zur Besprechung Nr. {meeting_no}".strip(),
+        "_Ort_": ort,
+        "TT.MM.JJ": datum,
+        "0.00 – 0.00 Uhr": zeit,
     }
     _replace_visible_text(doc._element, replacements)
     for part in doc.part.related_parts.values():
@@ -638,12 +918,22 @@ def _add_title_block(doc, title: str, subtitle: str | None) -> None:
 def render_to_docx(parsed: ParsedMd, out_path: Path) -> None:
     """Build an EBA-styled DOCX from the parsed MD.
 
-    Gesprächsnotiz uses the official QMG-024-141 Word template and fills its
-    real tables so header/footer/page numbering and EBA-CI are preserved. The
-    other formats still use the generic renderer until their QMG mappings are
-    implemented."""
+    The supported EBA formats use the official QMG-024-141 Word table shells so
+    header/footer/page numbering and EBA-CI are preserved. The generic renderer
+    is retained only as a fallback for unknown Markdown."""
     if parsed.detected_format == "gespraechsnotiz":
         _render_gespraechsnotiz_template(parsed, out_path)
+        return
+    if parsed.detected_format == "protokoll-einfach":
+        _render_protokoll_einfach_template(parsed, out_path)
+        return
+    if parsed.detected_format in {
+        "protokoll-tracking",
+        "protokoll-lp1-4",
+        "protokoll-bim",
+        "protokoll-lp5",
+    }:
+        _render_tracking_template(parsed, out_path)
         return
 
     doc = Document()
