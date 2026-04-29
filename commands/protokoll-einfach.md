@@ -1,11 +1,12 @@
 ---
-description: Erstellt ein einfaches EBA-Protokoll (LP1-4 Word Stand A) aus einem Transkript — hierarchische Themen, Frist-Spalte, kein D/K-Tracking.
+description: Erstellt ein einfaches EBA-Protokoll (LP1-4 Word + Excel Stand A) aus einem Transkript — hierarchische Themen, Frist-Spalte, kein D/K-Tracking.
 argument-hint: <pfad/zur/transkript.txt>
 allowed-tools: Read, Write, Edit, Bash, Glob, Grep, Skill
 ---
 
 Du erstellst ein einfaches Protokoll im EBA-Format
-`QMG-024-141 ORG-PK-LP1-4-MA` (Stand A, Word-Variante).
+`QMG-024-141 ORG-PK-LP1-4-MA` (Stand A, Word-Variante) plus
+`QMG-024-141 ORG-PK-LP1-4-EXCEL-MA` (Stand A, Excel-Variante).
 
 ## Eingabe
 
@@ -27,9 +28,9 @@ Wenn leer, frage den Nutzer nach der Datei oder liste verfügbare Transkripte au
    - Verteiler (3 Spalten: Vorname, Name, Firma).
    - Gesprächsinhalt mit hierarchischer Themenstruktur und kombinierter
      Spalte „Zuständig / Frist".
-3. Ausgabe als **DOCX + PDF** (kein Markdown im Projekt) unter
+3. Ausgabe als **DOCX + PDF + XLSX** (kein Markdown im Projekt) unter
    `protokolle/<jjjj-mm-tt>_<projekt-kurzname>_protokoll.docx` und
-   `…_protokoll.pdf`. Pipeline:
+   `…_protokoll.pdf` sowie `…_protokoll.xlsx`. Pipeline:
    `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 
 ## Verwendung

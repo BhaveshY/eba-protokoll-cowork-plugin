@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -8,6 +9,10 @@ const failures = [];
 
 function read(relativePath) {
   return readFileSync(join(repoRoot, relativePath), "utf8");
+}
+
+function sha256(relativePath) {
+  return createHash("sha256").update(readFileSync(join(repoRoot, relativePath))).digest("hex");
 }
 
 function expect(condition, message) {
@@ -174,7 +179,23 @@ expectFile("references/categories/ausgabe-konvention.md");
 expectFile("references/templates/qmg/QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx");
 expectFile("references/templates/qmg/QMG-024-141_ORG-PK-LP1-4-MA_230227-A.docx");
 expectFile("references/templates/qmg/QMG-024-141_ORG-PK-LP5-MA_230202-B.docx");
+expectFile("references/templates/qmg/QMG-024-141_ORG-PK-LP1-4-EXCEL-MA_240920-A.xlsx");
 expectFile("references/templates/qmg/QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx");
+const qmgTemplateHashes = {
+  "references/templates/qmg/QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx":
+    "d89c4b57fa22810c48ae3cec31bb283d283db32a4701081a4454bab8322a3930",
+  "references/templates/qmg/QMG-024-141_ORG-PK-LP1-4-MA_230227-A.docx":
+    "fed52b658540355e491600d43f8e75f3254855aed7e665e1e843e2e0cc699019",
+  "references/templates/qmg/QMG-024-141_ORG-PK-LP5-MA_230202-B.docx":
+    "f61a9e4657a1fac2cb0642d35fa22427087630457ff76f988700f7560ecc1a6c",
+  "references/templates/qmg/QMG-024-141_ORG-PK-LP1-4-EXCEL-MA_240920-A.xlsx":
+    "0026537daffaf3809c273b71e77264848c3bbd569e31f78ded496eabf0177e70",
+  "references/templates/qmg/QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx":
+    "9db7d927f5f6909be842ec2bd858df4b0985c97578fa420d04245e62c63e808a",
+};
+for (const [templatePath, expectedHash] of Object.entries(qmgTemplateHashes)) {
+  expect(sha256(templatePath) === expectedHash, `${templatePath} matches the original QMG source file`);
+}
 
 const ausgabeKonvention = read("references/categories/ausgabe-konvention.md");
 expect(
@@ -201,7 +222,7 @@ expect(
 );
 expect(
   requirements.includes("openpyxl>=3.1.0"),
-  "requirements include openpyxl for official tracking XLSX output",
+  "requirements include openpyxl for official QMG XLSX output",
 );
 expect(
   renderer.includes("pdf_required = sys.platform == \"win32\""),
@@ -211,13 +232,16 @@ expect(
   renderer.includes("GESPRAECHSNOTIZ_TEMPLATE") &&
     renderer.includes("PROTOKOLL_EINFACH_TEMPLATE") &&
     renderer.includes("TRACKING_WORD_TEMPLATE") &&
+    renderer.includes("PROTOKOLL_EINFACH_EXCEL_TEMPLATE") &&
     renderer.includes("TRACKING_EXCEL_TEMPLATE") &&
     renderer.includes("def _render_gespraechsnotiz_template") &&
     renderer.includes("def _render_protokoll_einfach_template") &&
+    renderer.includes("def _render_simple_excel_template") &&
     renderer.includes("def _render_tracking_template") &&
     renderer.includes("def render_to_xlsx") &&
+    renderer.includes("Refusing to render without a supported QMG template") &&
     renderer.includes("page numbering and EBA-CI are preserved"),
-  "renderer fills the official QMG Word and Excel templates",
+  "renderer fills the official QMG Word and Excel templates and rejects generic output",
 );
 
 for (const skillRel of [
@@ -255,11 +279,11 @@ for (const skillRel of [
 }
 
 const pluginManifest = JSON.parse(read(".claude-plugin/plugin.json"));
-expect(pluginManifest.version === "0.2.5", "plugin.json bumped to 0.2.5");
+expect(pluginManifest.version === "0.2.6", "plugin.json bumped to 0.2.6");
 const market = JSON.parse(read(".claude-plugin/marketplace.json"));
 expect(
-  market.plugins[0].version === "0.2.5",
-  "marketplace.json plugin entry bumped to 0.2.5",
+  market.plugins[0].version === "0.2.6",
+  "marketplace.json plugin entry bumped to 0.2.6",
 );
 
 // Dispatcher smoke test — verify each example transcript would route to the

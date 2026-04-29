@@ -4,17 +4,19 @@ description: >-
   Use when the user asks for a "Protokoll einfach", "einfaches Protokoll",
   "Protokoll ohne Tracking", "Workshop-Protokoll ohne D/K", "Kick-Off Notiz",
   or "simple meeting protocol with deadlines but no tracking". Produces the EBA
-  QMG-024-141 ORG-PK-LP1-4-MA Word format (Stand A): hierarchical theme
-  numbering (Thema 01.1), combined "Zuständig / Frist" column, 3-day notice
-  period, no status column, no D/K|B|LN scheme.
+  QMG-024-141 ORG-PK-LP1-4-MA Word format plus ORG-PK-LP1-4-EXCEL-MA workbook
+  (Stand A): hierarchical theme numbering (Thema 01.1), combined
+  "Zuständig / Frist" column, 3-day notice period, no status column, no
+  D/K|B|LN scheme.
 ---
 
 # Einfaches Protokoll erstellen
 
 Erstellt ein Protokoll im EBA-Format `QMG-024-141 ORG-PK-LP1-4-MA` (Stand A,
-Word-Variante). Dieses Format liegt **zwischen** Gesprächsnotiz und voller
-LP1-4-Tracking: hierarchische Themen mit Frist-Spalte, aber **ohne** D/K|B|LN-Schema
-und **ohne** Status.
+Word-Variante) plus `QMG-024-141 ORG-PK-LP1-4-EXCEL-MA` (Stand A,
+Excel-Variante). Dieses Format liegt **zwischen** Gesprächsnotiz und voller
+LP1-4-Tracking: hierarchische Themen mit Frist-Spalte, aber **ohne**
+D/K|B|LN-Schema und **ohne** Status.
 
 ## Wann dieses Format
 
@@ -91,9 +93,10 @@ Pro erkanntem Themenblock eine Zeile (oder Hauptzeile + Unterzeilen mit Hierarch
 
 Bei Unterthemen: `Thema 01`, `Thema 01.1`, `Thema 01.2`, `Thema 02`, …
 
-### 6. Ausgabe als DOCX + PDF schreiben
+### 6. Ausgabe als DOCX + PDF + XLSX schreiben
 
-**Endformat**: DOCX + PDF. **Kein Markdown** im Projekt-Ordner.
+**Endformat**: DOCX + PDF + offizielles QMG-XLSX. **Kein Markdown** im
+Projekt-Ordner.
 Auf Windows 11 mit MS Word bootstrapt der Renderer fehlende Python-Pakete
 selbst und exportiert die PDF via Word. Keine technischen Setup-Fragen an den
 Nutzer.
@@ -116,15 +119,17 @@ Schritte:
    ```
 
 3. Der Renderer schreibt
-   `protokolle/eba-protokoll-einfach-<datum>-<kuerzel>.docx` und
-   `protokolle/eba-protokoll-einfach-<datum>-<kuerzel>.pdf`,
-   und löscht das MD-Zwischenformat. Wenn der Renderer einen Windows-PDF-Fehler
-   meldet, stderr lesen, denselben Befehl nach der automatischen Selbstheilung
-   erneut versuchen und erst danach echte Blocker melden.
+   `protokolle/eba-protokoll-einfach-<datum>-<kuerzel>.docx`,
+   `protokolle/eba-protokoll-einfach-<datum>-<kuerzel>.pdf` und
+   `protokolle/eba-protokoll-einfach-<datum>-<kuerzel>.xlsx`, und löscht das
+   MD-Zwischenformat. Wenn der Renderer einen Windows-PDF-Fehler meldet,
+   stderr lesen, denselben Befehl nach der automatischen Selbstheilung erneut
+   versuchen und erst danach echte Blocker melden.
 
 **EBA-Dateinamen-Konvention** (wenn vom Nutzer gewünscht): siehe
 `${CLAUDE_PLUGIN_ROOT}/references/categories/dateinamen-konvention.md`. Schema:
-`<PrjNr>-<PrjKZ>-EBA-WS-PK-<JJMMTT>` (ohne Endung; Renderer hängt `.docx`/`.pdf` an).
+`<PrjNr>-<PrjKZ>-EBA-WS-PK-<JJMMTT>` (ohne Endung; Renderer hängt
+`.docx`/`.pdf`/`.xlsx` an).
 
 Volle Pipeline-Beschreibung:
 `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
@@ -133,7 +138,7 @@ Volle Pipeline-Beschreibung:
 
 Nach dem Schreiben kurz mitteilen:
 
-- Pfad zur erzeugten Datei.
+- Pfade zu DOCX, PDF und XLSX.
 - Anzahl der erkannten Teilnehmer.
 - Anzahl der Themen (mit Aufschlüsselung Hauptthemen / Unterpunkte).
 - Anzahl von Aufgaben mit konkreter Frist.

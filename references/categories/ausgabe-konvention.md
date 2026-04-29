@@ -1,9 +1,9 @@
-# Ausgabe-Konvention: DOCX + PDF + Tracking-XLSX (kein Markdown)
+# Ausgabe-Konvention: DOCX + PDF + QMG-XLSX (kein Markdown)
 
 Alle Protokoll-Skills schreiben als Endformat **DOCX + PDF**. Für
-`protokoll-lp1-4` und `protokoll-bim` schreibt der Renderer zusätzlich das
-offizielle **QMG-XLSX**. Markdown ist nur ein **flüchtiges Zwischenformat** und
-wird nach dem Rendern gelöscht.
+`protokoll-einfach`, `protokoll-lp1-4` und `protokoll-bim` schreibt der Renderer
+zusätzlich das passende offizielle **QMG-XLSX**. Markdown ist nur ein
+**flüchtiges Zwischenformat** und wird nach dem Rendern gelöscht.
 
 Die Produktionsumgebung ist **Windows 11 mit installiertem Microsoft Word**.
 Der Nutzer ist nicht technisch. Die Skill darf den Nutzer deshalb **nicht**
@@ -23,7 +23,7 @@ Die Ausgaben landen relativ zum aktuellen Arbeitsverzeichnis:
 protokolle/
 └── <projekt>/                 # z.B. 553-WIL/
     ├── 2026-03-24_planungsbesprechung-12.docx   # immer
-    ├── 2026-03-24_planungsbesprechung-12.xlsx   # LP1-4/BIM
+    ├── 2026-03-24_planungsbesprechung-12.xlsx   # einfach/LP1-4/BIM
     └── 2026-03-24_planungsbesprechung-12.pdf    # wenn Konverter vorhanden
 ```
 
@@ -38,7 +38,7 @@ Vor dem ersten DOCX/PDF/XLSX-Rendern prüft `render_protokoll.py` seine
 Abhängigkeiten:
 
 - `python-docx` für DOCX-Erzeugung.
-- `openpyxl` für das offizielle LP1-4/BIM-XLSX.
+- `openpyxl` für die offiziellen QMG-XLSX-Ausgaben.
 - `pywin32` auf Windows für den MS-Word-COM-PDF-Export.
 
 Fehlt ein Paket, installiert der Renderer es automatisch mit:
@@ -86,7 +86,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
 Wichtige Flags:
 
 - `--no-pdf` — DOCX-only, PDF-Schritt überspringen.
-- `--no-xlsx` — nur für Debugging: LP1-4/BIM-XLSX überspringen.
+- `--no-xlsx` — nur für Debugging: QMG-XLSX überspringen.
 - `--keep-md` — nur für Debugging: behält das MD-Zwischenformat.
 - `--out-dir <pfad>` — Zielverzeichnis (Default: neben dem MD).
 - `--format <name>` — überschreibt die Auto-Erkennung
@@ -140,6 +140,10 @@ und PDF vorhanden sind oder ein echter Blocker vorliegt.
   `QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx`,
   `QMG-024-141_ORG-PK-LP1-4-MA_230227-A.docx` und dem
   QMG-Tracking-Word-Shell `QMG-024-141_ORG-PK-LP5-MA_230202-B.docx`.
+- Protokoll-einfach-XLSX-Ausgaben werden direkt aus
+  `QMG-024-141_ORG-PK-LP1-4-EXCEL-MA_240920-A.xlsx` erzeugt. Dieses Workbook
+  hat die einfache `Gesprächsinhalt` / `zuständig` / `Frist`-Struktur und kein
+  D/K|B|LN-Tracking.
 - LP1-4/BIM-XLSX-Ausgaben werden direkt aus
   `QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx` erzeugt. Die Sheets
   `Deckblatt`, `Protokoll`, `Doku_Info`, `Hilfe und Tipps` und `intern`
@@ -149,6 +153,9 @@ und PDF vorhanden sind oder ein echter Blocker vorliegt.
   ausführen.
 - Keine frei erfundenen Felder, keine ausgelassenen Header- oder Endblöcke, kein
   Markdown im Projektordner.
+- Unbekannte Markdown-Formate werden nicht generisch gerendert. Wenn der
+  Renderer ein Format ablehnt, muss Claude den passenden EBA-Typ bestimmen
+  oder bei echtem Formatkonflikt kurz nachfragen.
 
 ## Was beim Fortschreiben anders ist
 
@@ -163,8 +170,9 @@ nächsten Lauf.
   `protokolle/`-Ordner.
 - ❌ DOCX im aktuellen Verzeichnis oder auf dem Desktop ablegen — immer in
   `protokolle/<projekt>/`.
-- ❌ Bei LP1-4/BIM nur DOCX + PDF liefern — das offizielle XLSX gehört dazu,
-  außer der Nutzer verlangt ausdrücklich kein Excel.
+- ❌ Bei Protokoll-einfach oder LP1-4/BIM nur DOCX + PDF liefern — das
+  offizielle XLSX gehört dazu, außer der Nutzer verlangt ausdrücklich kein
+  Excel.
 - ❌ Den Nutzer bitten, `pip install`, `pywin32`, LibreOffice oder andere
   technische Setup-Schritte auszuführen — der Renderer bootstrapt selbst.
 - ❌ Auf Windows mit nur DOCX antworten, wenn PDF fehlt — Word-PDF ist dort
@@ -172,3 +180,5 @@ nächsten Lauf.
 - ❌ Den Renderer überspringen, wenn nur DOCX gefordert ist — auch dann via
   `--no-pdf` aufrufen, damit die Konvention konsistent bleibt.
 - ❌ `--keep-md` standardmäßig setzen — nur bei Debugging.
+- ❌ Unbekannte Inhalte mit einem freien DOCX-Layout ausgeben — nur unterstützte
+  QMG-Template-Pfade sind zulässig.

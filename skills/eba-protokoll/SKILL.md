@@ -171,8 +171,8 @@ dem `E`-Suffix als Ergänzung markiert.
 
 ### 6. Ausgabe ablegen
 
-**Endformat: DOCX + PDF; bei LP1-4/BIM zusätzlich XLSX. Kein Markdown im
-Projekt-Ordner.**
+**Endformat: DOCX + PDF; bei Protokoll-einfach und LP1-4/BIM zusätzlich XLSX.
+Kein Markdown im Projekt-Ordner.**
 
 Produktionsannahme: Windows 11 mit installiertem MS Word. Der Renderer
 installiert fehlende Python-Pakete (`python-docx`, auf Windows `pywin32`)
@@ -180,9 +180,9 @@ automatisch im Benutzerkontext und nutzt Word für den PDF-Export. Stelle dem
 Nutzer keine technischen Setup-Fragen.
 
 Default-Speicherort:
-`protokolle/<jjjj-mm-tt>_<projekt>_<typ>.docx` (+ `.pdf`, bei LP1-4/BIM auch
-`.xlsx`) relativ zum aktuellen Arbeitsverzeichnis. Wenn der Nutzer einen
-anderen Pfad wünscht, dort.
+`protokolle/<jjjj-mm-tt>_<projekt>_<typ>.docx` (+ `.pdf`, bei
+Protokoll-einfach und LP1-4/BIM auch `.xlsx`) relativ zum aktuellen
+Arbeitsverzeichnis. Wenn der Nutzer einen anderen Pfad wünscht, dort.
 
 Wenn `protokolle/` nicht existiert: anlegen.
 

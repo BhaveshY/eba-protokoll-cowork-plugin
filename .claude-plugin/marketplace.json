@@ -1,7 +1,7 @@
 {
   "name": "eba-protokoll-cowork",
   "metadata": {
-    "description": "Erzeugt EBA-konforme Protokolle als DOCX + PDF, plus offizielles QMG-XLSX für LP1-4/BIM-Tracking. Windows-11-first mit Metadaten-Fallbacks und automatischem Dependency-Bootstrap."
+    "description": "Erzeugt EBA-konforme Protokolle als DOCX + PDF, plus offizielles QMG-XLSX für Protokoll-einfach und LP1-4/BIM-Tracking. Windows-11-first mit Metadaten-Fallbacks und automatischem Dependency-Bootstrap."
   },
   "owner": {
     "name": "Eike Becker_Architekten",
@@ -11,8 +11,8 @@
     {
       "name": "eba-protokoll-cowork",
       "source": "./",
-      "description": "Erzeugt EBA-konforme Protokolle als DOCX + PDF nach QMG-024-141 (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4/BIM Tracking, Bauleitungsprotokoll LP5) aus rohen Transkripten der EBA Protokoll App. LP1-4/BIM schreibt zusätzlich die offizielle QMG-Excel-Datei. Windows-11-first; fehlende Metadaten werden per Fallback gefüllt, PDF via MS Word und automatischem Dependency-Bootstrap.",
-      "version": "0.2.5",
+      "description": "Erzeugt EBA-konforme Protokolle als DOCX + PDF nach QMG-024-141 (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4/BIM Tracking, Bauleitungsprotokoll LP5) aus rohen Transkripten der EBA Protokoll App. Protokoll-einfach und LP1-4/BIM schreiben zusätzlich die passende offizielle QMG-Excel-Datei. Windows-11-first; fehlende Metadaten werden per Fallback gefüllt, PDF via MS Word und automatischem Dependency-Bootstrap.",
+      "version": "0.2.6",
       "category": "productivity",
       "tags": [
         "protokoll",

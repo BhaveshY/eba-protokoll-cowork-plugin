@@ -31,9 +31,10 @@ Das ist entweder:
    befüllen, Themen-Tabelle bauen, Ausgabe schreiben.
 
 3. Speicherort default:
-   `protokolle/<jjjj-mm-tt>_<projekt>_<typ>.docx` (+ `.pdf`, bei LP1-4/BIM
-   auch `.xlsx`) relativ zum aktuellen Arbeitsverzeichnis. **DOCX und PDF sind
-   die Endausgabe; LP1-4/BIM liefert zusätzlich XLSX**.
+   `protokolle/<jjjj-mm-tt>_<projekt>_<typ>.docx` (+ `.pdf`, bei
+   Protokoll-einfach und LP1-4/BIM auch `.xlsx`) relativ zum aktuellen
+   Arbeitsverzeichnis. **DOCX und PDF sind die Endausgabe; einfache Protokolle
+   und LP1-4/BIM liefern zusätzlich XLSX**.
    Auf Windows 11 mit MS Word erzeugt der Renderer die PDF automatisch und
    bootstrapt fehlende Python-Pakete selbst. **Kein Markdown** im Projekt.
 
@@ -41,7 +42,7 @@ Das ist entweder:
    diesen verwenden.
 
 5. Am Ende **zusammenfassen**:
-   - Pfade zu DOCX und PDF; bei LP1-4/BIM auch zu XLSX.
+   - Pfade zu DOCX und PDF; bei Protokoll-einfach und LP1-4/BIM auch zu XLSX.
    - Erkannter Format-Typ.
    - Anzahl Teilnehmer / Themen / offene vs. erledigte Punkte.
    - Annahmen/Fallbacks, z.B. `Projekt-Nr. 000`, `Ort nicht angegeben`.
@@ -50,9 +51,9 @@ Das ist entweder:
 ## Wichtig
 
 - Niemals den ursprünglichen Transkript verändern.
-- Ausgabe ist **DOCX + PDF**, bei LP1-4/BIM zusätzlich **XLSX** — nicht
-  Markdown. Keine technischen Setup-Fragen an den Nutzer; der Renderer heilt
-  Abhängigkeiten selbst. Pipeline:
+- Ausgabe ist **DOCX + PDF**, bei Protokoll-einfach und LP1-4/BIM zusätzlich
+  **XLSX** — nicht Markdown. Keine technischen Setup-Fragen an den Nutzer; der
+  Renderer heilt Abhängigkeiten selbst. Pipeline:
   `${CLAUDE_PLUGIN_ROOT}/references/categories/ausgabe-konvention.md`.
 - Nicht wegen fehlender Projekt-Nr., Projektname, Ort oder Ersteller fragen.
   Diese Felder automatisch aus dem Transkript ableiten oder per

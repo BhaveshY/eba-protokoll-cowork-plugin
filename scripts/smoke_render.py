@@ -46,6 +46,9 @@ TRACKING_XLSX_EXAMPLES = {
     "references/examples/beispiel-ausgabe-lp1-4.md",
     "references/examples/beispiel-ausgabe-bim.md",
 }
+SIMPLE_XLSX_EXAMPLES = {
+    "references/examples/beispiel-ausgabe-einfach.md",
+}
 
 
 def read_docx_text(path: Path) -> str:
@@ -77,6 +80,16 @@ def xlsx_template_checks(path: Path, example: str) -> list[str]:
         failures.append(f"{example}: XLSX sheet structure changed: {wb.sheetnames}")
     if "Protokoll" not in wb["Protokoll"].tables:
         failures.append(f"{example}: XLSX Protokoll table is missing")
+    else:
+        ref = wb["Protokoll"].tables["Protokoll"].ref
+        if not ref.startswith("A2:H"):
+            failures.append(f"{example}: XLSX Protokoll table should include ausblenden column H (got {ref})")
+    if wb["Protokoll"]["H2"].value != "ausblenden":
+        failures.append(f"{example}: XLSX ausblenden helper header missing")
+    if not str(wb["Protokoll"]["H5"].value or "").startswith("=IF(AND((1+B5)<Deckblatt!$A$3"):
+        failures.append(f"{example}: XLSX ausblenden helper formula missing")
+    if not isinstance(wb["Deckblatt"]["A3"].value, int):
+        failures.append(f"{example}: XLSX meeting number should be numeric in Deckblatt!A3")
     for sheet_name in ["Deckblatt", "Protokoll", "Doku_Info"]:
         sheet_text = "\n".join(
             str(cell.value)
@@ -95,6 +108,50 @@ def xlsx_template_checks(path: Path, example: str) -> list[str]:
         ]:
             if placeholder in sheet_text:
                 failures.append(f"{example}: XLSX placeholder leaked into {sheet_name}: {placeholder}")
+    return failures
+
+
+def simple_xlsx_template_checks(path: Path, example: str) -> list[str]:
+    failures: list[str] = []
+    wb = load_workbook(path, data_only=False)
+    expected_sheets = ["Deckblatt", "Protokoll", "Doku_Info", "Hilfe und Tipps", "intern"]
+    if wb.sheetnames != expected_sheets:
+        failures.append(f"{example}: simple XLSX sheet structure changed: {wb.sheetnames}")
+    if wb["Protokoll"]["A1"].value != "Gesprächsinhalt":
+        failures.append(f"{example}: simple XLSX Protokoll sheet is not the official simple template")
+    if wb["Protokoll"]["D1"].value != "zuständig" or wb["Protokoll"]["E1"].value != "Frist":
+        failures.append(f"{example}: simple XLSX zuständig/Frist headers missing")
+    if wb["Protokoll"]["A2"].value != "1" or wb["Protokoll"]["B3"].value != "Thema 01.1":
+        failures.append(f"{example}: simple XLSX topic numbering not populated")
+    if "Protokoll" in wb["Protokoll"].tables:
+        failures.append(f"{example}: simple XLSX should not use the D/K tracking table")
+    if wb["Protokoll"]["H2"].value == "ausblenden":
+        failures.append(f"{example}: simple XLSX should not include tracking helper column H")
+    for sheet_name in ["Deckblatt", "Protokoll", "Doku_Info"]:
+        sheet_text = "\n".join(
+            str(cell.value)
+            for row in wb[sheet_name].iter_rows()
+            for cell in row
+            if cell.value is not None
+        )
+        for placeholder in [
+            "_Vorname_",
+            "_Name_",
+            "_Firma_",
+            "_Kürzel_",
+            "_Prj.-Nr._",
+            "_Prj.-Name_",
+            "_Besprechungsthema_",
+            "_Ersteller_",
+            "_Ersteller eintragen_",
+            "_ Dokument/e, Plan/Pläne _",
+            "_Thema 01_",
+            "_Dokument/e, Plan/Pläne_",
+            "_Format_",
+            "Besprechnungsthema A",
+        ]:
+            if placeholder in sheet_text:
+                failures.append(f"{example}: simple XLSX placeholder leaked into {sheet_name}: {placeholder}")
     return failures
 
 
@@ -184,7 +241,20 @@ def render_example(example: str, required_text: list[str]) -> list[str]:
         failures.extend(qmg_template_checks(docx_path, example))
 
         xlsx_path = out_dir / f"{md_path.stem}.xlsx"
-        if example in TRACKING_XLSX_EXAMPLES:
+        if example in SIMPLE_XLSX_EXAMPLES:
+            if not xlsx_path.exists():
+                failures.append(f"{example}: simple XLSX was not written")
+                return failures
+            rendered_xlsx = read_xlsx_text(xlsx_path)
+            for needle in [
+                "Kick-Off Meeting Projekt VTS-549",
+                "Projektorganisation: EBA übernimmt die Gesamtkoordination.",
+                "22.04.26",
+            ]:
+                if needle not in rendered_xlsx:
+                    failures.append(f"{example}: rendered simple XLSX missing {needle!r}")
+            failures.extend(simple_xlsx_template_checks(xlsx_path, example))
+        elif example in TRACKING_XLSX_EXAMPLES:
             if not xlsx_path.exists():
                 failures.append(f"{example}: tracking XLSX was not written")
                 return failures
@@ -208,6 +278,36 @@ def render_example(example: str, required_text: list[str]) -> list[str]:
             failures.extend(xlsx_template_checks(xlsx_path, example))
         elif xlsx_path.exists():
             failures.append(f"{example}: unexpected XLSX was written for non-Excel format")
+    return failures
+
+
+def unknown_format_rejected() -> list[str]:
+    failures: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="eba-render-unknown-") as tmp:
+        tmp_path = Path(tmp)
+        md_path = tmp_path / "unknown.md"
+        out_dir = tmp_path / "out"
+        md_path.write_text("# Freitext\n\nDies ist kein EBA-Protokoll.\n", encoding="utf-8")
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(RENDERER),
+                str(md_path),
+                "--out-dir",
+                str(out_dir),
+                "--no-pdf",
+            ],
+            cwd=str(REPO_ROOT),
+            text=True,
+            capture_output=True,
+            timeout=120,
+        )
+        if result.returncode != 3:
+            failures.append(f"unknown format: expected renderer exit 3, got {result.returncode}")
+        if "Refusing to render without a supported QMG template" not in result.stderr:
+            failures.append("unknown format: renderer did not explain QMG-template refusal")
+        if (out_dir / "unknown.docx").exists():
+            failures.append("unknown format: generic DOCX was written")
     return failures
 
 
@@ -252,6 +352,7 @@ def main() -> int:
     failures: list[str] = []
     for example, required_text in checks.items():
         failures.extend(render_example(example, required_text))
+    failures.extend(unknown_format_rejected())
 
     if failures:
         print(f"Render smoke test failed with {len(failures)} issue(s):")
