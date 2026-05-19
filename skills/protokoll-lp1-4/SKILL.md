@@ -170,15 +170,17 @@ technischen Setup-Fragen an den Nutzer.
 Schritte:
 
 1. Erzeuge das Protokoll als Markdown unter einem flüchtigen Pfad:
-   `/tmp/eba-protokoll-lp1-4-<jjjj-mm-tt>-<projekt>.md` (bzw.
-   `/tmp/eba-protokoll-bim-...md` für BIM-Koordinationen).
+   `<temp-dir>/eba-protokoll-lp1-4-<jjjj-mm-tt>-<projekt>.md` (bzw.
+   `<temp-dir>/eba-protokoll-bim-...md` für BIM-Koordinationen).
+   `<temp-dir>` ist das OS-Temp-Verzeichnis (`tempfile.gettempdir()`;
+   `%TEMP%` auf Windows, `/tmp` auf Unix), nicht fest `/tmp`.
    Die Vorbemerkungs-Box bleibt wortgleich (mit **5 Kalendertagen**).
 
 2. Rufe den Renderer auf:
 
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
-     "/tmp/eba-protokoll-lp1-4-<datum>-<projekt>.md" \
+     "<temp-dir>/eba-protokoll-lp1-4-<datum>-<projekt>.md" \
      --format protokoll-lp1-4 \
      --out-dir "protokolle/<projekt>/"
    ```

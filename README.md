@@ -208,7 +208,8 @@ Das Plugin füllt das State-File mit dem ersten Protokoll vollständig auf.
 Alle Skills delegieren das Rendering an
 `scripts/render_protokoll.py`. Der Renderer:
 
-1. Liest das vom Skill erzeugte Markdown-Zwischenformat aus `/tmp/`.
+1. Liest das vom Skill erzeugte Markdown-Zwischenformat aus dem temporären
+   Verzeichnis des Betriebssystems (`%TEMP%` auf Windows, `/tmp` auf Unix).
 2. Schreibt bei Word-Ursprungsvorlagen ein EBA-konformes DOCX nach
    `protokolle/<projekt>/`.
 3. Schreibt bei Excel-Ursprungsvorlagen ein XLSX aus der passenden offiziellen

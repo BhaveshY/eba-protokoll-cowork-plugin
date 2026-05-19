@@ -113,7 +113,9 @@ Nutzer.
 Schritte:
 
 1. Erzeuge die Notiz als Markdown unter einem flüchtigen Pfad:
-   `/tmp/eba-gespraechsnotiz-<jjjj-mm-tt>-<projekt-kuerzel>.md`.
+   `<temp-dir>/eba-gespraechsnotiz-<jjjj-mm-tt>-<projekt-kuerzel>.md`.
+   `<temp-dir>` ist das OS-Temp-Verzeichnis (`tempfile.gettempdir()`;
+   `%TEMP%` auf Windows, `/tmp` auf Unix), nicht fest `/tmp`.
    Verwende **exakt** die Markdown-Struktur aus
    `${CLAUDE_PLUGIN_ROOT}/references/templates/gespraechsnotiz.md`. Die
    „Hinweis"-Box bleibt wortgleich.
@@ -122,7 +124,7 @@ Schritte:
 
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
-     "/tmp/eba-gespraechsnotiz-<datum>-<kuerzel>.md" \
+     "<temp-dir>/eba-gespraechsnotiz-<datum>-<kuerzel>.md" \
      --format gespraechsnotiz \
      --out-dir "protokolle/"
    ```

@@ -101,7 +101,9 @@ Nutzer.
 Schritte:
 
 1. Erzeuge das Protokoll als Markdown unter einem flüchtigen Pfad:
-   `/tmp/eba-protokoll-einfach-<jjjj-mm-tt>-<projekt-kuerzel>.md`.
+   `<temp-dir>/eba-protokoll-einfach-<jjjj-mm-tt>-<projekt-kuerzel>.md`.
+   `<temp-dir>` ist das OS-Temp-Verzeichnis (`tempfile.gettempdir()`;
+   `%TEMP%` auf Windows, `/tmp` auf Unix), nicht fest `/tmp`.
    Verwende **exakt** die Markdown-Struktur aus
    `${CLAUDE_PLUGIN_ROOT}/references/templates/protokoll-einfach.md`. Die
    „Hinweis"-Box bleibt wortgleich (mit **3 Kalendertagen**, nicht 5).
@@ -110,7 +112,7 @@ Schritte:
 
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
-     "/tmp/eba-protokoll-einfach-<datum>-<kuerzel>.md" \
+     "<temp-dir>/eba-protokoll-einfach-<datum>-<kuerzel>.md" \
      --format protokoll-einfach \
      --out-dir "protokolle/"
    ```

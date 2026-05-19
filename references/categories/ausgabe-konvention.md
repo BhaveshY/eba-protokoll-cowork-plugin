@@ -56,10 +56,14 @@ Renderer ausführen; er bootstrapt beim ersten Lauf und ist danach schnell.
 Schreibe das Protokoll als Markdown unter einen flüchtigen Pfad:
 
 ```
-/tmp/eba-<format>-<jjjj-mm-tt>-<projekt-kuerzel>.md
+<temp-dir>/eba-<format>-<jjjj-mm-tt>-<projekt-kuerzel>.md
 ```
 
-Beispiel: `/tmp/eba-gespraechsnotiz-2026-03-24-WIL.md`
+`<temp-dir>` ist das temporäre Verzeichnis des Betriebssystems, z.B. über
+`tempfile.gettempdir()` (`%TEMP%` auf Windows, `/tmp` auf macOS/Linux).
+Den Pfad **nicht fest auf `/tmp`** setzen.
+
+Beispiel: `<temp-dir>/eba-gespraechsnotiz-2026-03-24-WIL.md`
 
 Die Markdown-Struktur folgt **exakt** der jeweiligen Vorlage in
 `${CLAUDE_PLUGIN_ROOT}/references/templates/<format>.md`. Standard-Hinweistexte
@@ -71,7 +75,7 @@ Führe das folgende Bash-Kommando aus:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
-  "/tmp/eba-<format>-<datum>-<kuerzel>.md" \
+  "<temp-dir>/eba-<format>-<datum>-<kuerzel>.md" \
   --out-dir "protokolle/<projekt>/"
 ```
 
@@ -79,9 +83,12 @@ Ohne projekt-Unterordner:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
-  "/tmp/eba-<format>-<datum>-<kuerzel>.md" \
+  "<temp-dir>/eba-<format>-<datum>-<kuerzel>.md" \
   --out-dir "protokolle/"
 ```
+
+Auf Windows kann statt `python3` derselbe Befehl mit `python` oder `py -3`
+ausgeführt werden, wenn `python3` nicht registriert ist.
 
 Wichtige Flags:
 
