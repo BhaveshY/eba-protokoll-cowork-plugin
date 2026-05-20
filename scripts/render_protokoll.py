@@ -35,13 +35,14 @@ from __future__ import annotations
 
 import argparse
 from copy import copy, deepcopy
-import os
+import json
 import re
+import shutil
+import site
 import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable
 
 
 def _in_virtualenv() -> bool:
@@ -53,6 +54,7 @@ def _run_pip_install(args: list[str]) -> bool:
     if not _in_virtualenv():
         cmd.append("--user")
     cmd.extend(args)
+    pip_error = ""
     try:
         result = subprocess.run(
             cmd,
@@ -62,9 +64,49 @@ def _run_pip_install(args: list[str]) -> bool:
         )
         if result.returncode == 0:
             return True
+        pip_error = result.stderr.strip()
+    except Exception as exc:
+        pip_error = str(exc)
+
+    if _run_uv_install(args):
+        return True
+    if pip_error:
+        sys.stderr.write(pip_error + "\n")
+    return False
+
+
+def _run_uv_install(args: list[str]) -> bool:
+    """Fallback for lean Python installs that have uv but no pip/ensurepip."""
+    uv = shutil.which("uv")
+    if not uv:
+        return False
+    try:
+        if _in_virtualenv():
+            site_packages = site.getsitepackages()
+            target = site_packages[0] if site_packages else site.getusersitepackages()
+        else:
+            target = site.getusersitepackages()
+        Path(target).mkdir(parents=True, exist_ok=True)
+        result = subprocess.run(
+            [
+                uv,
+                "pip",
+                "install",
+                "--python",
+                sys.executable,
+                "--target",
+                target,
+                *args,
+            ],
+            text=True,
+            capture_output=True,
+            timeout=300,
+        )
+        if result.returncode == 0:
+            return True
         sys.stderr.write(result.stderr.strip() + "\n")
     except Exception as exc:
-        sys.stderr.write(f"Dependency bootstrap failed: {exc}\n")
+        sys.stderr.write(f"uv dependency bootstrap failed: {exc}\n")
     return False
 
 
@@ -102,10 +144,6 @@ def _bootstrap_package(package: str) -> bool:
 
 try:
     from docx import Document
-    from docx.shared import Pt, Cm, RGBColor, Mm
-    from docx.enum.table import WD_ALIGN_VERTICAL, WD_ROW_HEIGHT_RULE
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
-    from docx.enum.section import WD_ORIENTATION
     from docx.oxml.ns import qn
     from docx.oxml import OxmlElement
     from openpyxl import load_workbook
@@ -121,10 +159,6 @@ except ImportError:
         sys.exit(3)
     try:
         from docx import Document
-        from docx.shared import Pt, Cm, RGBColor, Mm
-        from docx.enum.table import WD_ALIGN_VERTICAL, WD_ROW_HEIGHT_RULE
-        from docx.enum.text import WD_ALIGN_PARAGRAPH
-        from docx.enum.section import WD_ORIENTATION
         from docx.oxml.ns import qn
         from docx.oxml import OxmlElement
         from openpyxl import load_workbook
@@ -139,13 +173,6 @@ except ImportError:
         )
         sys.exit(3)
 
-
-# EBA brand colors lifted from the QMG-024-141 templates' "intern" page:
-EBA_ORANGE = "FA6400"   # 'energy' accent
-EBA_ORANGE_SOFT = "FFE0CC"  # 'soft' background tint
-EBA_GREY_HEADER = "E1E1E1"  # 'silver' for table headers
-EBA_GREY_LIGHT = "F2F2F2"   # very light grey for key cells
-EBA_TEXT_GREY = "404040"
 
 QMG_TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "references" / "templates" / "qmg"
 GESPRAECHSNOTIZ_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-GESPRAECHSNOTIZ_230202-D.docx"
@@ -1312,149 +1339,6 @@ def render_to_xlsx(parsed: ParsedMd, out_path: Path) -> bool:
 # ─── DOCX rendering ────────────────────────────────────────────────────────
 
 
-def _set_cell_shading(cell, fill: str) -> None:
-    """Apply a hex fill (e.g. 'F0F0F0') to a table cell."""
-    tcPr = cell._tc.get_or_add_tcPr()
-    shd = OxmlElement("w:shd")
-    shd.set(qn("w:val"), "clear")
-    shd.set(qn("w:color"), "auto")
-    shd.set(qn("w:fill"), fill)
-    tcPr.append(shd)
-
-
-def _set_table_borders(tbl) -> None:
-    """Add a thin black border to every cell side."""
-    tblPr = tbl._tbl.find(qn("w:tblPr"))
-    if tblPr is None:
-        tblPr = OxmlElement("w:tblPr")
-        tbl._tbl.insert(0, tblPr)
-    borders = OxmlElement("w:tblBorders")
-    for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
-        b = OxmlElement(f"w:{edge}")
-        b.set(qn("w:val"), "single")
-        b.set(qn("w:sz"), "4")
-        b.set(qn("w:color"), "808080")
-        borders.append(b)
-    tblPr.append(borders)
-
-
-def _add_run(p, text: str, *, bold=False, italic=False, size_pt: int | None = None):
-    r = p.add_run(text)
-    r.font.name = "Arial"
-    if bold:
-        r.bold = True
-    if italic:
-        r.italic = True
-    if size_pt:
-        r.font.size = Pt(size_pt)
-    return r
-
-
-def _make_table(doc, headers: list[str], rows: list[list[str]], *, header_fill=EBA_GREY_HEADER):
-    """Standard EBA-style table: bold grey header row, thin grey borders, alternating row tint."""
-    tbl = doc.add_table(rows=1 + len(rows), cols=len(headers))
-    tbl.style = "Table Grid"
-    _set_table_borders(tbl)
-    for ci, h in enumerate(headers):
-        cell = tbl.rows[0].cells[ci]
-        cell.text = ""
-        _set_cell_shading(cell, header_fill)
-        p = cell.paragraphs[0]
-        p.paragraph_format.space_before = Pt(2)
-        p.paragraph_format.space_after = Pt(2)
-        _add_run(p, h, bold=True, size_pt=10)
-    for ri, row in enumerate(rows):
-        if ri % 2 == 1:
-            for ci in range(len(headers)):
-                _set_cell_shading(tbl.rows[ri + 1].cells[ci], "FAFAFA")
-        for ci, value in enumerate(row[: len(headers)]):
-            cell = tbl.rows[ri + 1].cells[ci]
-            cell.text = ""
-            p = cell.paragraphs[0]
-            p.paragraph_format.space_before = Pt(1)
-            p.paragraph_format.space_after = Pt(1)
-            _add_run(p, value, size_pt=10)
-    return tbl
-
-
-def _add_heading(doc, text: str, *, level=1):
-    p = doc.add_paragraph()
-    if level == 1:
-        _add_run(p, text, bold=True, size_pt=14)
-    elif level == 2:
-        _add_run(p, text, bold=True, size_pt=12)
-    else:
-        _add_run(p, text, bold=True, size_pt=11)
-    p.paragraph_format.space_before = Pt(8)
-    p.paragraph_format.space_after = Pt(4)
-    return p
-
-
-def _add_para(doc, text: str, *, italic=False, indent_left_cm=0.0):
-    p = doc.add_paragraph()
-    if indent_left_cm:
-        p.paragraph_format.left_indent = Cm(indent_left_cm)
-    _add_run(p, text, italic=italic, size_pt=10)
-    return p
-
-
-def _setup_page(doc):
-    """A4 portrait, EBA-style margins, default font Arial 10pt."""
-    style = doc.styles["Normal"]
-    style.font.name = "Arial"
-    style.font.size = Pt(10)
-    rpr = style.element.get_or_add_rPr()
-    fonts = rpr.find(qn("w:rFonts"))
-    if fonts is None:
-        fonts = OxmlElement("w:rFonts")
-        rpr.append(fonts)
-    for attr in ("w:ascii", "w:hAnsi", "w:cs"):
-        fonts.set(qn(attr), "Arial")
-
-    section = doc.sections[0]
-    section.page_height = Mm(297)
-    section.page_width = Mm(210)
-    section.orientation = WD_ORIENTATION.PORTRAIT
-    section.top_margin = Cm(2.0)
-    section.bottom_margin = Cm(2.0)
-    section.left_margin = Cm(2.2)
-    section.right_margin = Cm(2.0)
-
-
-def _add_title_block(doc, title: str, subtitle: str | None) -> None:
-    """An EBA-style title: orange accent bar + bold title + optional subtitle."""
-    # Orange accent bar (a thin shaded paragraph)
-    bar = doc.add_paragraph()
-    bar.paragraph_format.space_after = Pt(0)
-    bar_pPr = bar._p.get_or_add_pPr()
-    pBdr = OxmlElement("w:pBdr")
-    bottom = OxmlElement("w:bottom")
-    bottom.set(qn("w:val"), "single")
-    bottom.set(qn("w:sz"), "24")
-    bottom.set(qn("w:space"), "1")
-    bottom.set(qn("w:color"), EBA_ORANGE)
-    pBdr.append(bottom)
-    bar_pPr.append(pBdr)
-
-    p = doc.add_paragraph()
-    p.paragraph_format.space_before = Pt(8)
-    p.paragraph_format.space_after = Pt(2)
-    r = p.add_run(title)
-    r.font.name = "Arial"
-    r.font.size = Pt(20)
-    r.font.bold = True
-    r.font.color.rgb = RGBColor.from_string("000000")
-
-    if subtitle:
-        sp = doc.add_paragraph()
-        sp.paragraph_format.space_after = Pt(12)
-        sr = sp.add_run(subtitle)
-        sr.font.name = "Arial"
-        sr.font.size = Pt(11)
-        sr.font.italic = True
-        sr.font.color.rgb = RGBColor.from_string(EBA_TEXT_GREY)
-
-
 def render_to_docx(parsed: ParsedMd, out_path: Path) -> None:
     """Build an EBA-styled DOCX from the parsed MD.
 
@@ -1481,112 +1365,6 @@ def render_to_docx(parsed: ParsedMd, out_path: Path) -> None:
     )
 
 
-def _render_section_lines(doc, lines: list[str]) -> None:
-    """Render a markdown section in document order.
-
-    Tracking protocols put multiple header tables and the Vorbemerkung inside the
-    first ``## zur Besprechung`` section. Rendering only the first table silently
-    drops Ort/Datum/Zeit and the standard notice, so this function walks the
-    whole section and flushes tables/blockquote groups as they appear.
-    """
-    table_block: list[str] = []
-    quote_block: list[str] = []
-
-    def flush_table() -> None:
-        nonlocal table_block
-        if not table_block:
-            return
-        table = _parse_md_table(table_block)
-        table_block = []
-        if not table:
-            return
-        _make_table(doc, table[0], table[1:])
-        doc.add_paragraph()
-
-    def flush_quote() -> None:
-        nonlocal quote_block
-        if not quote_block:
-            return
-        text = " ".join(quote_block).strip()
-        quote_block = []
-        if not text:
-            return
-        if "Vorbemerkung" in text or "Hinweis" in text:
-            _add_notice_box(doc, _strip_md_inline(text))
-        else:
-            _add_para(doc, _strip_md_inline(text), italic=True)
-
-    for raw in lines:
-        stripped = raw.lstrip()
-        if stripped.startswith("|"):
-            flush_quote()
-            table_block.append(raw)
-            continue
-
-        flush_table()
-
-        if not stripped:
-            flush_quote()
-            continue
-        if stripped.startswith(">"):
-            quote_block.append(re.sub(r"^>\s?", "", stripped).strip())
-            continue
-
-        flush_quote()
-
-        if stripped.startswith("### "):
-            _add_heading(doc, _strip_md_inline(stripped[4:].strip()), level=3)
-        elif stripped.startswith("- ") or stripped.startswith("* "):
-            p = doc.add_paragraph(style="List Bullet")
-            _add_run(p, _strip_md_inline(stripped[2:]), size_pt=10)
-        elif stripped == "---":
-            continue
-        else:
-            _add_para(doc, _strip_md_inline(stripped))
-
-    flush_table()
-    flush_quote()
-
-
-def _add_notice_box(doc, text: str) -> None:
-    """A shaded callout box for the Hinweis/Vorbemerkung blockquote."""
-    tbl = doc.add_table(rows=1, cols=1)
-    tbl.autofit = True
-    cell = tbl.rows[0].cells[0]
-    _set_cell_shading(cell, EBA_ORANGE_SOFT)
-    cell.text = ""
-    p = cell.paragraphs[0]
-    p.paragraph_format.space_before = Pt(2)
-    p.paragraph_format.space_after = Pt(2)
-    _add_run(p, text, italic=True, size_pt=9)
-    doc.add_paragraph()
-
-
-def _make_kv_table(doc, rows: list[list[str]]):
-    """Two-column key/value table — bold grey label cells, plain value cells."""
-    tbl = doc.add_table(rows=len(rows), cols=2)
-    tbl.style = "Table Grid"
-    _set_table_borders(tbl)
-    # Set column widths: 35% / 65% of usable page width (~16.5 cm)
-    for row in tbl.rows:
-        if len(row.cells) >= 2:
-            row.cells[0].width = Cm(5.5)
-            row.cells[1].width = Cm(11.0)
-    for ri, row in enumerate(rows):
-        if len(row) < 2:
-            continue
-        kc, vc = tbl.rows[ri].cells
-        kc.text = ""
-        vc.text = ""
-        _set_cell_shading(kc, EBA_GREY_LIGHT)
-        for c in (kc, vc):
-            c.paragraphs[0].paragraph_format.space_before = Pt(1)
-            c.paragraphs[0].paragraph_format.space_after = Pt(1)
-        _add_run(kc.paragraphs[0], row[0], bold=True, size_pt=10)
-        _add_run(vc.paragraphs[0], row[1], size_pt=10)
-    return tbl
-
-
 # ─── PDF rendering ─────────────────────────────────────────────────────────
 
 
@@ -1607,28 +1385,59 @@ def render_to_pdf(docx_path: Path, pdf_path: Path) -> bool:
     to the next. On Windows, pywin32 is installed automatically if it is
     missing and MS Word is available.
     """
+    docx_path = docx_path.resolve()
+    pdf_path = pdf_path.resolve()
+    pdf_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        pdf_path.unlink()
+    except FileNotFoundError:
+        pass
+    except OSError as exc:
+        sys.stderr.write(f"Could not remove stale PDF before export: {exc}\n")
+        return False
+
     # 1. Word COM on Windows
     if sys.platform == "win32":
+        pythoncom = None
+        word = None
+        doc = None
         try:
             try:
+                import pythoncom  # type: ignore[import-not-found]
                 import win32com.client  # type: ignore[import-not-found]
             except ImportError:
                 if not _bootstrap_package("pywin32>=306"):
                     raise
+                import pythoncom  # type: ignore[import-not-found]
                 import win32com.client  # type: ignore[import-not-found]
 
-            word = win32com.client.Dispatch("Word.Application")
+            pythoncom.CoInitialize()
+            word = win32com.client.DispatchEx("Word.Application")
             word.Visible = False
             try:
-                doc = word.Documents.Open(str(docx_path))
+                doc = word.Documents.Open(
+                    FileName=str(docx_path),
+                    ReadOnly=True,
+                    AddToRecentFiles=False,
+                )
                 # 17 == wdExportFormatPDF / wdFormatPDF.
                 try:
                     doc.ExportAsFixedFormat(str(pdf_path), ExportFormat=17)
                 except Exception:
                     doc.SaveAs(str(pdf_path), FileFormat=17)
-                doc.Close(SaveChanges=False)
             finally:
-                word.Quit()
+                if doc is not None:
+                    try:
+                        doc.Close(SaveChanges=False)
+                    except Exception:
+                        pass
+                if word is not None:
+                    try:
+                        word.Quit()
+                    except Exception:
+                        pass
+                if pythoncom is not None:
+                    pythoncom.CoUninitialize()
             if pdf_path.exists():
                 return True
         except Exception as exc:
@@ -1672,13 +1481,15 @@ def render_to_pdf(docx_path: Path, pdf_path: Path) -> bool:
     # 3. macOS Pages — dev-environment fallback only
     if sys.platform == "darwin" and Path("/Applications/Pages.app").exists():
         try:
+            docx_posix = json.dumps(str(docx_path))
+            pdf_posix = json.dumps(str(pdf_path))
             script = (
                 'tell application "Pages"\n'
                 "  launch\n"
                 "  delay 0.5\n"
-                f'  set theDoc to open POSIX file "{docx_path}"\n'
+                f"  set theDoc to open POSIX file {docx_posix}\n"
                 "  delay 1\n"
-                f'  export theDoc to POSIX file "{pdf_path}" as PDF\n'
+                f"  export theDoc to POSIX file {pdf_posix} as PDF\n"
                 "  try\n"
                 "    close theDoc saving no\n"
                 "  end try\n"

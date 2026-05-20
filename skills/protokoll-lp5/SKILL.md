@@ -127,14 +127,16 @@ Nutzer.
 Schritte:
 
 1. Erzeuge das Protokoll als Markdown unter einem flüchtigen Pfad:
-   `/tmp/eba-protokoll-lp5-<jjjj-mm-tt>-<projekt>.md`. Die Vorbemerkungs-Box
-   bleibt wortgleich (mit **5 Kalendertagen**).
+   `<temp-dir>/eba-protokoll-lp5-<jjjj-mm-tt>-<projekt>.md`. `<temp-dir>` ist
+   das OS-Temp-Verzeichnis (`tempfile.gettempdir()`; `%TEMP%` auf Windows,
+   `/tmp` auf Unix), nicht fest `/tmp`. Die Vorbemerkungs-Box bleibt wortgleich
+   (mit **5 Kalendertagen**).
 
 2. Rufe den Renderer auf:
 
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
-     "/tmp/eba-protokoll-lp5-<datum>-<projekt>.md" \
+     "<temp-dir>/eba-protokoll-lp5-<datum>-<projekt>.md" \
      --format protokoll-lp5 \
      --out-dir "protokolle/<projekt>/"
    ```

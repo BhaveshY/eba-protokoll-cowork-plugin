@@ -149,13 +149,15 @@ Setup-Fragen an den Nutzer.
 Schritte:
 
 1. Erzeuge das Folgeprotokoll als Markdown unter einem flüchtigen Pfad:
-   `/tmp/eba-protokoll-fortschreibung-<jjjj-mm-tt>-<projekt>.md`.
+   `<temp-dir>/eba-protokoll-fortschreibung-<jjjj-mm-tt>-<projekt>.md`.
+   `<temp-dir>` ist das OS-Temp-Verzeichnis (`tempfile.gettempdir()`;
+   `%TEMP%` auf Windows, `/tmp` auf Unix), nicht fest `/tmp`.
 
 2. Rufe den Renderer auf:
 
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
-     "/tmp/eba-protokoll-fortschreibung-<datum>-<projekt>.md" \
+     "<temp-dir>/eba-protokoll-fortschreibung-<datum>-<projekt>.md" \
      --format <protokoll-lp1-4|protokoll-bim|protokoll-lp5> \
      --out-dir "protokolle/<projekt>/"
    ```

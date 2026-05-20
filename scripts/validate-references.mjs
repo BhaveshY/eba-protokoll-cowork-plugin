@@ -211,6 +211,11 @@ expect(
     ausgabeKonvention.includes("keinen separaten Setup-Schritt"),
   "ausgabe-konvention documents self-healing setup for nontechnical users",
 );
+expect(
+  ausgabeKonvention.includes("tempfile.gettempdir()") &&
+    ausgabeKonvention.includes("nicht fest auf `/tmp`"),
+  "ausgabe-konvention documents cross-platform temporary Markdown paths",
+);
 
 const renderer = read("scripts/render_protokoll.py");
 const requirements = read("scripts/requirements.txt");
@@ -244,6 +249,25 @@ expect(
     renderer.includes("page numbering and EBA-CI are preserved"),
   "renderer fills the official QMG Word and Excel templates, keeps Excel formats XLSX-only, and rejects generic output",
 );
+expect(
+  !renderer.includes("Document()") &&
+    !renderer.includes(".add_table(") &&
+    !renderer.includes(".add_paragraph("),
+  "renderer does not construct synthetic Word layouts from scratch",
+);
+expect(
+  renderer.includes("Document(str(template_path))") &&
+    renderer.includes("Document(str(TRACKING_WORD_TEMPLATE))") &&
+    renderer.includes("load_workbook(str(PROTOKOLL_EINFACH_EXCEL_TEMPLATE))") &&
+    renderer.includes("load_workbook(str(TRACKING_EXCEL_TEMPLATE))"),
+  "renderer opens official QMG DOCX/XLSX templates before filling content",
+);
+expect(
+  renderer.includes("pdf_path.unlink()") &&
+    renderer.includes("DispatchEx(\"Word.Application\")") &&
+    renderer.includes("AddToRecentFiles=False"),
+  "renderer hardens Windows Word PDF export and avoids stale PDF success",
+);
 
 for (const skillRel of [
   "skills/gespraechsnotiz/SKILL.md",
@@ -268,6 +292,10 @@ for (const skillRel of [
   expect(
     skill.includes("metadaten-konvention.md"),
     `${skillRel} cites the metadata fallback reference`,
+  );
+  expect(
+    !skill.includes("/tmp/eba-"),
+    `${skillRel} does not hard-code Unix-only /tmp paths`,
   );
 }
 
