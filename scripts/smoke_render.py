@@ -16,9 +16,16 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import warnings
 from zipfile import ZipFile
 from pathlib import Path
 from xml.etree import ElementTree as ET
+
+warnings.filterwarnings(
+    "ignore",
+    message="Conditional Formatting extension is not supported and will be removed",
+    module="openpyxl.worksheet._reader",
+)
 
 try:
     from docx import Document
@@ -50,7 +57,7 @@ DOCX_TEMPLATE_BY_EXAMPLE = {
 }
 QMG_TEMPLATE_EXAMPLES = set(DOCX_TEMPLATE_BY_EXAMPLE)
 SIMPLE_XLSX_TEMPLATE = REPO_ROOT / "references/templates/qmg/QMG-024-141_ORG-PK-LP1-4-EXCEL-MA_240920-A.xlsx"
-TRACKING_XLSX_TEMPLATE = REPO_ROOT / "references/templates/qmg/QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx"
+TRACKING_XLSX_TEMPLATE = REPO_ROOT / "references/templates/qmg/QMG-024-141_ORG-PK-EXCEL-MA_260828-D.xlsx"
 TRACKING_XLSX_EXAMPLES = {
     "references/examples/beispiel-ausgabe-bim.md",
 }
@@ -205,6 +212,31 @@ def xlsx_official_template_checks(path: Path, template_path: Path, example: str)
             failures.append(f"{example}: {sheet_name} merged cells changed")
         if _sheet_values(ws) != _sheet_values(template_ws):
             failures.append(f"{example}: {sheet_name} content changed")
+
+    if template_path == TRACKING_XLSX_TEMPLATE:
+        preserved_prefixes = (
+            "xl/drawings/",
+            "xl/media/",
+            "xl/printerSettings/",
+            "xl/webextensions/",
+        )
+        with ZipFile(path) as rendered_zip, ZipFile(template_path) as template_zip:
+            rendered_names = set(rendered_zip.namelist())
+            for part_name in template_zip.namelist():
+                if not part_name.startswith(preserved_prefixes):
+                    continue
+                if part_name not in rendered_names:
+                    failures.append(f"{example}: original package part missing: {part_name}")
+                elif rendered_zip.read(part_name) != template_zip.read(part_name):
+                    failures.append(f"{example}: original package part changed: {part_name}")
+            sheet2_xml = rendered_zip.read("xl/worksheets/sheet2.xml").decode("utf-8")
+            if "x14:conditionalFormattings" not in sheet2_xml:
+                failures.append(f"{example}: native Stand-D conditional formatting extension missing")
+            if "legacyDrawingHF" not in sheet2_xml or "pageSetup" not in sheet2_xml:
+                failures.append(f"{example}: original header image or printer settings link missing")
+            for placeholder in ["_PRJ.-Nr._", "_Prj Kürzel_", "_Prj.-Name_", "_Besprechungsthema_"]:
+                if placeholder in sheet2_xml:
+                    failures.append(f"{example}: print header placeholder leaked: {placeholder}")
     return failures
 
 
@@ -223,10 +255,16 @@ def xlsx_template_checks(path: Path, example: str) -> list[str]:
             failures.append(f"{example}: XLSX Protokoll table should include ausblenden column H (got {ref})")
     if wb["Protokoll"]["H2"].value != "ausblenden":
         failures.append(f"{example}: XLSX ausblenden helper header missing")
-    if not str(wb["Protokoll"]["H5"].value or "").startswith("=IF(AND((1+B5)<Deckblatt!$A$3"):
+    if not str(wb["Protokoll"]["H5"].value or "").startswith("=IFERROR(IF(AND((1+B5)<Deckblatt!$A$3"):
         failures.append(f"{example}: XLSX ausblenden helper formula missing")
     if not isinstance(wb["Deckblatt"]["A3"].value, int):
         failures.append(f"{example}: XLSX meeting number should be numeric in Deckblatt!A3")
+    if wb["Deckblatt"]["B11"].value in (None, "", "_Ort_"):
+        failures.append(f"{example}: XLSX location was not written to Deckblatt!B11")
+    if wb["Deckblatt"]["E11"].value in (None, "", "TT.MM.JJJJ"):
+        failures.append(f"{example}: XLSX date was not written to Deckblatt!E11")
+    if wb["Deckblatt"]["E12"].value in (None, "", "0.00 – 0.00 Uhr"):
+        failures.append(f"{example}: XLSX time was not written to Deckblatt!E12")
     for sheet_name in ["Deckblatt", "Protokoll", "Doku_Info"]:
         sheet_text = "\n".join(
             str(cell.value)
@@ -241,6 +279,7 @@ def xlsx_template_checks(path: Path, example: str) -> list[str]:
             "_ Dokument/e, Plan/Pläne _",
             "_Thema 01_",
             "_Ersteller eintragen_",
+            "_Ort_",
             "Besprechnungsthema A",
         ]:
             if placeholder in sheet_text:
@@ -434,7 +473,7 @@ def forced_excel_formats() -> list[str]:
         ),
         (
             "references/examples/beispiel-ausgabe-lp1-4.md",
-            "protokoll-lp1-4-excel",
+            "protokoll",
             xlsx_template_checks,
             [
                 "Planungsbesprechung — BIM, Bauantrag, Wohnfassade",

@@ -1,7 +1,7 @@
 {
   "name": "eba-protokoll-cowork",
   "metadata": {
-    "description": "Erzeugt EBA-konforme Protokolle im Originalformat der QMG-Vorlage: Word-Vorlagen als DOCX + PDF, Excel-Vorlagen als XLSX. Windows-11-first mit Metadaten-Fallbacks und automatischem Dependency-Bootstrap."
+    "description": "Erzeugt aus EBA-App-Transkripten automatisch quellengetreue Protokolle in der originalen QMG-024-141 ORG-PK-EXCEL-MA Stand-D-XLSX-Vorlage."
   },
   "owner": {
     "name": "Eike Becker_Architekten",
@@ -11,8 +11,8 @@
     {
       "name": "eba-protokoll-cowork",
       "source": "./",
-      "description": "Erzeugt EBA-konforme Protokolle nach QMG-024-141 (Gesprächsnotiz, Protokoll-einfach, Planungsprotokoll LP1-4/PLB-PK, BIM/Excel-Tracking, Bauleitungsprotokoll LP5) aus rohen Transkripten der EBA Protokoll App. Word-Vorlagen werden als DOCX + PDF ausgegeben; Excel-Vorlagen bleiben XLSX. Windows-11-first; fehlende Metadaten werden per Fallback gefüllt, PDF via MS Word und automatischem Dependency-Bootstrap.",
-      "version": "0.2.7",
+      "description": "Erzeugt aus Transkripten der EBA Protokoll App automatisch ein quellengetreues Protokoll in der originalen QMG-024-141 ORG-PK-EXCEL-MA Stand-D-XLSX-Vorlage. Keine Vorlagenauswahl im Standardworkflow; Legacy-Formate nur auf ausdrücklichen Wunsch.",
+      "version": "0.2.8",
       "category": "productivity",
       "tags": [
         "protokoll",

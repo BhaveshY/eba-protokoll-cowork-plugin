@@ -1,13 +1,10 @@
 ---
 name: gespraechsnotiz
 description: >-
-  Use when the user asks for a "Gesprächsnotiz", "kurze Notiz",
-  "conversation note", "kurzes Protokoll", "informelle Notiz", or has a short
-  transcript (under ~1500 words, ≤3 speakers, no LP-specific vocabulary) that
-  should be turned into the simple EBA Gesprächsnotiz format (no D/K|B|LN
-  tracking, no status column). Also use for EBA-related external interviews,
-  press conversations, TV/radio/podcast transcripts, and editorial calls where
-  there is no project number.
+  Use only when the user explicitly asks for the legacy EBA Gesprächsnotiz,
+  short-note, or no-tracking Word format. Do not select this skill merely because
+  an uploaded EBA Protokoll App transcript is short, informal, or an interview;
+  those transcripts use the eba-protokoll Stand-D Excel workflow by default.
 ---
 
 # Gesprächsnotiz erstellen

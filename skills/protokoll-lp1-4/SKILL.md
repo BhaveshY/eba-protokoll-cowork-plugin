@@ -1,13 +1,10 @@
 ---
 name: protokoll-lp1-4
 description: >-
-  Use when the user asks for a "Protokoll LP1-4", "Planungsprotokoll",
-  "Planungsbesprechung", "Jour Fixe", "Kick-Off", "BIM-Koordination",
-  "Workshop-Protokoll", or has a transcript from a planning-phase meeting
-  (LP1-Grundlagenermittlung, LP2-Vorplanung, LP3-Entwurfsplanung,
-  LP4-Genehmigungsplanung). Produces the EBA QMG-024-141 ORG-PK-(LP1-4)
-  tracking protocol with D/K|B|LN topic numbering, status column, and continuous
-  tracking across meetings.
+  Use only when the user explicitly asks for a legacy LP1-4/Planungsprotokoll
+  variant instead of the standard Stand-D workbook. Do not select this skill
+  automatically from planning, BIM, Jour-Fixe, kick-off, or workshop terms in
+  an EBA Protokoll App transcript; those inputs use eba-protokoll by default.
 ---
 
 # Planungsprotokoll LP1-4 erstellen

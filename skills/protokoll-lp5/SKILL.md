@@ -1,14 +1,10 @@
 ---
 name: protokoll-lp5
 description: >-
-  Use when the user asks for a "Protokoll LP5", "Bauleitungsprotokoll",
-  "Baubesprechung", "Baustelle", "Mängelprotokoll", "Bemusterungsprotokoll", or
-  has a transcript from a construction-phase meeting (LP5 Ausführungsplanung /
-  LP8 Objektüberwachung). Produces the EBA QMG-024-141 ORG-PK-LP5 tracking
-  protocol with construction-specific D/K categories (Mängel, Bemusterung,
-  Bauablauf, …). Do not use for pure BIM-Koordination, BIM-Jour-Fixe,
-  BIM-PK-JF, IFC, BCF, BIMcollab, CDE, BAP, LOIN, or Datendrop transcripts
-  unless the user explicitly asks for LP5.
+  Use only when the user explicitly asks for the legacy LP5 Word template or a
+  legacy Bauleitungsprotokoll. Do not select this skill automatically because an
+  EBA Protokoll App transcript mentions a building site, defects, sampling, LP5,
+  or LP8; those transcripts use the eba-protokoll Stand-D Excel workflow.
 ---
 
 # Bauleitungsprotokoll LP5 erstellen

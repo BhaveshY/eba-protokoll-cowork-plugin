@@ -10,6 +10,8 @@
 /transkripte/
 *.bereinigt.txt
 *.zusammengefuehrt.txt
+__pycache__/
+*.pyc
 
 # Claude Code session artifacts
 .claude/projects/

@@ -1,14 +1,11 @@
 ---
 name: protokoll-fortschreiben
 description: >-
-  Use when generating an LP1-4, LP1-4-BIM or LP5 tracking protocol that follows
-  a previous one in the same project — i.e. when a protokoll-state.json or
-  earlier protocol exists in the project's protokolle/ directory. Carries open
-  items forward, marks new comments as Ergänzung (LN-suffix E, prefix #NN:),
-  increments the meeting number B, and preserves the project-specific D/K
-  schema (LP1-4 and LP5 use 2-digit D/K, BIM uses 1-digit D/K 1–8), distribution
-  list, and Firma-/Personen-Kürzel. Does not apply to Gesprächsnotiz or
-  Protokoll-einfach (these formats have no tracking).
+  Use when the standard EBA Stand-D Excel protocol follows a previous protocol
+  in the same project and a protokoll-state.json or earlier protocol exists.
+  Carries open items forward, adds sourced updates, increments meeting number B,
+  and preserves the project's D/K schema, distribution list, and abbreviations.
+  Legacy output formats apply only when the user explicitly requests one.
 ---
 
 # Protokoll fortschreiben (Folgeprotokoll erstellen)
@@ -139,12 +136,10 @@ Schreibe die State-Datei neu mit:
 
 ### 8. Ausgabe formatgetreu schreiben & Zusammenfassung
 
-**Endformat**: Word-Ursprungsformate als DOCX + PDF; BIM/Excel-Ursprungsformate
-als offizielles QMG-XLSX. **Kein Markdown** im Projekt-Ordner. Die
-`protokoll-state.json` bleibt erhalten (persistente Projektzustand-Datei). Auf
-Windows 11 mit MS Word bootstrapt der Renderer fehlende Python-Pakete selbst
-und exportiert Word-Ursprungs-DOCX via Word zu PDF. Keine technischen
-Setup-Fragen an den Nutzer.
+**Standard-Endformat**: offizielles QMG-XLSX aus
+`QMG-024-141_ORG-PK-EXCEL-MA_260828-D.xlsx`. **Kein Markdown** im
+Projekt-Ordner. Die `protokoll-state.json` bleibt erhalten (persistente
+Projektzustand-Datei). Keine technischen Setup-Fragen an den Nutzer.
 
 Schritte:
 
@@ -158,20 +153,18 @@ Schritte:
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/render_protokoll.py" \
      "<temp-dir>/eba-protokoll-fortschreibung-<datum>-<projekt>.md" \
-     --format <protokoll-lp1-4|protokoll-bim|protokoll-lp5> \
+     --format protokoll \
      --out-dir "protokolle/<projekt>/"
    ```
 
-3. Wähle den `--format`-Wert aus dem bestehenden Projekt-State bzw. dem
-   erkannten Protokolltyp, damit die passende QMG-Tracking-Vorlage genutzt wird.
+3. Verwende die Stand-D-XLSX-Vorlage unabhängig vom Besprechungstyp. Nur eine
+   ausdrücklich angeforderte Legacy-Ausgabe darf einen anderen `--format`-Wert
+   verwenden.
 4. Schreibe die aktualisierte `protokolle/<projekt>/protokoll-state.json`.
-   Wenn der Renderer bei einem Word-Ursprungsformat einen Windows-PDF-Fehler
-   meldet, stderr lesen, denselben Befehl nach der automatischen Selbstheilung
-   erneut versuchen und erst danach echte Blocker melden.
 
 Berichte dem Nutzer:
 
-- Pfade der erzeugten DOCX/PDF- oder XLSX-Datei.
+- Pfad der erzeugten XLSX-Datei.
 - Anzahl übernommener offener Punkte ohne Änderung.
 - Anzahl Ergänzungen zu Vorpunkten (mit kurzer Auflistung der LN-Referenzen).
 - Anzahl neu eröffneter Punkte.

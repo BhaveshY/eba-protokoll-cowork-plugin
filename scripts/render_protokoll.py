@@ -36,13 +36,17 @@ from __future__ import annotations
 import argparse
 from copy import copy, deepcopy
 import json
+import os
 import re
 import shutil
 import site
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
+from xml.etree import ElementTree as ET
+from zipfile import ZIP_DEFLATED, ZipFile
 
 
 def _in_virtualenv() -> bool:
@@ -179,7 +183,7 @@ GESPRAECHSNOTIZ_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-GESPRAECHSNOTIZ_2
 PROTOKOLL_EINFACH_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-PK-LP1-4-MA_230227-A.docx"
 TRACKING_WORD_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-PK-LP5-MA_230202-B.docx"
 PROTOKOLL_EINFACH_EXCEL_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-PK-LP1-4-EXCEL-MA_240920-A.xlsx"
-TRACKING_EXCEL_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-PK-EXCEL-MA_240926-C.xlsx"
+TRACKING_EXCEL_TEMPLATE = QMG_TEMPLATE_DIR / "QMG-024-141_ORG-PK-EXCEL-MA_260828-D.xlsx"
 
 
 # ─── Markdown parsing ──────────────────────────────────────────────────────
@@ -683,6 +687,7 @@ def _tracking_header(parsed: ParsedMd) -> dict[str, str]:
         "notice": _quote_text_from_lines(intro.lines),
         "project_number": _pick(project, "Projekt-Nr.", "Projekt-Nr", "Projekt-Nummer"),
         "project_name": _pick(project, "Projekt-Name", "Projektname"),
+        "project_short": _pick(project, "Projekt-Kürzel", "Projekt-KZ", "Prj-Kürzel"),
         "ort": _pick(meta, "Ort"),
         "datum": _pick(meta, "Datum", "Gesprächsdatum"),
         "zeit": _pick(meta, "Zeit"),
@@ -833,6 +838,7 @@ def _render_tracking_template(parsed: ParsedMd, out_path: Path) -> None:
 
 def _is_tracking_excel_format(parsed: ParsedMd) -> bool:
     return parsed.detected_format in {
+        "protokoll",
         "protokoll-bim",
         "protokoll-lp1-4-excel",
         "protokoll-lp1-4-xlsx",
@@ -866,6 +872,24 @@ def _excel_set_raw(cell, value) -> None:
     if isinstance(cell, MergedCell):
         return
     cell.value = value
+
+
+def _excel_replace_header_footer_text(ws, replacements: dict[str, str]) -> None:
+    for header_footer in [
+        ws.oddHeader,
+        ws.evenHeader,
+        ws.firstHeader,
+        ws.oddFooter,
+        ws.evenFooter,
+        ws.firstFooter,
+    ]:
+        for section in [header_footer.left, header_footer.center, header_footer.right]:
+            text = section.text
+            if not text:
+                continue
+            for old, new in replacements.items():
+                text = text.replace(old, _excel_safe(new))
+            section.text = text
 
 
 def _tracking_meeting_number_value(meeting_no: str):
@@ -1166,13 +1190,15 @@ def _render_simple_excel_template(parsed: ParsedMd, out_path: Path) -> None:
 
 
 def _ensure_protocol_hide_column(ws, last_row: int) -> None:
-    _excel_set(ws["H2"], "ausblenden")
+    if not ws["H2"].value:
+        _excel_set(ws["H2"], "ausblenden")
     for row_idx in range(3, last_row + 1):
         cell = ws.cell(row_idx, 8)
-        _excel_copy_cell(ws["G5"], cell)
+        style_source = ws["H3"] if row_idx == 3 else ws["H4"]
+        _excel_copy_cell(style_source, cell)
         _excel_set_raw(
             cell,
-            f'=IF(AND((1+B{row_idx})<Deckblatt!$A$3,G{row_idx}="E"),"x","-")',
+            f'=IFERROR(IF(AND((1+B{row_idx})<Deckblatt!$A$3,G{row_idx}="E"),"x","-"),"")',
         )
 
     if "Protokoll" in ws.tables:
@@ -1181,6 +1207,214 @@ def _ensure_protocol_hide_column(ws, last_row: int) -> None:
         existing = list(table.tableColumns)
         if not any(col.name == "ausblenden" for col in existing):
             table.tableColumns.append(TableColumn(id=len(existing) + 1, name="ausblenden"))
+
+
+def _xml_block(xml: bytes, tag: str) -> bytes | None:
+    match = re.search(
+        rb"<" + tag.encode("ascii") + rb"(?:\s[^>]*)?>[\s\S]*?</" + tag.encode("ascii") + rb">",
+        xml,
+    )
+    return match.group(0) if match else None
+
+
+def _xml_singleton(xml: bytes, tag: str) -> bytes | None:
+    match = re.search(rb"<" + tag.encode("ascii") + rb"\b[^>]*/>", xml)
+    return match.group(0) if match else None
+
+
+def _replace_singleton(xml: bytes, tag: str, replacement: bytes) -> bytes:
+    pattern = rb"<" + tag.encode("ascii") + rb"\b[^>]*/>"
+    if re.search(pattern, xml):
+        return re.sub(pattern, replacement, xml, count=1)
+    return xml.replace(b"</worksheet>", replacement + b"</worksheet>", 1)
+
+
+def _insert_before(xml: bytes, marker: bytes, fragment: bytes) -> bytes:
+    if fragment in xml:
+        return xml
+    if marker in xml:
+        return xml.replace(marker, fragment + marker, 1)
+    return xml.replace(b"</worksheet>", fragment + b"</worksheet>", 1)
+
+
+def _merge_relationship(
+    xml: bytes,
+    *,
+    rel_type: str,
+    target: str,
+    preferred_id: str | None = None,
+) -> bytes:
+    ns = "http://schemas.openxmlformats.org/package/2006/relationships"
+    ET.register_namespace("", ns)
+    root = ET.fromstring(xml)
+    for rel in root:
+        if rel.attrib.get("Type") == rel_type:
+            return xml
+    used_ids = {rel.attrib.get("Id") for rel in root}
+    rel_id = preferred_id
+    if not rel_id or rel_id in used_ids:
+        number = 1
+        while f"rId{number}" in used_ids:
+            number += 1
+        rel_id = f"rId{number}"
+    ET.SubElement(root, f"{{{ns}}}Relationship", Id=rel_id, Type=rel_type, Target=target)
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
+
+
+def _merge_content_types(output_xml: bytes, template_xml: bytes) -> bytes:
+    ns = "http://schemas.openxmlformats.org/package/2006/content-types"
+    ET.register_namespace("", ns)
+    output_root = ET.fromstring(output_xml)
+    template_root = ET.fromstring(template_xml)
+    defaults = {node.attrib.get("Extension") for node in output_root.findall(f"{{{ns}}}Default")}
+    overrides = {node.attrib.get("PartName") for node in output_root.findall(f"{{{ns}}}Override")}
+    copied_prefixes = (
+        "/xl/drawings/",
+        "/xl/media/",
+        "/xl/printerSettings/",
+        "/xl/webextensions/",
+    )
+    for node in template_root:
+        extension = node.attrib.get("Extension")
+        part_name = node.attrib.get("PartName", "")
+        if extension and extension not in defaults:
+            output_root.append(node)
+            defaults.add(extension)
+        elif part_name.startswith(copied_prefixes) and part_name not in overrides:
+            output_root.append(node)
+            overrides.add(part_name)
+    return ET.tostring(output_root, encoding="utf-8", xml_declaration=True)
+
+
+def _restore_xlsx_source_parts(template_path: Path, out_path: Path, protocol_last: int) -> None:
+    """Restore QMG package parts that openpyxl cannot round-trip.
+
+    openpyxl correctly edits cells and tables but drops header images, printer
+    settings, web-extension parts, and x14 conditional formatting. Reattaching
+    those source parts keeps the output based on the original workbook instead
+    of a visually reconstructed approximation.
+    """
+
+    with ZipFile(template_path, "r") as source_zip, ZipFile(out_path, "r") as output_zip:
+        source_names = set(source_zip.namelist())
+        output_names = set(output_zip.namelist())
+        replacements: dict[str, bytes] = {}
+
+        replacements["[Content_Types].xml"] = _merge_content_types(
+            output_zip.read("[Content_Types].xml"),
+            source_zip.read("[Content_Types].xml"),
+        )
+
+        root_rels = output_zip.read("_rels/.rels")
+        root_rels = _merge_relationship(
+            root_rels,
+            rel_type="http://schemas.microsoft.com/office/2011/relationships/webextensiontaskpanes",
+            target="xl/webextensions/taskpanes.xml",
+        )
+        replacements["_rels/.rels"] = root_rels
+
+        for part_name, close_tag in [
+            ("xl/workbook.xml", b"</workbook>"),
+            ("xl/styles.xml", b"</styleSheet>"),
+        ]:
+            source_ext = _xml_block(source_zip.read(part_name), "extLst")
+            if source_ext:
+                output_xml = output_zip.read(part_name)
+                output_xml = re.sub(rb"<extLst>[\s\S]*?</extLst>", b"", output_xml, count=1)
+                replacements[part_name] = output_xml.replace(close_tag, source_ext + close_tag, 1)
+
+        for sheet_number in range(1, 6):
+            sheet_name = f"xl/worksheets/sheet{sheet_number}.xml"
+            source_xml = source_zip.read(sheet_name)
+            output_xml = output_zip.read(sheet_name)
+            output_xml = output_xml.replace(
+                b'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">',
+                b'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
+                b'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
+                1,
+            )
+
+            page_setup = _xml_singleton(source_xml, "pageSetup")
+            if page_setup:
+                if sheet_number == 2:
+                    page_setup = page_setup.replace(b'r:id="rId1"', b'r:id="rId2"')
+                output_xml = _replace_singleton(output_xml, "pageSetup", page_setup)
+
+            drawing = _xml_singleton(source_xml, "drawing")
+            if drawing:
+                output_xml = _insert_before(output_xml, b"</worksheet>", drawing)
+
+            legacy = _xml_singleton(source_xml, "legacyDrawingHF")
+            if legacy:
+                if sheet_number == 2:
+                    legacy = legacy.replace(b'r:id="rId2"', b'r:id="rId3"')
+                marker = b"<tableParts" if sheet_number == 2 else b"</worksheet>"
+                output_xml = _insert_before(output_xml, marker, legacy)
+
+            if sheet_number == 2:
+                source_ext = _xml_block(source_xml, "extLst")
+                if source_ext:
+                    source_ext = source_ext.replace(b"A3:G22", f"A3:G{protocol_last}".encode())
+                    source_ext = source_ext.replace(b"A3:H22", f"A3:H{protocol_last}".encode())
+                    output_xml = re.sub(rb"<extLst>[\s\S]*?</extLst>", b"", output_xml, count=1)
+                    output_xml = output_xml.replace(b"</worksheet>", source_ext + b"</worksheet>", 1)
+
+            replacements[sheet_name] = output_xml
+
+        rel_dir = "xl/worksheets/_rels"
+        for sheet_number in (1, 3, 4, 5):
+            rel_name = f"{rel_dir}/sheet{sheet_number}.xml.rels"
+            replacements[rel_name] = source_zip.read(rel_name)
+
+        sheet2_rel_name = f"{rel_dir}/sheet2.xml.rels"
+        sheet2_rels = output_zip.read(sheet2_rel_name)
+        sheet2_rels = _merge_relationship(
+            sheet2_rels,
+            rel_type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/printerSettings",
+            target="../printerSettings/printerSettings2.bin",
+            preferred_id="rId2",
+        )
+        sheet2_rels = _merge_relationship(
+            sheet2_rels,
+            rel_type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/vmlDrawing",
+            target="../drawings/vmlDrawing2.vml",
+            preferred_id="rId3",
+        )
+        replacements[sheet2_rel_name] = sheet2_rels
+
+        copied_prefixes = (
+            "xl/drawings/",
+            "xl/media/",
+            "xl/printerSettings/",
+            "xl/webextensions/",
+        )
+        copied_names = {
+            name
+            for name in source_names
+            if name.startswith(copied_prefixes)
+        }
+
+        fd, temp_name = tempfile.mkstemp(prefix=out_path.stem + "-", suffix=".xlsx", dir=out_path.parent)
+        os.close(fd)
+        Path(temp_name).unlink(missing_ok=True)
+        try:
+            with ZipFile(temp_name, "w", compression=ZIP_DEFLATED) as merged_zip:
+                for info in output_zip.infolist():
+                    data = replacements.get(info.filename, output_zip.read(info.filename))
+                    merged_zip.writestr(info, data)
+                for name in sorted((copied_names | set(replacements)) - output_names):
+                    if name in replacements:
+                        merged_zip.writestr(name, replacements[name])
+                    else:
+                        merged_zip.writestr(source_zip.getinfo(name), source_zip.read(name))
+            output_zip.close()
+            source_zip.close()
+            Path(temp_name).replace(out_path)
+        finally:
+            try:
+                Path(temp_name).unlink()
+            except FileNotFoundError:
+                pass
 
 
 def _render_tracking_excel_template(parsed: ParsedMd, out_path: Path) -> None:
@@ -1197,23 +1431,45 @@ def _render_tracking_excel_template(parsed: ParsedMd, out_path: Path) -> None:
     _excel_set(deck["B8"], header["project_name"])
     if header["notice"]:
         _excel_set(deck["D7"], header["notice"])
-    _excel_set(deck["B10"], header["ort"])
-    _excel_set(deck["E10"], header["datum"])
-    _excel_set(deck["E11"], header["zeit"])
+    _excel_set(deck["B11"], header["ort"])
+    _excel_set(deck["E11"], header["datum"])
+    _excel_set(deck["E12"], header["zeit"])
+
+    project_header_parts = [header["project_number"]]
+    if header["project_short"]:
+        project_header_parts.append(header["project_short"])
+    project_header = "-".join(part for part in project_header_parts if part)
+    if header["project_name"]:
+        project_header = (
+            f"{project_header} - {header['project_name']}"
+            if project_header
+            else header["project_name"]
+        )
+    header_footer_replacements = {
+        "_PRJ.-Nr._-_Prj Kürzel_ - _Prj.-Name_": project_header,
+        "_PRJ.-Nr._": header["project_number"],
+        "_Prj Kürzel_": header["project_short"],
+        "_Prj.-Name_": header["project_name"],
+        "_Besprechungsthema_": header["meeting_topic"],
+        "_Projektnummer einsetzen_": header["project_number"],
+        "_Projektname einsetzen_": header["project_name"],
+    }
+    for sheet in wb.worksheets:
+        _excel_replace_header_footer_text(sheet, header_footer_replacements)
 
     teilnehmer = _tracking_data_rows(parsed, "Teilnehmer")
     participant_extra = _excel_fill_block(
         deck,
-        start_row=15,
+        start_row=16,
         capacity=10,
         rows=teilnehmer,
         cell_indices=[1, 2, 3, 4, 5, 6, 7],
-        template_row=15,
+        template_row=16,
         max_col=7,
     )
 
     unterlagen = _tracking_data_rows(parsed, "Besprochene Unterlagen")
-    underlagen_start = 29 + participant_extra
+    underlagen_start = 30 + participant_extra
     underlagen_extra = _excel_fill_block(
         deck,
         start_row=underlagen_start,
@@ -1223,7 +1479,7 @@ def _render_tracking_excel_template(parsed: ParsedMd, out_path: Path) -> None:
         template_row=underlagen_start,
         max_col=7,
     )
-    _set_print_area(deck, "G", 32 + participant_extra + underlagen_extra)
+    _set_print_area(deck, "G", 33 + participant_extra + underlagen_extra)
 
     protocol = wb["Protokoll"]
     themen = _tracking_data_rows(parsed, "Besprechungsthemen")
@@ -1324,6 +1580,7 @@ def _render_tracking_excel_template(parsed: ParsedMd, out_path: Path) -> None:
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(str(out_path))
+    _restore_xlsx_source_parts(TRACKING_EXCEL_TEMPLATE, out_path, protocol_last)
 
 
 def render_to_xlsx(parsed: ParsedMd, out_path: Path) -> bool:
